@@ -1,14 +1,13 @@
-/** Approved sellers may manage inventory (backend: role seller or both). */
+/** Approved sellers may manage inventory (backend: is_seller=true). */
 
 export function isApprovedSeller(user) {
   if (!user) return false;
   if (user.is_approved_seller === true) return true;
-  return user.role === "seller" || user.role === "both";
+  return user.is_seller === true;
 }
 
-/** Buyer-side features (cart, purchases) — excludes seller-only accounts. */
+/** Buyer-side features (cart, purchases) — all authenticated users. */
 
 export function isBuyerCapable(user) {
-  if (!user) return false;
-  return user.role === "buyer" || user.role === "both";
+  return Boolean(user);
 }

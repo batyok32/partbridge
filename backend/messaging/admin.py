@@ -1,24 +1,18 @@
 from django.contrib import admin
 
-from .models import Message, Quote, Thread
+from .models import Message, Thread
 
 
 @admin.register(Thread)
 class ThreadAdmin(admin.ModelAdmin):
-    list_display = ("id", "buyer", "seller", "vehicle_part", "status", "last_message_at")
-    list_filter = ("status",)
-    search_fields = ("buyer__email", "seller__email", "vehicle_part__label")
+    list_display = ("id", "buyer", "seller", "item", "last_message_at", "created_at")
+    search_fields = ("buyer__email", "seller__email")
+    readonly_fields = ("created_at",)
 
 
 @admin.register(Message)
 class MessageAdmin(admin.ModelAdmin):
-    list_display = ("id", "thread", "sender", "is_system", "created_at")
-    list_filter = ("is_system",)
-    search_fields = ("thread__id", "sender__email", "body")
-
-
-@admin.register(Quote)
-class QuoteAdmin(admin.ModelAdmin):
-    list_display = ("id", "thread", "seller", "price", "status", "created_at")
-    list_filter = ("status",)
-    search_fields = ("thread__id", "seller__email", "note")
+    list_display = ("id", "thread", "sender", "is_read", "sent_at")
+    list_filter = ("is_read",)
+    search_fields = ("sender__email", "body")
+    readonly_fields = ("sent_at",)

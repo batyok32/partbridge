@@ -2,7 +2,6 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.tokens import default_token_generator
 from django.core import signing
-from django.db.models import Avg, Count
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.utils.encoding import force_bytes
@@ -17,11 +16,7 @@ from .emailing import (
     send_password_reset_email,
     send_verification_email,
 )
-from .models import EmailVerificationChallenge, SellerApplication, ShippingAddress
-
-from orders.models import SellerReview
-from vehicles.models import VehiclePart
-from .zip_lookup import lookup_us_zip_digits
+from .models import EmailVerificationChallenge, SellerApplication, ShippingAddress, UserCar
 from .serializers import (
     EmailVerifiedTokenObtainPairSerializer,
     PasswordResetConfirmSerializer,
@@ -30,9 +25,11 @@ from .serializers import (
     ResendVerificationSerializer,
     SellerApplicationCreateSerializer,
     ShippingAddressSerializer,
+    UserCarSerializer,
     UserSerializer,
     VerifyEmailSerializer,
 )
+from .zip_lookup import lookup_us_zip_digits
 
 User = get_user_model()
 
@@ -45,9 +42,10 @@ def _issue_verification(user):
     from .emailing import build_email_verify_link_token
 
     link_token = build_email_verify_link_token(user.pk)
+    name = user.get_full_name() or user.email
     send_verification_email(
         to_email=user.email,
-        name=user.name,
+        name=name,
         code=code,
         link_token=link_token,
     )
@@ -99,9 +97,7 @@ class VerifyEmailView(APIView):
             if user.email_verified_at:
                 return Response({"detail": "Email already verified."})
             challenge = (
-                EmailVerificationChallenge.objects.filter(
-                    user=user, consumed_at__isnull=True
-                )
+                EmailVerificationChallenge.objects.filter(user=user, consumed_at__isnull=True)
                 .order_by("-created_at")
                 .first()
             )
@@ -146,13 +142,11 @@ class MeView(APIView):
 
 
 class SellerApplicationView(APIView):
-    """Submit a request to become an approved seller (reviewed in Django admin)."""
-
     permission_classes = [permissions.IsAuthenticated]
 
     def post(self, request):
         user = request.user
-        if user.role in (User.Role.SELLER, User.Role.BOTH):
+        if user.is_seller:
             return Response(
                 {"detail": "You are already an approved seller."},
                 status=status.HTTP_400_BAD_REQUEST,
@@ -162,9 +156,7 @@ class SellerApplicationView(APIView):
                 {"detail": "Verify your email before applying to sell."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        if SellerApplication.objects.filter(
-            user=user, status=SellerApplication.Status.PENDING
-        ).exists():
+        if SellerApplication.objects.filter(user=user, status=SellerApplication.Status.PENDING).exists():
             return Response(
                 {"detail": "You already have a pending application."},
                 status=status.HTTP_400_BAD_REQUEST,
@@ -204,7 +196,8 @@ class PasswordResetRequestView(APIView):
         uid = urlsafe_base64_encode(force_bytes(user.pk))
         tok = default_token_generator.make_token(user)
         reset_url = f"{settings.FRONTEND_BASE_URL}/reset-password?uid={uid}&token={tok}"
-        send_password_reset_email(to_email=user.email, name=user.name, reset_url=reset_url)
+        name = user.get_full_name() or user.email
+        send_password_reset_email(to_email=user.email, name=name, reset_url=reset_url)
         return Response({"detail": "If an account exists, you will receive an email."})
 
 
@@ -219,8 +212,6 @@ class PasswordResetConfirmView(APIView):
 
 
 class UsZipLookupView(APIView):
-    """Authenticated lookup: US ZIP → city, state (for checkout forms)."""
-
     permission_classes = [permissions.IsAuthenticated]
 
     def get(self, request):
@@ -247,37 +238,6 @@ class ShippingAddressListView(APIView):
         return Response(ShippingAddressSerializer(obj, context={"request": request}).data, status=status.HTTP_201_CREATED)
 
 
-class SellerPublicProfileView(APIView):
-    """Public seller card for buyers (no email/phone)."""
-
-    permission_classes = [permissions.AllowAny]
-
-    def get(self, request, pk: int):
-        user = get_object_or_404(
-            User.objects.filter(pk=pk, role__in=(User.Role.SELLER, User.Role.BOTH))
-        )
-        display_name = (user.name or "").strip() or (user.email or "").split("@")[0]
-        reviews = SellerReview.objects.filter(seller_id=user.id)
-        agg = reviews.aggregate(avg=Avg("rating"), c=Count("id"))
-        avg = agg["avg"]
-        part_qs = VehiclePart.objects.filter(vehicle__owner_id=user.id, is_removed=False)
-        return Response(
-            {
-                "id": user.id,
-                "display_name": display_name,
-                "completed_sales": part_qs.filter(
-                    listing_state=VehiclePart.ListingState.SOLD
-                ).count(),
-                "rating_avg": round(float(avg), 2) if avg is not None else None,
-                "rating_count": int(agg["c"] or 0),
-                "active_buy_now_listings": part_qs.filter(
-                    listing_state=VehiclePart.ListingState.BUY_NOW
-                ).count(),
-                "member_since": timezone.localtime(user.date_joined).date().isoformat(),
-            }
-        )
-
-
 class ShippingAddressDetailView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
@@ -292,3 +252,41 @@ class ShippingAddressDetailView(APIView):
         addr = get_object_or_404(ShippingAddress, pk=pk, user=request.user)
         addr.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class UserCarListView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        cars = UserCar.objects.filter(user=request.user)
+        return Response(UserCarSerializer(cars, many=True).data)
+
+    def post(self, request):
+        ser = UserCarSerializer(data=request.data, context={"request": request})
+        ser.is_valid(raise_exception=True)
+        obj = ser.save()
+        return Response(UserCarSerializer(obj).data, status=status.HTTP_201_CREATED)
+
+
+class UserCarDetailView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def delete(self, request, pk: int):
+        car = get_object_or_404(UserCar, pk=pk, user=request.user)
+        car.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class SellerPublicProfileView(APIView):
+    permission_classes = [permissions.AllowAny]
+
+    def get(self, request, pk: int):
+        user = get_object_or_404(User.objects.filter(pk=pk, is_seller=True))
+        display_name = user.get_full_name().strip() or user.email.split("@")[0]
+        return Response(
+            {
+                "id": user.id,
+                "display_name": display_name,
+                "member_since": timezone.localtime(user.date_joined).date().isoformat(),
+            }
+        )

@@ -7,7 +7,7 @@ from rest_framework import serializers
 from rest_framework.exceptions import AuthenticationFailed
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 
-from .models import SellerApplication, ShippingAddress
+from .models import SellerApplication, ShippingAddress, UserCar
 
 User = get_user_model()
 
@@ -21,9 +21,10 @@ class UserSerializer(serializers.ModelSerializer):
         fields = (
             "id",
             "email",
-            "name",
+            "first_name",
+            "last_name",
             "phone",
-            "role",
+            "is_seller",
             "is_approved_seller",
             "seller_application",
             "email_verified_at",
@@ -32,19 +33,13 @@ class UserSerializer(serializers.ModelSerializer):
         read_only_fields = fields
 
     def get_is_approved_seller(self, obj):
-        return obj.role in (User.Role.SELLER, User.Role.BOTH)
+        return obj.is_seller
 
     def get_seller_application(self, obj):
-        app = (
-            SellerApplication.objects.filter(user=obj).order_by("-created_at").first()
-        )
+        app = SellerApplication.objects.filter(user=obj).order_by("-submitted_at").first()
         if not app:
             return None
-        out = {
-            "id": app.id,
-            "status": app.status,
-            "created_at": app.created_at,
-        }
+        out = {"id": app.id, "status": app.status, "submitted_at": app.submitted_at}
         if app.status == SellerApplication.Status.REJECTED and app.rejection_reason:
             out["rejection_reason"] = app.rejection_reason
         return out
@@ -52,23 +47,21 @@ class UserSerializer(serializers.ModelSerializer):
 
 class RegisterSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True, min_length=8)
-    role = serializers.CharField(write_only=True, required=False, allow_blank=True)
 
     class Meta:
         model = User
-        fields = ("email", "password", "name", "phone", "role")
+        fields = ("email", "password", "first_name", "last_name", "phone")
 
     def validate_email(self, value):
         return value.lower().strip()
 
     def validate(self, attrs):
-        attrs.pop("role", None)
         validate_password(attrs["password"])
         return attrs
 
     def create(self, validated_data):
         password = validated_data.pop("password")
-        user = User(**validated_data, role=User.Role.BUYER)
+        user = User(**validated_data)
         user.set_password(password)
         user.save()
         return user
@@ -77,18 +70,12 @@ class RegisterSerializer(serializers.ModelSerializer):
 class SellerApplicationCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = SellerApplication
-        fields = ("business_name", "why_sell", "inventory_summary")
+        fields = ("bio",)
 
-    def validate_why_sell(self, value):
+    def validate_bio(self, value):
         t = (value or "").strip()
         if len(t) < 20:
             raise serializers.ValidationError("Please write at least a few sentences.")
-        return t
-
-    def validate_inventory_summary(self, value):
-        t = (value or "").strip()
-        if len(t) < 10:
-            raise serializers.ValidationError("Describe what you plan to list.")
         return t
 
 
@@ -160,20 +147,8 @@ class PasswordResetConfirmSerializer(serializers.Serializer):
 class ShippingAddressSerializer(serializers.ModelSerializer):
     class Meta:
         model = ShippingAddress
-        fields = (
-            "id",
-            "label",
-            "recipient_name",
-            "line1",
-            "line2",
-            "city",
-            "state",
-            "postal_code",
-            "is_default",
-            "created_at",
-            "updated_at",
-        )
-        read_only_fields = ("id", "created_at", "updated_at")
+        fields = ("id", "full_name", "line1", "line2", "city", "state", "zip", "is_default", "created_at")
+        read_only_fields = ("id", "created_at")
 
     def validate_state(self, value):
         s = (value or "").strip().upper()[:2]
@@ -191,3 +166,16 @@ class ShippingAddressSerializer(serializers.ModelSerializer):
         if validated_data.get("is_default"):
             ShippingAddress.objects.filter(user=instance.user).exclude(pk=instance.pk).update(is_default=False)
         return super().update(instance, validated_data)
+
+
+class UserCarSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserCar
+        fields = ("id", "user", "generation", "modification", "year", "nickname", "is_default", "created_at")
+        read_only_fields = ("id", "user", "created_at")
+
+    def create(self, validated_data):
+        user = self.context["request"].user
+        if validated_data.get("is_default"):
+            UserCar.objects.filter(user=user).update(is_default=False)
+        return UserCar.objects.create(user=user, **validated_data)

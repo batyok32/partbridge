@@ -38,23 +38,14 @@ class UserManager(BaseUserManager):
 class User(AbstractUser):
     username = None
     email = models.EmailField("email address", unique=True)
-    name = models.CharField(max_length=150)
-    phone = models.CharField(max_length=32)
-
-    class Role(models.TextChoices):
-        BUYER = "buyer", "Buyer"
-        SELLER = "seller", "Seller"
-        BOTH = "both", "Buyer and seller"
-
-    role = models.CharField(
-        max_length=16,
-        choices=Role.choices,
-        default=Role.BUYER,
-    )
+    first_name = models.CharField(max_length=150, blank=True)
+    last_name = models.CharField(max_length=150, blank=True)
+    phone = models.CharField(max_length=32, blank=True)
+    is_seller = models.BooleanField(default=False)
     email_verified_at = models.DateTimeField(null=True, blank=True)
 
     USERNAME_FIELD = "email"
-    REQUIRED_FIELDS = ["name", "phone"]
+    REQUIRED_FIELDS = []
 
     objects = UserManager()
 
@@ -63,77 +54,103 @@ class User(AbstractUser):
 
 
 class ShippingAddress(models.Model):
-    """Buyer saved shipping destinations (ZIP + state drive rate quotes)."""
-
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name="shipping_addresses",
     )
-    label = models.CharField(max_length=64, default="Home")
-    recipient_name = models.CharField(max_length=128, blank=True)
+    full_name = models.CharField(max_length=128)
     line1 = models.CharField(max_length=255)
     line2 = models.CharField(max_length=255, blank=True)
     city = models.CharField(max_length=128)
     state = models.CharField(max_length=2)
-    postal_code = models.CharField(max_length=16)
+    zip = models.CharField(max_length=16)
     is_default = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        ordering = ["-is_default", "-updated_at", "-id"]
+        ordering = ["-is_default", "-id"]
 
     def __str__(self):
-        return f"{self.user_id} · {self.label} ({self.city}, {self.state})"
+        return f"{self.user_id} — {self.full_name} ({self.city}, {self.state})"
 
 
 class SellerApplication(models.Model):
-    """Request to upgrade from buyer to approved seller (staff reviews in admin)."""
-
     class Status(models.TextChoices):
         PENDING = "pending", "Pending review"
         APPROVED = "approved", "Approved"
         REJECTED = "rejected", "Rejected"
 
     user = models.ForeignKey(
-        User,
+        settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name="seller_applications",
     )
-    business_name = models.CharField(max_length=200, blank=True)
-    why_sell = models.TextField(max_length=4000)
-    inventory_summary = models.TextField(max_length=4000)
-    status = models.CharField(
-        max_length=16,
-        choices=Status.choices,
-        default=Status.PENDING,
-    )
-    reviewed_at = models.DateTimeField(null=True, blank=True)
-    reviewed_by = models.ForeignKey(
-        User,
-        null=True,
-        blank=True,
-        on_delete=models.SET_NULL,
-        related_name="seller_applications_reviewed",
-    )
-    staff_notes = models.TextField(blank=True)
+    status = models.CharField(max_length=16, choices=Status.choices, default=Status.PENDING)
+    bio = models.TextField()
     rejection_reason = models.TextField(blank=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    submitted_at = models.DateTimeField(auto_now_add=True)
+    reviewed_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
-        ordering = ["-created_at"]
+        ordering = ["-submitted_at"]
 
     def __str__(self):
         return f"{self.user.email} — {self.status}"
 
 
-class EmailVerificationChallenge(models.Model):
-    """Stores a short-lived hashed code sent by email (and complements magic-link token)."""
+class SellerVerificationDoc(models.Model):
+    class DocType(models.TextChoices):
+        GOV_ID = "gov_id", "Government ID"
+        BUSINESS_LICENSE = "business_license", "Business License"
+        DEALER_LICENSE = "dealer_license", "Dealer License"
 
     user = models.ForeignKey(
-        User,
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="verification_docs",
+    )
+    doc_type = models.CharField(max_length=24, choices=DocType.choices)
+    file_url = models.CharField(max_length=1024)
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"SellerVerificationDoc user={self.user_id} type={self.doc_type}"
+
+
+class UserCar(models.Model):
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="user_cars",
+    )
+    generation = models.ForeignKey(
+        "catalog.Generation",
+        on_delete=models.CASCADE,
+        related_name="user_cars",
+    )
+    modification = models.ForeignKey(
+        "catalog.Modification",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="user_cars",
+    )
+    year = models.PositiveSmallIntegerField()
+    nickname = models.CharField(max_length=128, blank=True)
+    is_default = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-is_default", "-created_at"]
+
+    def __str__(self):
+        return f"UserCar user={self.user_id} gen={self.generation_id} year={self.year}"
+
+
+class EmailVerificationChallenge(models.Model):
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
         related_name="email_verification_challenges",
     )
