@@ -1,0 +1,290 @@
+async def _apply_remanufactured_condition_filter(self, page):
+        """Apply used condition filter"""
+        try:
+            used_selectors = [
+                'input[aria-label*="Remanufactured"]',
+                'input[name="LH_ItemCondition"][value="3000"]'
+            ]
+            for selector in used_selectors:
+                if await page.locator(selector).count() > 0:
+                    await page.click(selector)
+                    await page.wait_for_load_state("domcontentloaded")
+                    await page.wait_for_timeout(2000)
+                    break
+        except Exception:
+            pass
+
+
+    
+Look how it should work 
+
+
+1. You go to 6000 category (which is eBay Motors)
+2. then you find link with 6028 (which is Parts & Accessories)
+3. then you find a link with 6030 which is Car & Truck Parts & Accessories 
+4. Now you apply all filters, sold, used, pagination
+5. In sidebar you have div with id="x-refine__group__0"
+you have ul with class class="srp-refine__category__list"
+and then li and you go inside until you find span which contains Car & Truck Parts & Accessories and taking next ul
+and now we have ul with class=srp-refine__category__list
+we take all the li-s inside that ul tag and those categories is gonna be our first depth categories 
+we will go through each of them 
+we get first li-s - inside it we see a tag with nested span tag 
+a href="https://www.ebay.com/sch/33694/i.html?_nkw=Toyota+Prius+2010&_from=R40&LH_Sold=1&LH_Complete=1&LH_ItemCondition=3000" > span with category name Interior Parts & Accessories
+we extract it and in our categories dictionary we go and create such column 
+{
+    "depth":"0",
+    category_name:"Car & Truck Parts & Accessories",
+    items:Null,
+    category_id:6030, 
+    categories: [
+        {
+            "depth:1,
+        category_name:"Interior Parts & Accessories"
+        category_id:1234
+        categories: [
+
+        ],
+        items:Null 
+        }, 
+        {
+            "depth:1,
+            category_id:1235
+        category_name:"Exterior Parts & Accessories"
+        categories: [
+
+        ],
+        items:Null ,
+        }, 
+        {
+            "depth:1,
+            category_id:1236
+        category_name:"Brakes & Brake Pads"
+        categories: [
+
+        ],
+        items:Null ,
+        },
+        ...
+    ]
+}
+
+Why items are null, because it is not leaf category thats why 
+Then we are gonna click on that a tag
+we wait until page loads 
+we see sidebar where we have div with id="x-refine__group__0"
+you have ul with class class="srp-refine__category__list"
+and then li and you go inside until you find span which contains Interior Parts & Accessories and taking next ul
+and now we add all those li-s into our db dictionary 
+{
+    "depth":"0",
+    category_name:"Car & Truck Parts & Accessories",
+    items:Null,
+    categories: [
+        {
+            "depth:1,
+            category_name:"Interior Parts & Accessories"
+            categories: [
+            {
+                "depth:2,
+                category_id:1237
+                category_name:"Switches & Controls"
+                categories: [
+                    
+                ],
+                items:Null 
+            },
+
+            {
+                "depth:2,
+                category_id:1238
+                category_name:"Other Interior Parts & Accessories"
+                categories: [
+                    
+                ],
+                items:Null 
+            }, 
+            {
+                "depth:2,
+                category_name:"Gauges"
+                category_id:1239
+                categories: [
+                    
+                ],
+                items:Null 
+            }, 
+            ...
+        ],
+        items:Null 
+        }, 
+    ]
+}
+Then we are gonna click on that a tag
+we wait until page loads 
+we see sidebar where we have div with id="x-refine__group__0"
+you have ul with class class="srp-refine__category__list"
+and then li and you go inside until you find span which contains Switches & Controls and trying to find next ul 
+and we see that we cant find, because there is no neighbor ul in Switches & Controls
+Now we see that this is leaf and we are going to collect all items here as we did before we are gonna look how many items is there
+but here we are going to add collecting with type
+How that works is described in underneath
+Go through all of them and collect into our db as Switches & Controls Items
+
+And now we are going to continue our trip, but now we are gonna look into our db and check next subscategory that is neighbor to our last subscategory
+which is for now is Other Interioir Parts & Accessories
+we are going to click on its a tag
+and again we see there is no ul tag next to span 
+then we do collecting again 
+and go to next subcategory which is Gauges 
+we click on a tag but now we see there is ul tag next to it 
+and we get all those subscategories into our db as we did before 
+
+and so on 
+
+and lets imagine we checked all subscategories of Gauges now we are going to see our db and find the parent category of Gauges 
+And find a tag with category id of the parent and we are going to click it 
+and we are going to look our db where did we left, which one doesnt have not items and no categories 
+and we are going to continue until we reach the point that all subscategories are done collecting and that we reach the point that for continue we are going to need parent of 6030 
+then we say we are done 
+
+and continue our script 
+
+* Ignore category if name contains  More or Fewer
+* Add prints all over the script to see what is going on 
+* just give code nothing more 
+
+How collecting by type works 
+when we come to the decision to collect all items we are going to check if there are any types and types more than one if not then as usual collect without type but if yes then 
+we are going to look in sidebar (ul with class="x-refine__left__nav") for h3 with text inside "Type"
+and we are going to get div with id of x-refine__group_1__0
+inside there, there is ul > li, li, li ...
+inside each li there is a tag with link 
+this link needs to be clicked but before that we are going to extract all type names 
+inside that a tag we are going to extract all text from it
+that text is gonna be like:
+ABS Accumulator (24) Items 
+ABS Pump (105) Items 
+Not specified (26) Items 
+
+we are going to click each a tag and then collect all items as we do usually 
+and then when we are done with one type we are going to click again that a tag to remove select 
+and then we are going to continue with next type and then next type until we are done
+but places are gonna change so orientation should be by context 
+and then after we get all items we are going to save them inside our mini db inside our subcategory inside items with type name 
+
+and for more deeper analyzation we are going to collect all other sidebar filters context 
+what do i mean by that is we are going to look 
+(ul with class="x-refine__left__nav") for h3 with text inside our list 
+which is Type, Manufacturer Warranty, Items Included, Performance Part, Material, Brand, Brand Type, Placement on Vehicle, Terminal Type, Condition, Buying format
+and then get all context inside and parse them 
+we are going to see text like this 
+
+"""
+Type
+
+ABS Accumulator(24) Items (24)
+
+ABS Pump(169) Items (169)
+
+ABS Pump & Motor Assembly(131) Items (131)
+
+Not Specified(101) Items (101)
+Manufacturer Warranty
+
+1 Month(153) Items (153)
+
+3 Months(11) Items (11)
+
+1 Year(1) Items (1)
+
+Not Specified(244) Items (244)
+Items Included
+
+ABS Accumulator(60) Items (60)
+
+ABS Pump(302) Items (302)
+
+Not Specified(92) Items (92)
+Performance Part
+
+Yes(9) Items (9)
+
+No(144) Items (144)
+
+Not Specified(256) Items (256)
+Material
+
+Iron(1) Items (1)
+
+Plastic(21) Items (21)
+
+Stainless Steel(10) Items (10)
+
+Steel(99) Items (99)
+
+Not Specified(289) Items (289)
+Brand
+
+A.B.S.(1) Items (1)
+
+ABS(1) Items (1)
+
+Aisin(2) Items (2)
+
+Areyourshop(2) Items (2)
+
+Factory Spec(1) Items (1)
+
+OEM(4) Items (4)
+
+Toyota(396) Items (396)
+
+Unbranded(2) Items (2)
+Brand Type
+
+Aftermarket Branded(1) Items (1)
+
+Genuine OEM(396) Items (396)
+
+Private Label(2) Items (2)
+
+Unbranded(2) Items (2)
+
+Not Specified(6) Items (6)
+Placement on Vehicle
+
+Front(361) Items (361)
+
+Left(12) Items (12)
+
+Lower(4) Items (4)
+
+Right(3) Items (3)
+
+Not Specified(44) Items (44)
+Terminal Type
+
+Blade & Bullet(1) Items (1)
+
+Pin Plug(335) Items (335)
+
+Slide(8) Items (8)
+
+Not Specified(73) Items (73)
+"""
+
+we are going to extract formart and save to our mini db for that subcategory so in report generation we are going to generate percent of the parts saying 50% of this subcategry is for front or most of the parts made from steel 
+so in mini db is going to be like 
+{
+    "category_name",
+    "specs":[
+        {
+            name:"Material",
+            values: [
+                {name:"", amount: 15, percent:which is going to be all materials amounts/to this amount }
+            ]
+        }
+    ]
+}
+
+and then generate rich report with all those informations

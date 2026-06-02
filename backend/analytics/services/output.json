@@ -1,0 +1,586 @@
+{
+  "query": "2020 Hyundai Ioniq",
+  "analysis_timestamp": "2025-11-04T19:27:50.695758",
+  "analysis_type": "scrapingbee_category_tree",
+  "data_summary": {
+    "total_categories": 5,
+    "leaf_categories": 3,
+    "non_leaf_categories": 2,
+    "total_items_scraped": 0,
+    "active_listings": 0,
+    "sold_listings": 0,
+    "categories_with_items": 0,
+    "categories_with_specs": 5
+  },
+  "category_tree": [
+    {
+      "id": "6030",
+      "name": "Car & Truck Parts & Accessories",
+      "is_leaf": false,
+      "item_count": 0,
+      "subcategories": [
+        {
+          "id": "33694",
+          "name": "Interior Parts & Accessories",
+          "is_leaf": false,
+          "item_count": 0,
+          "subcategories": [
+            {
+              "id": "50459",
+              "name": "Switches & Controls",
+              "is_leaf": true,
+              "item_count": 0,
+              "subcategories": []
+            },
+            {
+              "id": "33706",
+              "name": "Window Motors & Regulators",
+              "is_leaf": true,
+              "item_count": 0,
+              "subcategories": []
+            },
+            {
+              "id": "9887",
+              "name": "Other Interior Parts & Accessories",
+              "is_leaf": true,
+              "item_count": 0,
+              "subcategories": []
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "categories": [],
+  "top_opportunities": [],
+  "market_overview": {
+    "total_categories": 0,
+    "total_active": 0,
+    "total_sold": 0,
+    "overall_sell_through": 0,
+    "avg_opportunity_score": 0
+  },
+  "recommendations": {
+    "best_category": "N/A",
+    "suggestion": "Insufficient data",
+    "score": 0
+  },
+  "condition_breakdown": {},
+  "shipping_analysis": {
+    "total_items": 0,
+    "free_shipping_count": 0,
+    "free_shipping_percentage": 0,
+    "paid_shipping_count": 0,
+    "avg_shipping_cost": 0,
+    "min_shipping": 0,
+    "max_shipping": 0
+  },
+  "specs_collected": {
+    "6030": [
+      {
+        "name": "Brand",
+        "values": [
+          { "name": "CAR", "amount": 0, "percent": 0.0 },
+          { "name": "Hyundai", "amount": 0, "percent": 0.0 },
+          { "name": "Unbranded", "amount": 641, "percent": 55.5 },
+          { "name": "OEM", "amount": 103, "percent": 8.92 },
+          { "name": "Lloyd Mats", "amount": 276, "percent": 23.9 },
+          { "name": "ACDelco", "amount": 31, "percent": 2.68 },
+          { "name": "Bosch", "amount": 56, "percent": 4.85 },
+          { "name": "Dorman", "amount": 48, "percent": 4.16 }
+        ]
+      },
+      {
+        "name": "Brand Type",
+        "values": [
+          { "name": "Genuine OEM", "amount": 0, "percent": 0.0 },
+          { "name": "Aftermarket Branded", "amount": 0, "percent": 0.0 },
+          { "name": "Unbranded", "amount": 639, "percent": 85.66 },
+          { "name": "Private Label", "amount": 107, "percent": 14.34 },
+          { "name": "Not Specified", "amount": 0, "percent": 0.0 }
+        ]
+      },
+      {
+        "name": "Manufacturer Warranty",
+        "values": [
+          { "name": "1 Year", "amount": 793, "percent": 38.72 },
+          { "name": "5 Years", "amount": 352, "percent": 17.19 },
+          { "name": "Lifetime", "amount": 289, "percent": 14.11 },
+          { "name": "2 Years", "amount": 160, "percent": 7.81 },
+          { "name": "1 Month", "amount": 156, "percent": 7.62 },
+          { "name": "3 Years", "amount": 129, "percent": 6.3 },
+          { "name": "6 Months", "amount": 86, "percent": 4.2 },
+          { "name": "10 Years", "amount": 83, "percent": 4.05 }
+        ]
+      },
+      {
+        "name": "Performance Part",
+        "values": [
+          { "name": "No", "amount": 999, "percent": 76.96 },
+          { "name": "Yes", "amount": 299, "percent": 23.04 },
+          { "name": "Not Specified", "amount": 0, "percent": 0.0 }
+        ]
+      }
+    ],
+    "33694": [
+      {
+        "name": "Brand",
+        "values": [
+          { "name": "Hyundai", "amount": 657, "percent": 66.3 },
+          { "name": "Unbranded", "amount": 239, "percent": 24.12 },
+          { "name": "OEM", "amount": 7, "percent": 0.71 },
+          { "name": "No-Name", "amount": 34, "percent": 3.43 },
+          { "name": "Covercraft", "amount": 28, "percent": 2.83 },
+          { "name": "Intro-Tech Automotive", "amount": 11, "percent": 1.11 },
+          { "name": "Dash Designs", "amount": 8, "percent": 0.81 },
+          { "name": "Wheelskins", "amount": 7, "percent": 0.71 }
+        ]
+      },
+      {
+        "name": "Placement on Vehicle",
+        "values": [
+          { "name": "Front", "amount": 292, "percent": 38.17 },
+          { "name": "Left", "amount": 243, "percent": 31.76 },
+          { "name": "Dashboard", "amount": 8, "percent": 1.05 },
+          { "name": "Rear", "amount": 69, "percent": 9.02 },
+          { "name": "Right", "amount": 108, "percent": 14.12 },
+          { "name": "Center Console", "amount": 3, "percent": 0.39 },
+          { "name": "Door", "amount": 27, "percent": 3.53 },
+          { "name": "Front Left", "amount": 15, "percent": 1.96 }
+        ]
+      },
+      {
+        "name": "Brand Type",
+        "values": [
+          { "name": "Genuine OEM", "amount": 323, "percent": 27.99 },
+          { "name": "Unbranded", "amount": 239, "percent": 20.71 },
+          { "name": "Aftermarket Branded", "amount": 20, "percent": 1.73 },
+          { "name": "Not Specified", "amount": 572, "percent": 49.57 }
+        ]
+      },
+      {
+        "name": "Universal Fitment",
+        "values": [
+          { "name": "No", "amount": 261, "percent": 22.14 },
+          { "name": "Yes", "amount": 121, "percent": 10.26 },
+          { "name": "Not Specified", "amount": 797, "percent": 67.6 }
+        ]
+      },
+      {
+        "name": "Performance Part",
+        "values": [
+          { "name": "No", "amount": 84, "percent": 55.26 },
+          { "name": "Yes", "amount": 68, "percent": 44.74 },
+          { "name": "Not Specified", "amount": 0, "percent": 0.0 }
+        ]
+      }
+    ],
+    "50459": [
+      {
+        "name": "Brand",
+        "values": [
+          { "name": "Beck/Arnley", "amount": 1, "percent": 0.35 },
+          { "name": "Hyundai", "amount": 75, "percent": 26.41 },
+          { "name": "Unbranded", "amount": 149, "percent": 52.46 },
+          { "name": "Not Specified", "amount": 59, "percent": 20.77 }
+        ]
+      },
+      {
+        "name": "Placement on Vehicle",
+        "values": [
+          { "name": "Center Console", "amount": 2, "percent": 0.72 },
+          { "name": "Dashboard", "amount": 5, "percent": 1.81 },
+          { "name": "Door", "amount": 12, "percent": 4.35 },
+          { "name": "Front", "amount": 99, "percent": 35.87 },
+          { "name": "Left", "amount": 133, "percent": 48.19 },
+          { "name": "Rear", "amount": 2, "percent": 0.72 },
+          { "name": "Right", "amount": 20, "percent": 7.25 },
+          { "name": "Steering Column", "amount": 3, "percent": 1.09 }
+        ]
+      },
+      {
+        "name": "Brand Type",
+        "values": [
+          { "name": "Aftermarket Branded", "amount": 1, "percent": 0.35 },
+          { "name": "Genuine OEM", "amount": 65, "percent": 22.89 },
+          { "name": "Unbranded", "amount": 149, "percent": 52.46 },
+          { "name": "Not Specified", "amount": 69, "percent": 24.3 }
+        ]
+      },
+      {
+        "name": "Type",
+        "values": [
+          { "name": "Push Button", "amount": 6, "percent": 2.17 },
+          { "name": "Push Pull Switch", "amount": 52, "percent": 18.77 },
+          { "name": "Rocker Switch", "amount": 1, "percent": 0.36 },
+          { "name": "Switch Assembly", "amount": 17, "percent": 6.14 },
+          { "name": "Toggle Button", "amount": 1, "percent": 0.36 },
+          { "name": "Not Specified", "amount": 200, "percent": 72.2 }
+        ]
+      },
+      {
+        "name": "To Control",
+        "values": [
+          { "name": "Brake Light", "amount": 1, "percent": 0.44 },
+          { "name": "Front Wiper", "amount": 2, "percent": 0.88 },
+          { "name": "Headlight", "amount": 2, "percent": 0.88 },
+          { "name": "Ignition Button", "amount": 7, "percent": 3.08 },
+          { "name": "Multifunctional", "amount": 4, "percent": 1.76 },
+          { "name": "Turn Signal", "amount": 1, "percent": 0.44 },
+          { "name": "Window", "amount": 208, "percent": 91.63 },
+          { "name": "Wing Mirror", "amount": 2, "percent": 0.88 }
+        ]
+      },
+      {
+        "name": "Features",
+        "values": [
+          { "name": "Durable", "amount": 126, "percent": 41.45 },
+          { "name": "Dustproof", "amount": 9, "percent": 2.96 },
+          { "name": "LED Light", "amount": 7, "percent": 2.3 },
+          { "name": "Waterproof", "amount": 5, "percent": 1.64 },
+          { "name": "Weatherproof", "amount": 9, "percent": 2.96 },
+          { "name": "Not Specified", "amount": 148, "percent": 48.68 }
+        ]
+      },
+      {
+        "name": "Manufacturer Warranty",
+        "values": [
+          { "name": "1 Month", "amount": 4, "percent": 1.43 },
+          { "name": "6 Months", "amount": 46, "percent": 16.49 },
+          { "name": "1 Year", "amount": 96, "percent": 34.41 },
+          { "name": "2 Years", "amount": 1, "percent": 0.36 },
+          { "name": "Not Specified", "amount": 132, "percent": 47.31 }
+        ]
+      },
+      {
+        "name": "Universal Fitment",
+        "values": [
+          { "name": "Yes", "amount": 13, "percent": 4.64 },
+          { "name": "No", "amount": 130, "percent": 46.43 },
+          { "name": "Not Specified", "amount": 137, "percent": 48.93 }
+        ]
+      },
+      {
+        "name": "Performance Part",
+        "values": [
+          { "name": "Yes", "amount": 55, "percent": 19.64 },
+          { "name": "No", "amount": 8, "percent": 2.86 },
+          { "name": "Not Specified", "amount": 217, "percent": 77.5 }
+        ]
+      }
+    ],
+    "33706": [
+      {
+        "name": "Posição no veículo",
+        "values": [
+          { "name": "Dianteira esquerda", "amount": 11, "percent": 5.26 },
+          { "name": "Dianteira direita", "amount": 15, "percent": 7.18 },
+          { "name": "Na frente", "amount": 15, "percent": 7.18 },
+          { "name": "Esquerda traseira", "amount": 1, "percent": 0.48 },
+          { "name": "À esquerda", "amount": 9, "percent": 4.31 },
+          { "name": "À direita", "amount": 9, "percent": 4.31 },
+          { "name": "Não especificado", "amount": 149, "percent": 71.29 }
+        ]
+      },
+      {
+        "name": "Fabricante",
+        "values": [
+          { "name": "Hyundai", "amount": 157, "percent": 88.2 },
+          { "name": "Sem marca", "amount": 10, "percent": 5.62 },
+          { "name": "Não especificado", "amount": 11, "percent": 6.18 }
+        ]
+      },
+      {
+        "name": "Tipo",
+        "values": [
+          { "name": "Motor de vidro elétrico", "amount": 37, "percent": 23.87 },
+          { "name": "Regulador de janela", "amount": 14, "percent": 9.03 },
+          { "name": "Não especificado", "amount": 104, "percent": 67.1 }
+        ]
+      },
+      {
+        "name": "Tipo de marca",
+        "values": [
+          {
+            "name": "Fabricante original do equipamento genuíno",
+            "amount": 31,
+            "percent": 17.03
+          },
+          { "name": "Sem marca", "amount": 10, "percent": 5.49 },
+          { "name": "Não especificado", "amount": 141, "percent": 77.47 }
+        ]
+      },
+      {
+        "name": "Material",
+        "values": [
+          { "name": "Plástico", "amount": 17, "percent": 9.44 },
+          { "name": "Aço inoxidável", "amount": 16, "percent": 8.89 },
+          { "name": "Não especificado", "amount": 147, "percent": 81.67 }
+        ]
+      },
+      {
+        "name": "Garantia do fabricante",
+        "values": [
+          { "name": "3 anos", "amount": 10, "percent": 5.49 },
+          { "name": "6 meses", "amount": 8, "percent": 4.4 },
+          { "name": "1 ano", "amount": 7, "percent": 3.85 },
+          { "name": "3 meses", "amount": 4, "percent": 2.2 },
+          { "name": "Não especificado", "amount": 153, "percent": 84.07 }
+        ]
+      },
+      {
+        "name": "Modo de operação",
+        "values": [
+          { "name": "Elétrico", "amount": 30, "percent": 16.48 },
+          { "name": "Não especificado", "amount": 152, "percent": 83.52 }
+        ]
+      },
+      {
+        "name": "Instalação universal",
+        "values": [
+          { "name": "Não", "amount": 38, "percent": 20.88 },
+          { "name": "Não especificado", "amount": 144, "percent": 79.12 }
+        ]
+      }
+    ],
+    "9887": [
+      {
+        "name": "Brand Type",
+        "values": [
+          { "name": "Genuine OEM", "amount": 72, "percent": 59.02 },
+          { "name": "Aftermarket Branded", "amount": 1, "percent": 0.82 },
+          { "name": "Not Specified", "amount": 49, "percent": 40.16 }
+        ]
+      },
+      {
+        "name": "Brand",
+        "values": [
+          { "name": "Hyundai", "amount": 101, "percent": 87.07 },
+          { "name": "Not Specified", "amount": 15, "percent": 12.93 }
+        ]
+      },
+      {
+        "name": "Universal Fitment",
+        "values": [
+          { "name": "No", "amount": 18, "percent": 14.75 },
+          { "name": "Not Specified", "amount": 104, "percent": 85.25 }
+        ]
+      },
+      {
+        "name": "Performance Part",
+        "values": [
+          { "name": "No", "amount": 18, "percent": 14.75 },
+          { "name": "Not Specified", "amount": 104, "percent": 85.25 }
+        ]
+      }
+    ]
+  },
+  "scraper_config": {
+    "api_provider": "ScrapingBee",
+    "items_per_page": 240,
+    "max_pages_per_category": 2
+  },
+  "seller_report": {
+    "total_unique_sellers": 0,
+    "top_sellers_by_volume": [],
+    "top_rated_sellers": [],
+    "seller_statistics": {
+      "avg_listings_per_seller": 0,
+      "sellers_with_100_plus": 0,
+      "sellers_with_50_plus": 0,
+      "high_volume_sellers": 0
+    }
+  },
+  "price_distribution_report": {
+    "total_items": 0,
+    "valid_prices": 0,
+    "error": "No valid prices found"
+  },
+  "competition_analysis_report": {
+    "overall_competition": {
+      "total_active_listings": 0,
+      "total_sellers": 0,
+      "competition_level": "Low",
+      "competition_color": "green",
+      "market_concentration_hhi": 0,
+      "top_10_sellers_market_share": 0
+    },
+    "seller_concentration": {
+      "total_unique_sellers": 0,
+      "top_10_sellers": {},
+      "concentration_risk": "Low"
+    },
+    "category_competition": [],
+    "geographic_distribution": { "unique_locations": 0, "top_locations": {} },
+    "price_competitiveness": {},
+    "market_saturation": {
+      "active_to_sold_ratio": 0,
+      "saturation_level": "Balanced"
+    }
+  },
+  "category_performance_report": {
+    "summary": {
+      "total_categories_analyzed": 0,
+      "avg_opportunity_score": 0,
+      "avg_sell_through_rate": 0
+    },
+    "top_performers": [],
+    "all_categories": [],
+    "performance_distribution": {
+      "excellent": 0,
+      "good": 0,
+      "fair": 0,
+      "poor": 0
+    }
+  },
+  "time_based_analysis_report": {
+    "analysis_timestamp": "2025-11-04T19:27:50.697117",
+    "price_trends": {},
+    "volume_trends": {
+      "current_active_listings": 0,
+      "historical_sold_listings": 0,
+      "active_to_sold_ratio": 0,
+      "market_activity": "Low"
+    },
+    "category_trends": [],
+    "market_velocity": {},
+    "seasonal_analysis": {
+      "note": "Full seasonal analysis requires date-stamped data",
+      "current_market_activity": "Low",
+      "recommendation": "Monitor trends over multiple months for accurate seasonal patterns"
+    },
+    "insights": {
+      "price_momentum": "Unknown",
+      "market_health": "Healthy",
+      "best_performing_categories": []
+    }
+  },
+  "reports_summary": {
+    "generated_reports": [
+      {
+        "name": "Data Summary Report",
+        "description": "Overview of scraped items, duplicates, and filtering statistics",
+        "generated": true,
+        "key": "data_summary"
+      },
+      {
+        "name": "Category Analysis Report",
+        "description": "Detailed analysis of each category with pricing, demand, and opportunity scores",
+        "generated": true,
+        "key": "categories"
+      },
+      {
+        "name": "Top Opportunities Report",
+        "description": "Top 5 categories ranked by opportunity score with recommendations",
+        "generated": true,
+        "key": "top_opportunities"
+      },
+      {
+        "name": "Market Overview Report",
+        "description": "Overall market statistics including sell-through rates and average opportunity scores",
+        "generated": true,
+        "key": "market_overview"
+      },
+      {
+        "name": "Seller Report",
+        "description": "Analysis of sellers including top sellers by volume, ratings, and seller statistics",
+        "generated": true,
+        "key": "seller_report"
+      },
+      {
+        "name": "Recommendations Report",
+        "description": "Best category recommendations and strategic suggestions",
+        "generated": true,
+        "key": "recommendations"
+      },
+      {
+        "name": "Price Distribution Report",
+        "description": "Price ranges, quartiles, and distribution analysis across all categories",
+        "generated": true,
+        "key": "price_distribution_report"
+      },
+      {
+        "name": "Competition Analysis Report",
+        "description": "Analysis of competitor activity and market saturation",
+        "generated": true,
+        "key": "competition_analysis_report"
+      },
+      {
+        "name": "Category Performance Report",
+        "description": "Performance metrics for each category",
+        "generated": true,
+        "key": "category_performance_report"
+      },
+      {
+        "name": "Time-based Analysis Report",
+        "description": "Trends over time, seasonal patterns, and recent activity",
+        "generated": true,
+        "key": "time_based_analysis_report"
+      }
+    ],
+    "available_reports": [
+      {
+        "name": "Data Summary Report",
+        "description": "Overview of scraped items, duplicates, and filtering statistics",
+        "generated": true,
+        "key": "data_summary"
+      },
+      {
+        "name": "Category Analysis Report",
+        "description": "Detailed analysis of each category with pricing, demand, and opportunity scores",
+        "generated": true,
+        "key": "categories"
+      },
+      {
+        "name": "Top Opportunities Report",
+        "description": "Top 5 categories ranked by opportunity score with recommendations",
+        "generated": true,
+        "key": "top_opportunities"
+      },
+      {
+        "name": "Market Overview Report",
+        "description": "Overall market statistics including sell-through rates and average opportunity scores",
+        "generated": true,
+        "key": "market_overview"
+      },
+      {
+        "name": "Seller Report",
+        "description": "Analysis of sellers including top sellers by volume, ratings, and seller statistics",
+        "generated": true,
+        "key": "seller_report"
+      },
+      {
+        "name": "Recommendations Report",
+        "description": "Best category recommendations and strategic suggestions",
+        "generated": true,
+        "key": "recommendations"
+      },
+      {
+        "name": "Price Distribution Report",
+        "description": "Price ranges, quartiles, and distribution analysis across all categories",
+        "generated": true,
+        "key": "price_distribution_report"
+      },
+      {
+        "name": "Competition Analysis Report",
+        "description": "Analysis of competitor activity and market saturation",
+        "generated": true,
+        "key": "competition_analysis_report"
+      },
+      {
+        "name": "Category Performance Report",
+        "description": "Performance metrics for each category",
+        "generated": true,
+        "key": "category_performance_report"
+      },
+      {
+        "name": "Time-based Analysis Report",
+        "description": "Trends over time, seasonal patterns, and recent activity",
+        "generated": true,
+        "key": "time_based_analysis_report"
+      }
+    ],
+    "total_generated": 10,
+    "total_available": 10
+  }
+}
