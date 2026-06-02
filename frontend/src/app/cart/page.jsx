@@ -1,438 +1,169 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 
 import { useAuth } from "@/context/auth-context";
 import { useToast } from "@/context/toast-context";
 import { ApiError, apiFetch } from "@/lib/api";
-import { readSavedBuyerZip, writeSavedBuyerZip } from "@/lib/browse-prefs";
-import { lookupUsZip } from "@/lib/us-zip-lookup";
 
-const LABELS = { standard: "Standard", next_day: "Next day", pickup: "Pickup" };
+function formatMoney(v) {
+  return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(Number(v));
+}
 
-const inputStyle = {
-  background: "var(--bg-elevated)",
-  border: "1px solid var(--border)",
-  borderRadius: "var(--radius-md)",
-  color: "var(--text-primary)",
-  padding: "7px 10px",
-  fontSize: 13,
-  outline: "none",
-  fontFamily: "var(--ff-body)",
-  width: "100%",
-};
-
-function formatVehicleLine(item) {
-  const y = item.vehicle_year;
-  const mk = (item.vehicle_make || "").trim();
-  const md = (item.vehicle_model || "").trim();
-  const ymm = [y, mk, md].filter(Boolean).join(" ");
-  return ymm || "Vehicle";
+function sizeLabel(s) {
+  return { small: "Small", medium: "Medium", large: "Large", xl: "Extra Large" }[s] || s || "—";
 }
 
 export default function CartPage() {
   const { user, loading } = useAuth();
   const toast = useToast();
-  const [items, setItems] = useState([]);
-  const [busy, setBusy] = useState(false);
-  const [deliveryZip, setDeliveryZip] = useState("");
-  const [deliveryZipHint, setDeliveryZipHint] = useState("");
-  const [zipInitialized, setZipInitialized] = useState(false);
-  const coercingPickupRef = useRef(false);
-
-  const { partsTotal, shipTotal, grandTotal } = useMemo(() => {
-    let p = 0, s = 0;
-    for (const i of items) {
-      const q = Number(i.quantity || 1);
-      p += Number(i.vehicle_part_price || 0) * q;
-      s += Number(i.shipping_quoted_usd || 0);
-    }
-    return { partsTotal: p, shipTotal: s, grandTotal: p + s };
-  }, [items]);
-
-  const hasUnavailableLine = useMemo(
-    () => items.some((i) => (i.listing_state_effective || i.listing_state) !== "buy_now"),
-    [items],
-  );
-
-  /** True when any line uses shipped delivery (not local pickup). */
-  const needsDeliveryZip = useMemo(
-    () => items.some((i) => i.shipping_mode !== "pickup"),
-    [items],
-  );
+  const [cartItems, setCartItems] = useState([]);
+  const [removing, setRemoving] = useState(null);
 
   async function load() {
     const data = await apiFetch("/cart/");
-    setItems(Array.isArray(data) ? data : []);
+    setCartItems(Array.isArray(data) ? data : []);
   }
 
   useEffect(() => {
     if (loading || !user) return;
     void (async () => {
-      try {
-        await load();
-      } catch (e) {
-        if (e instanceof ApiError) toast.error(e.message);
-      }
+      try { await load(); } catch (e) { if (e instanceof ApiError) toast.error(e.message); }
     })();
   }, [loading, user, toast]);
 
-  useEffect(() => {
-    if (items.length === 0) {
-      setZipInitialized(false);
-      return;
-    }
-    if (zipInitialized) return;
-    if (!needsDeliveryZip) {
-      setZipInitialized(true);
-      return;
-    }
-    const lineZip = items.find((i) => i.shipping_mode !== "pickup" && i.buyer_zip_snapshot)?.buyer_zip_snapshot?.trim();
-    const saved = readSavedBuyerZip();
-    setDeliveryZip(lineZip || saved || "");
-    setZipInitialized(true);
-  }, [items, needsDeliveryZip, zipInitialized]);
-
-  useEffect(() => {
-    if (!items.length || coercingPickupRef.current) return;
-    const bad = items.find((i) => i.shipping_mode === "pickup" && !i.pickup_allowed);
-    if (!bad) return;
-    coercingPickupRef.current = true;
-    void (async () => {
-      setBusy(true);
-      try {
-        const z = (bad.buyer_zip_snapshot || deliveryZip || readSavedBuyerZip() || "").trim();
-        await apiFetch(`/cart/${bad.id}/`, {
-          method: "PATCH",
-          body: JSON.stringify({ shipping_mode: "standard", buyer_zip: z }),
-        });
-        await load();
-        setZipInitialized(false);
-      } catch (e) {
-        if (e instanceof ApiError) toast.error(e.message);
-      } finally {
-        coercingPickupRef.current = false;
-        setBusy(false);
-      }
-    })();
-  }, [items, toast, deliveryZip]);
-
-  async function removeItem(id) {
-    setBusy(true);
+  async function removeItem(cartItemId) {
+    setRemoving(cartItemId);
     try {
-      await apiFetch(`/cart/${id}/`, { method: "DELETE" });
-      await load();
+      await apiFetch(`/cart/${cartItemId}/`, { method: "DELETE" });
+      setCartItems((prev) => prev.filter((ci) => ci.id !== cartItemId));
+      toast.success("Removed from cart.");
+    } catch (e) {
+      if (e instanceof ApiError) toast.error(e.message);
     } finally {
-      setBusy(false);
+      setRemoving(null);
     }
   }
 
-  const updateLine = useCallback(
-    async (id, patch) => {
-      setBusy(true);
-      try {
-        await apiFetch(`/cart/${id}/`, { method: "PATCH", body: JSON.stringify(patch) });
-        await load();
-      } catch (e) {
-        if (e instanceof ApiError) toast.error(e.message);
-      } finally {
-        setBusy(false);
-      }
-    },
-    [toast],
+  const subtotal = useMemo(() =>
+    cartItems.reduce((sum, ci) => sum + Number(ci.item_detail?.price || 0), 0),
+    [cartItems]
   );
 
-  async function applyDeliveryZipToLines() {
-    const z = deliveryZip.trim();
-    writeSavedBuyerZip(z);
-    if (!items.length) return;
-    for (const i of items) {
-      if (i.pickup_allowed) continue;
-      if ((i.buyer_zip_snapshot || "").trim() === z) continue;
-      await updateLine(i.id, { shipping_mode: i.shipping_mode, buyer_zip: z });
-    }
+  if (loading) {
+    return <div className="mx-auto max-w-2xl px-6 py-16"><p style={{ color: "var(--text-muted)", fontSize: 13 }}>Loading…</p></div>;
   }
 
-  async function refreshDeliveryZipHint() {
-    const digits = deliveryZip.replace(/\D/g, "").slice(0, 5);
-    if (digits.length !== 5) {
-      setDeliveryZipHint("");
-      return;
-    }
-    try {
-      const d = await lookupUsZip(digits);
-      if (d?.city && d?.state) setDeliveryZipHint(`${d.city}, ${d.state}`);
-      else setDeliveryZipHint("");
-    } catch {
-      setDeliveryZipHint("");
-    }
-  }
-
-  async function onDeliveryZipBlur() {
-    await applyDeliveryZipToLines();
-    await refreshDeliveryZipHint();
-  }
-
-  if (loading || !user) {
+  if (!user) {
     return (
-      <div className="mx-auto max-w-3xl px-6 py-16">
-        <p className="text-sm" style={{ color: "var(--text-muted)" }}>Loading cart…</p>
+      <div className="mx-auto max-w-2xl px-6 py-16 text-center">
+        <p style={{ color: "var(--text-muted)", fontSize: 14 }}>Sign in to view your cart.</p>
+        <Link href="/login" style={{ color: "var(--primary)", fontSize: 13, marginTop: 8, display: "inline-block" }}>Sign in →</Link>
       </div>
     );
   }
 
   return (
-    <div className="mx-auto max-w-3xl px-4 sm:px-6 py-12">
+    <div className="mx-auto max-w-2xl px-4 sm:px-6 py-10">
       <div className="absolute inset-0 mesh-bg pointer-events-none opacity-30" />
 
-      <div className="relative z-10">
-        {/* Header */}
-        <div className="mb-6 flex items-center justify-between">
-          <div>
-            <p className="section-label mb-1">Shopping</p>
-            <h1 className="heading-display text-2xl">Your Cart</h1>
-          </div>
-          <Link
-            href="/browse"
-            style={{ fontSize: 13, fontWeight: 500, color: "var(--primary)", fontFamily: "var(--ff-body)", textDecoration: "none" }}
-            onMouseEnter={e => e.currentTarget.style.color = "var(--primary-bright)"}
-            onMouseLeave={e => e.currentTarget.style.color = "var(--primary)"}
-          >
-            ← Continue browsing
-          </Link>
+      <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35 }} className="relative z-10">
+        <div className="mb-6">
+          <p className="section-label mb-1">Shopping</p>
+          <h1 className="heading-display text-2xl">Cart</h1>
         </div>
 
-        {items.length === 0 ? (
-          <div className="mt-8 text-center py-16"
-            style={{ background: "var(--bg-surface)", border: "1px solid var(--border)", borderRadius: "var(--radius-xl)" }}>
-            <p style={{ fontSize: 32, marginBottom: 12 }}>🛒</p>
-            <p style={{ color: "var(--text-muted)", fontSize: 14 }}>Your cart is empty.</p>
-            <Link href="/browse" className="btn-forge inline-flex mt-4" style={{ padding: "10px 24px", fontSize: 14 }}>
-              Browse parts
-            </Link>
+        {cartItems.length === 0 ? (
+          <div style={{ textAlign: "center", padding: "48px 0", background: "var(--bg-surface)", border: "1px solid var(--border)", borderRadius: "var(--radius-xl)" }}>
+            <p style={{ fontSize: 32, marginBottom: 10 }}>🛒</p>
+            <p style={{ color: "var(--text-muted)", fontSize: 14, marginBottom: 16 }}>Your cart is empty.</p>
+            <Link href="/browse" className="btn-forge inline-flex" style={{ padding: "10px 24px", fontSize: 14 }}>Browse parts</Link>
           </div>
         ) : (
           <>
-            <div className="space-y-3">
-              {items.map((i) => {
-                const pickupOffered = Boolean(i.pickup_allowed);
-                const shipModes = pickupOffered
-                  ? ["standard", "next_day", "pickup"]
-                  : ["standard", "next_day"];
+            <div className="space-y-3 mb-6">
+              {cartItems.map((ci) => {
+                const item = ci.item_detail || {};
+                const vehicleLine = [item.vehicle_year, item.vehicle_make, item.vehicle_model].filter(Boolean).join(" ");
                 return (
                   <div
-                    key={i.id}
+                    key={ci.id}
                     style={{
-                      background: "var(--bg-surface)",
-                      border: "1px solid var(--border)",
-                      borderRadius: "var(--radius-lg)",
-                      padding: "14px",
+                      display: "flex", gap: 12, background: "var(--bg-surface)",
+                      border: "1px solid var(--border)", borderRadius: "var(--radius-xl)", padding: "14px",
                     }}
                   >
-                    <div className="flex flex-wrap items-start justify-between gap-2">
-                      <div className="min-w-0">
-                        <p style={{ fontSize: 14, fontWeight: 600, color: "var(--text-primary)", fontFamily: "var(--ff-display)" }}>
-                          {i.vehicle_part_label}
-                        </p>
-                        <p style={{ fontSize: 12, color: "var(--text-muted)", marginTop: 4 }}>
-                          {formatVehicleLine(i)}
-                          {i.vehicle_vin ? (
-                            <>
-                              <span className="hidden sm:inline"> · </span>
-                              <span className="block sm:inline">VIN {i.vehicle_vin}</span>
-                            </>
-                          ) : null}
-                        </p>
-                        <p style={{ fontSize: 12, color: "var(--text-muted)", marginTop: 4 }}>
-                          <span className="price-mono" style={{ color: "var(--primary-bright)", fontSize: 13 }}>
-                            ${i.vehicle_part_price}
+                    {/* Photo */}
+                    <div style={{ width: 64, height: 64, borderRadius: 8, overflow: "hidden", flexShrink: 0, background: "var(--bg-elevated)" }}>
+                      {item.primary_photo_url ? (
+                        <img src={item.primary_photo_url} alt={item.title} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                      ) : (
+                        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%", fontSize: 20 }}>📦</div>
+                      )}
+                    </div>
+
+                    {/* Details */}
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <Link
+                        href={`/browse/parts/${item.id}`}
+                        style={{ fontSize: 13, fontWeight: 700, color: "var(--text-primary)", fontFamily: "var(--ff-display)", textDecoration: "none", display: "block", lineHeight: 1.3 }}
+                      >
+                        {item.title}
+                      </Link>
+                      {vehicleLine && <p style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 2 }}>{vehicleLine}</p>}
+                      <div style={{ display: "flex", gap: 6, marginTop: 4, flexWrap: "wrap" }}>
+                        {item.category_name && (
+                          <span style={{ fontSize: 10, fontWeight: 600, background: "var(--bg-elevated)", border: "1px solid var(--border)", borderRadius: 4, padding: "1px 6px", color: "var(--text-secondary)" }}>
+                            {item.category_name}
                           </span>
-                          {" × "}{i.quantity}
-                          {(i.listing_state_effective || i.listing_state) !== "buy_now" && (
-                            <span style={{ color: "#f87171", fontWeight: 600 }}> · not available</span>
-                          )}
-                        </p>
-                        <p style={{ fontSize: 12, color: "var(--text-muted)", marginTop: 4 }}>
-                          Shipping ({LABELS[i.shipping_mode] || i.shipping_mode}):{" "}
-                          {Number(i.shipping_quoted_usd) === 0 ? "Free" : `$${Number(i.shipping_quoted_usd).toFixed(2)}`}
-                        </p>
-                        {pickupOffered && i.pickup_zip ? (
-                          <p style={{ fontSize: 12, color: "var(--text-secondary)", marginTop: 4 }}>
-                            Pickup offered near ZIP {i.pickup_zip}
-                          </p>
-                        ) : null}
+                        )}
+                        {item.shipping_size && (
+                          <span style={{ fontSize: 10, color: "var(--text-muted)" }}>📦 {sizeLabel(item.shipping_size)}</span>
+                        )}
                       </div>
+                    </div>
+
+                    {/* Price + remove */}
+                    <div style={{ textAlign: "right", flexShrink: 0 }}>
+                      <p style={{ fontSize: 15, fontWeight: 700, color: "var(--text-primary)", fontFamily: "var(--ff-display)" }}>
+                        {formatMoney(item.price)}
+                      </p>
                       <button
                         type="button"
-                        disabled={busy}
-                        onClick={() => void removeItem(i.id)}
-                        style={{
-                          borderRadius: "var(--radius-sm)",
-                          padding: "4px 10px",
-                          fontSize: 12,
-                          fontWeight: 500,
-                          fontFamily: "var(--ff-display)",
-                          background: "transparent",
-                          border: "1px solid rgba(239,68,68,0.25)",
-                          color: "#f87171",
-                          cursor: "pointer",
-                          transition: "all 0.12s",
-                          opacity: busy ? 0.5 : 1,
-                        }}
-                        onMouseEnter={e => { if (!busy) e.currentTarget.style.background = "rgba(239,68,68,0.08)"; }}
-                        onMouseLeave={e => { e.currentTarget.style.background = "transparent"; }}
+                        onClick={() => removeItem(ci.id)}
+                        disabled={removing === ci.id}
+                        style={{ marginTop: 6, fontSize: 11, color: "var(--text-muted)", background: "none", border: "none", cursor: "pointer", textDecoration: "underline" }}
                       >
-                        Remove
+                        {removing === ci.id ? "Removing…" : "Remove"}
                       </button>
                     </div>
-
-                    <div className="mt-2 flex flex-wrap gap-2">
-                      {shipModes.map((mode) => (
-                        <label
-                          key={mode}
-                          style={{
-                            display: "flex", alignItems: "center", gap: 6,
-                            borderRadius: "var(--radius-md)", padding: "4px 10px",
-                            fontSize: 11, fontWeight: 600, fontFamily: "var(--ff-display)",
-                            cursor: "pointer", transition: "all 0.12s",
-                            border: i.shipping_mode === mode ? "1px solid rgba(255,92,26,0.4)" : "1px solid var(--border)",
-                            background: i.shipping_mode === mode ? "rgba(255,92,26,0.08)" : "var(--bg-elevated)",
-                            color: i.shipping_mode === mode ? "var(--primary-bright)" : "var(--text-secondary)",
-                          }}
-                        >
-                          <input
-                            type="radio"
-                            name={`ship-${i.id}`}
-                            className="sr-only"
-                            checked={i.shipping_mode === mode}
-                            onChange={() => void updateLine(i.id, {
-                              shipping_mode: mode,
-                              buyer_zip: mode === "pickup"
-                                ? ""
-                                : (i.buyer_zip_snapshot || deliveryZip || "").trim(),
-                            })}
-                          />
-                          {LABELS[mode]}
-                        </label>
-                      ))}
-                    </div>
-
-                    {i.shipping_mode === "pickup" && (
-                      <p className="mt-2 text-xs font-semibold" style={{ color: "var(--text-secondary)", fontFamily: "var(--ff-display)" }}>
-                        Local pickup — coordinate with the seller after purchase.
-                      </p>
-                    )}
-
-                    <textarea
-                      key={`notes-${i.id}-${i.buyer_notes ?? ""}`}
-                      defaultValue={i.buyer_notes || ""}
-                      onBlur={(e) => void updateLine(i.id, { buyer_notes: e.target.value.trim() })}
-                      rows={2}
-                      placeholder="Note for seller (side, trim, etc.)"
-                      style={{
-                        marginTop: 8, width: "100%", resize: "none",
-                        background: "var(--bg-elevated)", border: "1px solid var(--border)",
-                        borderRadius: "var(--radius-md)", padding: "7px 10px",
-                        fontSize: 12, color: "var(--text-primary)", outline: "none",
-                        fontFamily: "var(--ff-body)",
-                      }}
-                    />
                   </div>
                 );
               })}
             </div>
 
-            {needsDeliveryZip && (
-              <div
-                className="mt-4 rounded-xl px-4 py-3"
-                style={{ background: "var(--bg-surface)", border: "1px solid var(--border)" }}
+            {/* Summary */}
+            <div style={{ background: "var(--bg-surface)", border: "1px solid var(--border)", borderRadius: "var(--radius-xl)", padding: "16px" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8, fontSize: 13, color: "var(--text-secondary)" }}>
+                <span>Subtotal ({cartItems.length} item{cartItems.length !== 1 ? "s" : ""})</span>
+                <span style={{ fontWeight: 700, color: "var(--text-primary)" }}>{formatMoney(subtotal)}</span>
+              </div>
+              <p style={{ fontSize: 11, color: "var(--text-muted)", marginBottom: 14 }}>
+                Shipping cost is calculated at checkout.
+              </p>
+              <Link
+                href="/cart/checkout"
+                className="btn-forge w-full"
+                style={{ display: "flex", justifyContent: "center", padding: "12px 0", fontSize: 14 }}
               >
-                <label className="block text-xs font-bold uppercase tracking-wide mb-2" style={{ color: "var(--text-muted)", fontFamily: "var(--ff-display)" }}>
-                  Delivery ZIP (shipping estimates)
-                </label>
-                <div className="flex flex-wrap items-end gap-2">
-                  <input
-                    value={deliveryZip}
-                    onChange={(e) => {
-                      setDeliveryZip(e.target.value);
-                      if (e.target.value.replace(/\D/g, "").length < 5) setDeliveryZipHint("");
-                    }}
-                    onBlur={() => void onDeliveryZipBlur()}
-                    placeholder="ZIP code"
-                    disabled={busy}
-                    style={{ ...inputStyle, maxWidth: 140 }}
-                  />
-                  <button
-                    type="button"
-                    disabled={busy}
-                    className="rounded-lg px-3 py-2 text-xs font-semibold"
-                    style={{ border: "1px solid var(--border)", background: "var(--bg-elevated)", color: "var(--text-primary)" }}
-                    onClick={() => void onDeliveryZipBlur()}
-                  >
-                    Update shipping
-                  </button>
-                </div>
-                {deliveryZipHint ? (
-                  <p className="text-xs mt-2" style={{ color: "var(--text-muted)" }}>
-                    Typical area for this ZIP: {deliveryZipHint}
-                  </p>
-                ) : null}
-              </div>
-            )}
-
-            {hasUnavailableLine && (
-              <p className="mt-3 text-xs font-medium" style={{ color: "#fbbf24" }}>
-                Remove lines that are sold or unavailable before checkout.
-              </p>
-            )}
-
-            <motion.div
-              className="mt-6"
-              style={{
-                background: "var(--bg-surface)",
-                border: "1px solid var(--border)",
-                borderRadius: "var(--radius-xl)",
-                padding: "20px",
-              }}
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-            >
-              <p className="section-label mb-3">Estimated total</p>
-              <div className="space-y-1 mb-4">
-                <div className="flex justify-between text-sm">
-                  <span style={{ color: "var(--text-muted)" }}>Parts</span>
-                  <span className="price-mono">${partsTotal.toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span style={{ color: "var(--text-muted)" }}>Shipping</span>
-                  <span className="price-mono">${shipTotal.toFixed(2)}</span>
-                </div>
-                <div className="flex justify-between pt-2 text-base font-bold" style={{ borderTop: "1px solid var(--border)" }}>
-                  <span style={{ fontFamily: "var(--ff-display)" }}>Subtotal</span>
-                  <span className="price-mono" style={{ color: "var(--primary-bright)" }}>${grandTotal.toFixed(2)}</span>
-                </div>
-              </div>
-              <p className="text-xs mb-3" style={{ color: "var(--text-muted)" }}>
-                Next: confirm your ship-to address at checkout.
-              </p>
-              {hasUnavailableLine ? (
-                <span
-                  className="flex w-full justify-center rounded-lg py-3 text-sm font-semibold"
-                  style={{ background: "var(--bg-elevated)", border: "1px solid var(--border)", color: "var(--text-muted)" }}
-                >
-                  Fix cart issues to continue
-                </span>
-              ) : (
-                <Link href="/cart/checkout" className="btn-forge flex w-full justify-center py-3 text-sm">
-                  Continue to checkout →
-                </Link>
-              )}
-            </motion.div>
+                Proceed to checkout →
+              </Link>
+            </div>
           </>
         )}
-      </div>
+      </motion.div>
     </div>
   );
 }

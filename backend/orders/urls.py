@@ -8,6 +8,7 @@ from .views import (
     DisputeMessageCreateView,
     OrderDetailView,
     OrderListView,
+    PurchasesListView,
     SellerReviewCreateView,
 )
 
@@ -15,6 +16,7 @@ urlpatterns = [
     path("cart/", CartView.as_view(), name="cart"),
     path("cart/<int:item_id>/", CartItemDeleteView.as_view(), name="cart-item-delete"),
     path("orders/", OrderListView.as_view(), name="order-list"),
+    path("orders/purchases/", PurchasesListView.as_view(), name="purchases"),
     path("orders/<int:pk>/", OrderDetailView.as_view(), name="order-detail"),
     path("disputes/", DisputeListCreateView.as_view(), name="dispute-list"),
     path("disputes/order-item/<int:order_item_id>/", DisputeListCreateView.as_view(), name="dispute-create"),

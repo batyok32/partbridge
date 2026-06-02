@@ -1,10 +1,11 @@
 from django.shortcuts import get_object_or_404
 from rest_framework import generics, status
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from .models import Vehicle, VehiclePhoto
+from .nhtsa import decode_vin
 from .serializers import (
     VehicleCreateUpdateSerializer,
     VehicleDetailSerializer,
@@ -22,7 +23,7 @@ class VehicleListCreateView(generics.ListCreateAPIView):
         return VehicleListSerializer
 
     def get_queryset(self):
-        return Vehicle.objects.filter(seller=self.request.user)
+        return Vehicle.objects.filter(seller=self.request.user).prefetch_related("photos").select_related("generation__car_model__make", "modification")
 
     def perform_create(self, serializer):
         serializer.save(seller=self.request.user)
@@ -37,7 +38,7 @@ class VehicleDetailView(generics.RetrieveUpdateDestroyAPIView):
         return VehicleDetailSerializer
 
     def get_queryset(self):
-        return Vehicle.objects.filter(seller=self.request.user).prefetch_related("photos")
+        return Vehicle.objects.filter(seller=self.request.user).prefetch_related("photos").select_related("generation__car_model__make", "modification")
 
 
 class VehiclePhotoListCreateView(APIView):
@@ -64,3 +65,29 @@ class VehiclePhotoDeleteView(APIView):
         photo = get_object_or_404(VehiclePhoto, pk=photo_id, vehicle=vehicle)
         photo.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class VinDecodeView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        vin = (request.data.get("vin") or "").strip().upper()
+        if not vin:
+            return Response({"detail": "Provide a vin field."}, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            result = decode_vin(vin)
+        except ValueError as e:
+            return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(result)
+
+
+class VehicleItemListView(APIView):
+    """List all Items for a seller-owned Vehicle."""
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, vehicle_id):
+        from parts.models import Item
+        from parts.serializers import ItemSerializer
+        vehicle = get_object_or_404(Vehicle, pk=vehicle_id, seller=request.user)
+        items = Item.objects.filter(vehicle=vehicle).select_related("category").prefetch_related("photos", "options")
+        return Response(ItemSerializer(items, many=True).data)

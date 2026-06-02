@@ -48,7 +48,16 @@ class OrderListView(generics.ListAPIView):
     serializer_class = OrderSerializer
 
     def get_queryset(self):
-        return Order.objects.filter(buyer=self.request.user).prefetch_related("order_items")
+        return Order.objects.filter(buyer=self.request.user).prefetch_related("order_items__item__category", "order_items__item__photos")
+
+
+class PurchasesListView(generics.ListAPIView):
+    """Alias for order list — matches /orders/purchases/ frontend call."""
+    permission_classes = [IsAuthenticated]
+    serializer_class = OrderSerializer
+
+    def get_queryset(self):
+        return Order.objects.filter(buyer=self.request.user).prefetch_related("order_items__item__category", "order_items__item__photos")
 
 
 class OrderDetailView(generics.RetrieveAPIView):

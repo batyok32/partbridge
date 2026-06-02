@@ -6,10 +6,16 @@ from .models import CartItem, Dispute, DisputeMessage, Order, OrderItem, Payment
 
 
 class CartItemSerializer(serializers.ModelSerializer):
+    item_detail = serializers.SerializerMethodField()
+
     class Meta:
         model = CartItem
-        fields = ("id", "user", "item", "added_at")
+        fields = ("id", "user", "item", "item_detail", "added_at")
         read_only_fields = ("id", "user", "added_at")
+
+    def get_item_detail(self, obj):
+        from parts.serializers import ItemListSerializer
+        return ItemListSerializer(obj.item).data
 
 
 class OrderItemSerializer(serializers.ModelSerializer):
