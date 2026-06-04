@@ -82,8 +82,19 @@ export function ToastProvider({ children }) {
     <ToastContext.Provider value={value}>
       {children}
       <div
-        className="fixed bottom-4 right-4 z-[200] flex max-w-[min(20rem,calc(100vw-1.5rem))] flex-col items-end gap-1.5 pointer-events-none sm:bottom-5 sm:right-5"
         aria-live="polite"
+        style={{
+          position: "fixed",
+          bottom: 20,
+          right: 20,
+          zIndex: 9999,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "flex-end",
+          gap: 6,
+          pointerEvents: "none",
+          maxWidth: "min(20rem, calc(100vw - 1.5rem))",
+        }}
       >
         <AnimatePresence mode="popLayout">
           {toasts.map((toast) => {

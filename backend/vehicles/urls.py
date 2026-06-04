@@ -2,7 +2,9 @@ from django.urls import path
 
 from .views import (
     VehicleDetailView,
+    VehicleItemDetailView,
     VehicleItemListView,
+    VehicleItemPhotoView,
     VehicleListCreateView,
     VehiclePhotoDeleteView,
     VehiclePhotoListCreateView,
@@ -16,4 +18,7 @@ urlpatterns = [
     path("vehicles/<int:vehicle_id>/photos/", VehiclePhotoListCreateView.as_view(), name="vehicle-photos"),
     path("vehicles/<int:vehicle_id>/photos/<int:photo_id>/", VehiclePhotoDeleteView.as_view(), name="vehicle-photo-delete"),
     path("vehicles/<int:vehicle_id>/items/", VehicleItemListView.as_view(), name="vehicle-items"),
+    path("vehicles/<int:vehicle_id>/items/<int:item_id>/", VehicleItemDetailView.as_view(), name="vehicle-item-detail"),
+    path("vehicles/<int:vehicle_id>/items/<int:item_id>/photos/", VehicleItemPhotoView.as_view(), name="vehicle-item-photos"),
+    path("vehicles/<int:vehicle_id>/items/<int:item_id>/photos/<int:photo_id>/", VehicleItemPhotoView.as_view(), name="vehicle-item-photo-delete"),
 ]

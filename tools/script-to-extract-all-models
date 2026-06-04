@@ -1,0 +1,132 @@
+"give me js function to insert into browser to click on each of those series open them and get all of their models inside and give me big list then with their links names "(
+  async function () {
+    const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+    const results = [];
+
+    // get all top series nodes
+    const seriesRows = [...document.querySelectorAll("a")].filter((a) =>
+      a.href.includes("ToggleNode"),
+    );
+
+    console.log("Series found:", seriesRows.length);
+
+    for (let i = 0; i < seriesRows.length; i++) {
+      const seriesLink = seriesRows[i];
+
+      const seriesName = seriesLink.innerText.trim();
+
+      const toggleMatch = seriesLink.href.match(/ToggleNode\('(\d+)'\)/);
+
+      if (!toggleMatch) continue;
+
+      const nodeId = toggleMatch[1];
+
+      console.log(`[${i + 1}/${seriesRows.length}]`, "Opening:", seriesName);
+
+      // open node
+      try {
+        ToggleNode(nodeId);
+      } catch (e) {
+        console.log("Toggle failed", e);
+        continue;
+      }
+
+      await sleep(300);
+
+      const container = document.querySelector(`#d${nodeId}`);
+
+      if (!container) continue;
+
+      // get models inside
+      const modelLinks = [...container.querySelectorAll("a")].filter((a) =>
+        a.href.includes("submit("),
+      );
+
+      for (const model of modelLinks) {
+        const modelName = model.innerText.trim();
+
+        const href = model.getAttribute("href");
+
+        const submitMatch = href.match(
+          /submit\('([^']*)','([^']*)','([^']*)','([^']*)'\)/,
+        );
+
+        if (!submitMatch) continue;
+
+        const [_, mdlCode, transmission, nodeValue, fullName] = submitMatch;
+
+        // build what page will receive
+        const generatedRoute = {
+          page: "MdlYear.aspx",
+          Mdl: mdlCode,
+          Kpp: transmission,
+          T: fullName,
+        };
+
+        results.push({
+          series: seriesName,
+          model: modelName,
+          fullName,
+          mdlCode,
+          transmission,
+          nodeValue,
+          jsLink: href,
+          generatedRoute,
+        });
+      }
+
+      // collapse back
+      try {
+        ToggleNode(nodeId);
+      } catch {}
+
+      await sleep(100);
+    }
+
+    console.log("DONE");
+    console.log(results);
+
+    // global variable
+    window.bmwModels = results;
+
+    // JSON download
+    const jsonBlob = new Blob([JSON.stringify(results, null, 2)], {
+      type: "application/json",
+    });
+
+    const jsonUrl = URL.createObjectURL(jsonBlob);
+
+    const a = document.createElement("a");
+
+    a.href = jsonUrl;
+    a.download = "bmw_models.json";
+    a.click();
+
+    // CSV
+    const csv = [
+      ["series", "model", "fullName", "mdlCode", "transmission"].join(","),
+      ...results.map((x) =>
+        [
+          `"${x.series}"`,
+          `"${x.model}"`,
+          `"${x.fullName}"`,
+          x.mdlCode,
+          x.transmission,
+        ].join(","),
+      ),
+    ].join("\n");
+
+    const csvBlob = new Blob([csv], { type: "text/csv" });
+
+    const csvUrl = URL.createObjectURL(csvBlob);
+
+    const b = document.createElement("a");
+
+    b.href = csvUrl;
+    b.download = "bmw_models.csv";
+    b.click();
+
+    return results;
+  },
+)();

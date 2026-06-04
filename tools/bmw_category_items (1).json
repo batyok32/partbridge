@@ -1,0 +1,537 @@
+[
+  {
+    "category": "АКПП",
+    "items": [
+      {
+        "name": "АВТОМАТИЧЕСКАЯ КОРОБКА ПЕРЕДАЧ",
+        "href": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','37B00000','АВТОМАТИЧЕСКАЯ КОРОБКА ПЕРЕДАЧ','0');",
+        "rawHref": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','37B00000','%D0%90%D0%92%D0%A2%D0%9E%D0%9C%D0%90%D0%A2%D0%98%D0%A7%D0%95%D0%A1%D0%9A%D0%90%D0%AF %D0%9A%D0%9E%D0%A0%D0%9E%D0%91%D0%9A%D0%90 %D0%9F%D0%95%D0%A0%D0%95%D0%94%D0%90%D0%A7','0');"
+      },
+      {
+        "name": "ДЕТАЛИ КОРОБКИ ПЕРЕДАЧ",
+        "href": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','39000000','ДЕТАЛИ КОРОБКИ ПЕРЕДАЧ','0');",
+        "rawHref": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','39000000','%D0%94%D0%95%D0%A2%D0%90%D0%9B%D0%98 %D0%9A%D0%9E%D0%A0%D0%9E%D0%91%D0%9A%D0%98 %D0%9F%D0%95%D0%A0%D0%95%D0%94%D0%90%D0%A7','0');"
+      },
+      {
+        "name": "КРЕПЛЕНИЕ/ ПОДВЕСКА",
+        "href": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','37E00000','КРЕПЛЕНИЕ/ ПОДВЕСКА','0');",
+        "rawHref": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','37E00000','%D0%9A%D0%A0%D0%95%D0%9F%D0%9B%D0%95%D0%9D%D0%98%D0%95/ %D0%9F%D0%9E%D0%94%D0%92%D0%95%D0%A1%D0%9A%D0%90','0');"
+      }
+    ]
+  },
+  {
+    "category": "ДВИГАТЕЛЬ",
+    "items": [
+      {
+        "name": "ВАКУУМНОЕ УПРАВЛЕНИЕ",
+        "href": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','25B00000','ВАКУУМНОЕ УПРАВЛЕНИЕ','2');",
+        "rawHref": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','25B00000','%D0%92%D0%90%D0%9A%D0%A3%D0%A3%D0%9C%D0%9D%D0%9E%D0%95 %D0%A3%D0%9F%D0%A0%D0%90%D0%92%D0%9B%D0%95%D0%9D%D0%98%D0%95','2');"
+      },
+      {
+        "name": "ГОЛОВКА БЛОКА ЦИЛИНДРОВ",
+        "href": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','1AA00000','ГОЛОВКА БЛОКА ЦИЛИНДРОВ','2');",
+        "rawHref": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','1AA00000','%D0%93%D0%9E%D0%9B%D0%9E%D0%92%D0%9A%D0%90 %D0%91%D0%9B%D0%9E%D0%9A%D0%90 %D0%A6%D0%98%D0%9B%D0%98%D0%9D%D0%94%D0%A0%D0%9E%D0%92','2');"
+      },
+      {
+        "name": "ДВИГАТЕЛЬ",
+        "href": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','19500000','ДВИГАТЕЛЬ','2');",
+        "rawHref": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','19500000','%D0%94%D0%92%D0%98%D0%93%D0%90%D0%A2%D0%95%D0%9B%D0%AC','2');"
+      },
+      {
+        "name": "КАРТЕР ДВИГАТЕЛЯ",
+        "href": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','19800000','КАРТЕР ДВИГАТЕЛЯ','2');",
+        "rawHref": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','19800000','%D0%9A%D0%90%D0%A0%D0%A2%D0%95%D0%A0 %D0%94%D0%92%D0%98%D0%93%D0%90%D0%A2%D0%95%D0%9B%D0%AF','2');"
+      },
+      {
+        "name": "КРИВОШИПНО-ШАТУННЫЙ МЕХАНИЗМ",
+        "href": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','1B000000','КРИВОШИПНО-ШАТУННЫЙ МЕХАНИЗМ','2');",
+        "rawHref": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','1B000000','%D0%9A%D0%A0%D0%98%D0%92%D0%9E%D0%A8%D0%98%D0%9F%D0%9D%D0%9E-%D0%A8%D0%90%D0%A2%D0%A3%D0%9D%D0%9D%D0%AB%D0%99 %D0%9C%D0%95%D0%A5%D0%90%D0%9D%D0%98%D0%97%D0%9C','2');"
+      },
+      {
+        "name": "К-ТЫ ДЛЯ РЕГЛАМЕНТНЫХ РАБОТ",
+        "href": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','28B00000','К-ТЫ ДЛЯ РЕГЛАМЕНТНЫХ РАБОТ','2');",
+        "rawHref": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','28B00000','%D0%9A-%D0%A2%D0%AB %D0%94%D0%9B%D0%AF %D0%A0%D0%95%D0%93%D0%9B%D0%90%D0%9C%D0%95%D0%9D%D0%A2%D0%9D%D0%AB%D0%A5 %D0%A0%D0%90%D0%91%D0%9E%D0%A2','2');"
+      },
+      {
+        "name": "РЕМЕННЫЙ ПРИВОД",
+        "href": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','1AD00000','РЕМЕННЫЙ ПРИВОД','2');",
+        "rawHref": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','1AD00000','%D0%A0%D0%95%D0%9C%D0%95%D0%9D%D0%9D%D0%AB%D0%99 %D0%9F%D0%A0%D0%98%D0%92%D0%9E%D0%94','2');"
+      },
+      {
+        "name": "СИСТЕМА ВСАСЫВАНИЯ",
+        "href": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','24C00000','СИСТЕМА ВСАСЫВАНИЯ','2');",
+        "rawHref": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','24C00000','%D0%A1%D0%98%D0%A1%D0%A2%D0%95%D0%9C%D0%90 %D0%92%D0%A1%D0%90%D0%A1%D0%AB%D0%92%D0%90%D0%9D%D0%98%D0%AF','2');"
+      },
+      {
+        "name": "СИСТЕМА ОХЛАЖДЕНИЯ ДВИГАТЕЛЯ",
+        "href": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','24300000','СИСТЕМА ОХЛАЖДЕНИЯ ДВИГАТЕЛЯ','2');",
+        "rawHref": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','24300000','%D0%A1%D0%98%D0%A1%D0%A2%D0%95%D0%9C%D0%90 %D0%9E%D0%A5%D0%9B%D0%90%D0%96%D0%94%D0%95%D0%9D%D0%98%D0%AF %D0%94%D0%92%D0%98%D0%93%D0%90%D0%A2%D0%95%D0%9B%D0%AF','2');"
+      },
+      {
+        "name": "СИСТЕМА СМАЗКИ",
+        "href": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','23100000','СИСТЕМА СМАЗКИ','2');",
+        "rawHref": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','23100000','%D0%A1%D0%98%D0%A1%D0%A2%D0%95%D0%9C%D0%90 %D0%A1%D0%9C%D0%90%D0%97%D0%9A%D0%98','2');"
+      },
+      {
+        "name": "СИСТЕМА УПРАВЛЕНИЯ ДВИГАТЕЛЕМ",
+        "href": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','22800000','СИСТЕМА УПРАВЛЕНИЯ ДВИГАТЕЛЕМ','2');",
+        "rawHref": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','22800000','%D0%A1%D0%98%D0%A1%D0%A2%D0%95%D0%9C%D0%90 %D0%A3%D0%9F%D0%A0%D0%90%D0%92%D0%9B%D0%95%D0%9D%D0%98%D0%AF %D0%94%D0%92%D0%98%D0%93%D0%90%D0%A2%D0%95%D0%9B%D0%95%D0%9C','2');"
+      }
+    ]
+  },
+  {
+    "category": "З/ЧАСТИ+ПРИНАДЛ. (ДВИГАТЕЛЬ+ШАССИ)",
+    "items": [
+      {
+        "name": "БОРТОВОЙ ИНСТРУМЕНТ/ ДОМКРАТ",
+        "href": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','77400000','БОРТОВОЙ ИНСТРУМЕНТ/ ДОМКРАТ','4');",
+        "rawHref": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','77400000','%D0%91%D0%9E%D0%A0%D0%A2%D0%9E%D0%92%D0%9E%D0%99 %D0%98%D0%9D%D0%A1%D0%A2%D0%A0%D0%A3%D0%9C%D0%95%D0%9D%D0%A2/ %D0%94%D0%9E%D0%9C%D0%9A%D0%A0%D0%90%D0%A2','4');"
+      },
+      {
+        "name": "СИСТЕМА MOBILITY",
+        "href": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','77700000','СИСТЕМА MOBILITY','4');",
+        "rawHref": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','77700000','%D0%A1%D0%98%D0%A1%D0%A2%D0%95%D0%9C%D0%90 MOBILITY','4');"
+      },
+      {
+        "name": "ШИЛЬДИКИ",
+        "href": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','44A00000','ШИЛЬДИКИ','4');",
+        "rawHref": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','44A00000','%D0%A8%D0%98%D0%9B%D0%AC%D0%94%D0%98%D0%9A%D0%98','4');"
+      }
+    ]
+  },
+  {
+    "category": "ЗАПЧАСТИ+ПРИНАДЛЕЖНОСТИ (КУЗОВ)",
+    "items": [
+      {
+        "name": "НПБ",
+        "href": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','79200000','НПБ','6');",
+        "rawHref": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','79200000','%D0%9D%D0%9F%D0%91','6');"
+      },
+      {
+        "name": "РЕМЕНЬ БЕЗОПАСНОСТИ",
+        "href": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','79800000','РЕМЕНЬ БЕЗОПАСНОСТИ','6');",
+        "rawHref": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','79800000','%D0%A0%D0%95%D0%9C%D0%95%D0%9D%D0%AC %D0%91%D0%95%D0%97%D0%9E%D0%9F%D0%90%D0%A1%D0%9D%D0%9E%D0%A1%D0%A2%D0%98','6');"
+      }
+    ]
+  },
+  {
+    "category": "КАРДАННЫЙ ВАЛ",
+    "items": [
+      {
+        "name": "ДЕТАЛИ КАРДАННОГО ВАЛА",
+        "href": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','3C900000','ДЕТАЛИ КАРДАННОГО ВАЛА','8');",
+        "rawHref": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','3C900000','%D0%94%D0%95%D0%A2%D0%90%D0%9B%D0%98 %D0%9A%D0%90%D0%A0%D0%94%D0%90%D0%9D%D0%9D%D0%9E%D0%93%D0%9E %D0%92%D0%90%D0%9B%D0%90','8');"
+      },
+      {
+        "name": "КАРДАННЫЙ ВАЛ",
+        "href": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','3C600000','КАРДАННЫЙ ВАЛ','8');",
+        "rawHref": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','3C600000','%D0%9A%D0%90%D0%A0%D0%94%D0%90%D0%9D%D0%9D%D0%AB%D0%99 %D0%92%D0%90%D0%9B','8');"
+      }
+    ]
+  },
+  {
+    "category": "КОНТРОЛЬНЫЕ ПРИБОРЫ",
+    "items": [
+      {
+        "name": "КОМБИНАЦИЯ ПРИБОРОВ",
+        "href": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','71400000','КОМБИНАЦИЯ ПРИБОРОВ','10');",
+        "rawHref": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','71400000','%D0%9A%D0%9E%D0%9C%D0%91%D0%98%D0%9D%D0%90%D0%A6%D0%98%D0%AF %D0%9F%D0%A0%D0%98%D0%91%D0%9E%D0%A0%D0%9E%D0%92','10');"
+      }
+    ]
+  },
+  {
+    "category": "К-ТЫ ДЛЯ РЕГЛАМЕНТНЫХ РАБОТ",
+    "items": [
+      {
+        "name": "АВТОМАТИЧЕСКАЯ КОРОБКА ПЕРЕДАЧ",
+        "href": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','81C00000','АВТОМАТИЧЕСКАЯ КОРОБКА ПЕРЕДАЧ','12');",
+        "rawHref": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','81C00000','%D0%90%D0%92%D0%A2%D0%9E%D0%9C%D0%90%D0%A2%D0%98%D0%A7%D0%95%D0%A1%D0%9A%D0%90%D0%AF %D0%9A%D0%9E%D0%A0%D0%9E%D0%91%D0%9A%D0%90 %D0%9F%D0%95%D0%A0%D0%95%D0%94%D0%90%D0%A7','12');"
+      },
+      {
+        "name": "ЗАДНИЙ МОСТ",
+        "href": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','82500000','ЗАДНИЙ МОСТ','12');",
+        "rawHref": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','82500000','%D0%97%D0%90%D0%94%D0%9D%D0%98%D0%99 %D0%9C%D0%9E%D0%A1%D0%A2','12');"
+      },
+      {
+        "name": "ИНСПЕКЦИОННЫЕ КОМПЛЕКТЫ",
+        "href": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','81300000','ИНСПЕКЦИОННЫЕ КОМПЛЕКТЫ','12');",
+        "rawHref": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','81300000','%D0%98%D0%9D%D0%A1%D0%9F%D0%95%D0%9A%D0%A6%D0%98%D0%9E%D0%9D%D0%9D%D0%AB%D0%95 %D0%9A%D0%9E%D0%9C%D0%9F%D0%9B%D0%95%D0%9A%D0%A2%D0%AB','12');"
+      },
+      {
+        "name": "ОСНАЩЕНИЕ КУЗОВА",
+        "href": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','82B00000','ОСНАЩЕНИЕ КУЗОВА','12');",
+        "rawHref": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','82B00000','%D0%9E%D0%A1%D0%9D%D0%90%D0%A9%D0%95%D0%9D%D0%98%D0%95 %D0%9A%D0%A3%D0%97%D0%9E%D0%92%D0%90','12');"
+      },
+      {
+        "name": "ПЕРЕДНИЙ МОСТ",
+        "href": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','82200000','ПЕРЕДНИЙ МОСТ','12');",
+        "rawHref": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','82200000','%D0%9F%D0%95%D0%A0%D0%95%D0%94%D0%9D%D0%98%D0%99 %D0%9C%D0%9E%D0%A1%D0%A2','12');"
+      },
+      {
+        "name": "ТОРМОЗНЫЕ МЕХАНИЗМЫ",
+        "href": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','82800000','ТОРМОЗНЫЕ МЕХАНИЗМЫ','12');",
+        "rawHref": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','82800000','%D0%A2%D0%9E%D0%A0%D0%9C%D0%9E%D0%97%D0%9D%D0%AB%D0%95 %D0%9C%D0%95%D0%A5%D0%90%D0%9D%D0%98%D0%97%D0%9C%D0%AB','12');"
+      }
+    ]
+  },
+  {
+    "category": "ЛЮК С ПОД.-СДВ. КРЫШКОЙ И СКЛ. ВЕРХ",
+    "items": [
+      {
+        "name": "ПОДЪЕМНО-СДВИЖНАЯ КРЫШКА ЛЮКА",
+        "href": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','69600000','ПОДЪЕМНО-СДВИЖНАЯ КРЫШКА ЛЮКА','14');",
+        "rawHref": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','69600000','%D0%9F%D0%9E%D0%94%D0%AA%D0%95%D0%9C%D0%9D%D0%9E-%D0%A1%D0%94%D0%92%D0%98%D0%96%D0%9D%D0%90%D0%AF %D0%9A%D0%A0%D0%AB%D0%A8%D0%9A%D0%90 %D0%9B%D0%AE%D0%9A%D0%90','14');"
+      }
+    ]
+  },
+  {
+    "category": "МКПП",
+    "items": [
+      {
+        "name": "ДЕТАЛИ КОРОБКИ ПЕРЕДАЧ",
+        "href": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','35D00000','ДЕТАЛИ КОРОБКИ ПЕРЕДАЧ','16');",
+        "rawHref": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','35D00000','%D0%94%D0%95%D0%A2%D0%90%D0%9B%D0%98 %D0%9A%D0%9E%D0%A0%D0%9E%D0%91%D0%9A%D0%98 %D0%9F%D0%95%D0%A0%D0%95%D0%94%D0%90%D0%A7','16');"
+      },
+      {
+        "name": "КРЕПЛЕНИЕ/ ПОДВЕСКА",
+        "href": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','35100000','КРЕПЛЕНИЕ/ ПОДВЕСКА','16');",
+        "rawHref": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','35100000','%D0%9A%D0%A0%D0%95%D0%9F%D0%9B%D0%95%D0%9D%D0%98%D0%95/ %D0%9F%D0%9E%D0%94%D0%92%D0%95%D0%A1%D0%9A%D0%90','16');"
+      },
+      {
+        "name": "МКПП",
+        "href": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','34E00000','МКПП','16');",
+        "rawHref": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','34E00000','%D0%9C%D0%9A%D0%9F%D0%9F','16');"
+      }
+    ]
+  },
+  {
+    "category": "ОБЪЕМ РАБОТ ПО ОБСЛУЖИВАНИЮ И РЕМОНТУ",
+    "items": [
+      {
+        "name": "СЕРВИСНОЕ ОБСЛУЖИВАНИЕ ТОРМОЗОВ",
+        "href": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','15300000','СЕРВИСНОЕ ОБСЛУЖИВАНИЕ ТОРМОЗОВ','18');",
+        "rawHref": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','15300000','%D0%A1%D0%95%D0%A0%D0%92%D0%98%D0%A1%D0%9D%D0%9E%D0%95 %D0%9E%D0%91%D0%A1%D0%9B%D0%A3%D0%96%D0%98%D0%92%D0%90%D0%9D%D0%98%D0%95 %D0%A2%D0%9E%D0%A0%D0%9C%D0%9E%D0%97%D0%9E%D0%92','18');"
+      },
+      {
+        "name": "ТО ПО РЕГЛ.OELSERVICE / INSPEKTION",
+        "href": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','14700000','ТО ПО РЕГЛ.OELSERVICE / INSPEKTION','18');",
+        "rawHref": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','14700000','%D0%A2%D0%9E %D0%9F%D0%9E %D0%A0%D0%95%D0%93%D0%9B.OELSERVICE / INSPEKTION','18');"
+      }
+    ]
+  },
+  {
+    "category": "ОСНАЩЕНИЕ КУЗОВА",
+    "items": [
+      {
+        "name": "ZB STOSSSTANGE VORN BILLANTROT",
+        "href": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','58B00000','ZB STOSSSTANGE VORN BILLANTROT','20');",
+        "rawHref": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','58B00000','ZB STOSSSTANGE VORN BILLANTROT','20');"
+      },
+      {
+        "name": "БАГАЖНОЕ ОТДЕЛЕНИЕ",
+        "href": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','5B800000','БАГАЖНОЕ ОТДЕЛЕНИЕ','20');",
+        "rawHref": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','5B800000','%D0%91%D0%90%D0%93%D0%90%D0%96%D0%9D%D0%9E%D0%95 %D0%9E%D0%A2%D0%94%D0%95%D0%9B%D0%95%D0%9D%D0%98%D0%95','20');"
+      },
+      {
+        "name": "БАМПЕР ЗД",
+        "href": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','59400000','БАМПЕР ЗД','20');",
+        "rawHref": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','59400000','%D0%91%D0%90%D0%9C%D0%9F%D0%95%D0%A0 %D0%97%D0%94','20');"
+      },
+      {
+        "name": "ВНУТРЕННИЕ ПРИНАДЛЕЖНОСТИ ВХ",
+        "href": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','5A900000','ВНУТРЕННИЕ ПРИНАДЛЕЖНОСТИ ВХ','20');",
+        "rawHref": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','5A900000','%D0%92%D0%9D%D0%A3%D0%A2%D0%A0%D0%95%D0%9D%D0%9D%D0%98%D0%95 %D0%9F%D0%A0%D0%98%D0%9D%D0%90%D0%94%D0%9B%D0%95%D0%96%D0%9D%D0%9E%D0%A1%D0%A2%D0%98 %D0%92%D0%A5','20');"
+      },
+      {
+        "name": "ВНУТРЕННИЕ ПРИНАДЛЕЖНОСТИ НЖ",
+        "href": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','5B200000','ВНУТРЕННИЕ ПРИНАДЛЕЖНОСТИ НЖ','20');",
+        "rawHref": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','5B200000','%D0%92%D0%9D%D0%A3%D0%A2%D0%A0%D0%95%D0%9D%D0%9D%D0%98%D0%95 %D0%9F%D0%A0%D0%98%D0%9D%D0%90%D0%94%D0%9B%D0%95%D0%96%D0%9D%D0%9E%D0%A1%D0%A2%D0%98 %D0%9D%D0%96','20');"
+      },
+      {
+        "name": "ДОПОЛНИТЕЛЬНЫЕ ЭЛЕМЕНТЫ МОТОРНОГО ОТСЕКА",
+        "href": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','5BE00000','ДОПОЛНИТЕЛЬНЫЕ ЭЛЕМЕНТЫ МОТОРНОГО ОТСЕКА','20');",
+        "rawHref": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','5BE00000','%D0%94%D0%9E%D0%9F%D0%9E%D0%9B%D0%9D%D0%98%D0%A2%D0%95%D0%9B%D0%AC%D0%9D%D0%AB%D0%95 %D0%AD%D0%9B%D0%95%D0%9C%D0%95%D0%9D%D0%A2%D0%AB %D0%9C%D0%9E%D0%A2%D0%9E%D0%A0%D0%9D%D0%9E%D0%93%D0%9E %D0%9E%D0%A2%D0%A1%D0%95%D0%9A%D0%90','20');"
+      },
+      {
+        "name": "ЗАДНЯЯ ДВЕРЬ",
+        "href": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','58500000','ЗАДНЯЯ ДВЕРЬ','20');",
+        "rawHref": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','58500000','%D0%97%D0%90%D0%94%D0%9D%D0%AF%D0%AF %D0%94%D0%92%D0%95%D0%A0%D0%AC','20');"
+      },
+      {
+        "name": "ИЗОЛЯЦИЯ",
+        "href": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','5BB00000','ИЗОЛЯЦИЯ','20');",
+        "rawHref": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','5BB00000','%D0%98%D0%97%D0%9E%D0%9B%D0%AF%D0%A6%D0%98%D0%AF','20');"
+      },
+      {
+        "name": "НАКЛАДКА ВНУТР",
+        "href": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','5AC00000','НАКЛАДКА ВНУТР','20');",
+        "rawHref": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','5AC00000','%D0%9D%D0%90%D0%9A%D0%9B%D0%90%D0%94%D0%9A%D0%90 %D0%92%D0%9D%D0%A3%D0%A2%D0%A0','20');"
+      },
+      {
+        "name": "НАКЛАДКА ПОРОГ / АРКА КОЛЕСА",
+        "href": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','59100000','НАКЛАДКА ПОРОГ / АРКА КОЛЕСА','20');",
+        "rawHref": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','59100000','%D0%9D%D0%90%D0%9A%D0%9B%D0%90%D0%94%D0%9A%D0%90 %D0%9F%D0%9E%D0%A0%D0%9E%D0%93 / %D0%90%D0%A0%D0%9A%D0%90 %D0%9A%D0%9E%D0%9B%D0%95%D0%A1%D0%90','20');"
+      },
+      {
+        "name": "НАРУЖНОЕ ЗЕРКАЛО ЗАДНЕГО ВИДА",
+        "href": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','57F00000','НАРУЖНОЕ ЗЕРКАЛО ЗАДНЕГО ВИДА','20');",
+        "rawHref": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','57F00000','%D0%9D%D0%90%D0%A0%D0%A3%D0%96%D0%9D%D0%9E%D0%95 %D0%97%D0%95%D0%A0%D0%9A%D0%90%D0%9B%D0%9E %D0%97%D0%90%D0%94%D0%9D%D0%95%D0%93%D0%9E %D0%92%D0%98%D0%94%D0%90','20');"
+      },
+      {
+        "name": "НАРУЖНЫЕ НАКЛАДКИ / ДЕКОРАТИВНЫЕ РЕШЕТКИ",
+        "href": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','59A00000','НАРУЖНЫЕ НАКЛАДКИ / ДЕКОРАТИВНЫЕ РЕШЕТКИ','20');",
+        "rawHref": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','59A00000','%D0%9D%D0%90%D0%A0%D0%A3%D0%96%D0%9D%D0%AB%D0%95 %D0%9D%D0%90%D0%9A%D0%9B%D0%90%D0%94%D0%9A%D0%98 / %D0%94%D0%95%D0%9A%D0%9E%D0%A0%D0%90%D0%A2%D0%98%D0%92%D0%9D%D0%AB%D0%95 %D0%A0%D0%95%D0%A8%D0%95%D0%A2%D0%9A%D0%98','20');"
+      },
+      {
+        "name": "ОБШИВКА ДВЕРИ/ БОКОВАЯ ОБШИВКА",
+        "href": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','5AF00000','ОБШИВКА ДВЕРИ/ БОКОВАЯ ОБШИВКА','20');",
+        "rawHref": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','5AF00000','%D0%9E%D0%91%D0%A8%D0%98%D0%92%D0%9A%D0%90 %D0%94%D0%92%D0%95%D0%A0%D0%98/ %D0%91%D0%9E%D0%9A%D0%9E%D0%92%D0%90%D0%AF %D0%9E%D0%91%D0%A8%D0%98%D0%92%D0%9A%D0%90','20');"
+      },
+      {
+        "name": "ОСТЕКЛЕНИЕ",
+        "href": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','57C00000','ОСТЕКЛЕНИЕ','20');",
+        "rawHref": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','57C00000','%D0%9E%D0%A1%D0%A2%D0%95%D0%9A%D0%9B%D0%95%D0%9D%D0%98%D0%95','20');"
+      },
+      {
+        "name": "ПАНЕЛЬ ПРИБОРОВ/ДОПОЛНИТЕЛЬНЫЕ ЭЛЕМЕНТЫ",
+        "href": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','5A300000','ПАНЕЛЬ ПРИБОРОВ/ДОПОЛНИТЕЛЬНЫЕ ЭЛЕМЕНТЫ','20');",
+        "rawHref": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','5A300000','%D0%9F%D0%90%D0%9D%D0%95%D0%9B%D0%AC %D0%9F%D0%A0%D0%98%D0%91%D0%9E%D0%A0%D0%9E%D0%92/%D0%94%D0%9E%D0%9F%D0%9E%D0%9B%D0%9D%D0%98%D0%A2%D0%95%D0%9B%D0%AC%D0%9D%D0%AB%D0%95 %D0%AD%D0%9B%D0%95%D0%9C%D0%95%D0%9D%D0%A2%D0%AB','20');"
+      },
+      {
+        "name": "ПЕРЕДНЯЯ ДВЕРЬ",
+        "href": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','58200000','ПЕРЕДНЯЯ ДВЕРЬ','20');",
+        "rawHref": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','58200000','%D0%9F%D0%95%D0%A0%D0%95%D0%94%D0%9D%D0%AF%D0%AF %D0%94%D0%92%D0%95%D0%A0%D0%AC','20');"
+      },
+      {
+        "name": "РАЗЛИЧНЫЕ ДЕТАЛИ КУЗОВА",
+        "href": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','5C100000','РАЗЛИЧНЫЕ ДЕТАЛИ КУЗОВА','20');",
+        "rawHref": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','5C100000','%D0%A0%D0%90%D0%97%D0%9B%D0%98%D0%A7%D0%9D%D0%AB%D0%95 %D0%94%D0%95%D0%A2%D0%90%D0%9B%D0%98 %D0%9A%D0%A3%D0%97%D0%9E%D0%92%D0%90','20');"
+      },
+      {
+        "name": "СР.ПОДЛОКОТНИК/ЯЩИКИ ДЛЯ МЕЛКИХ ВЕЩЕЙ",
+        "href": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','5A600000','СР.ПОДЛОКОТНИК/ЯЩИКИ ДЛЯ МЕЛКИХ ВЕЩЕЙ','20');",
+        "rawHref": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','5A600000','%D0%A1%D0%A0.%D0%9F%D0%9E%D0%94%D0%9B%D0%9E%D0%9A%D0%9E%D0%A2%D0%9D%D0%98%D0%9A/%D0%AF%D0%A9%D0%98%D0%9A%D0%98 %D0%94%D0%9B%D0%AF %D0%9C%D0%95%D0%9B%D0%9A%D0%98%D0%A5 %D0%92%D0%95%D0%A9%D0%95%D0%99','20');"
+      }
+    ]
+  },
+  {
+    "category": "ПЕДАЛЬНОЕ УПРАВЛЕНИЕ",
+    "items": [
+      {
+        "name": "МОДУЛЬ ПЕДАЛИ АКСЕЛЕРАТОРА",
+        "href": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','1C800000','МОДУЛЬ ПЕДАЛИ АКСЕЛЕРАТОРА','22');",
+        "rawHref": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','1C800000','%D0%9C%D0%9E%D0%94%D0%A3%D0%9B%D0%AC %D0%9F%D0%95%D0%94%D0%90%D0%9B%D0%98 %D0%90%D0%9A%D0%A1%D0%95%D0%9B%D0%95%D0%A0%D0%90%D0%A2%D0%9E%D0%A0%D0%90','22');"
+      },
+      {
+        "name": "ПЕДАЛЬНОЕ УПРАВЛЕНИЕ",
+        "href": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','0F900000','ПЕДАЛЬНОЕ УПРАВЛЕНИЕ','22');",
+        "rawHref": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','0F900000','%D0%9F%D0%95%D0%94%D0%90%D0%9B%D0%AC%D0%9D%D0%9E%D0%95 %D0%A3%D0%9F%D0%A0%D0%90%D0%92%D0%9B%D0%95%D0%9D%D0%98%D0%95','22');"
+      }
+    ]
+  },
+  {
+    "category": "ПОДВЕСКА ДВИГАТЕЛЯ И КПП",
+    "items": [
+      {
+        "name": "КРЕПЛЕНИЕ КПП",
+        "href": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','33F00000','КРЕПЛЕНИЕ КПП','24');",
+        "rawHref": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','33F00000','%D0%9A%D0%A0%D0%95%D0%9F%D0%9B%D0%95%D0%9D%D0%98%D0%95 %D0%9A%D0%9F%D0%9F','24');"
+      },
+      {
+        "name": "ПОДВЕСКА ДВИГАТЕЛЯ",
+        "href": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','33C00000','ПОДВЕСКА ДВИГАТЕЛЯ','24');",
+        "rawHref": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','33C00000','%D0%9F%D0%9E%D0%94%D0%92%D0%95%D0%A1%D0%9A%D0%90 %D0%94%D0%92%D0%98%D0%93%D0%90%D0%A2%D0%95%D0%9B%D0%AF','24');"
+      }
+    ]
+  },
+  {
+    "category": "ПОДДЕРЖАНИЕ ДИСТАНЦИИ, КРУИЗ-КОНТР.",
+    "items": [
+      {
+        "name": "ДИСТАНЦИОННОЕ УПРАВЛЕНИЕ",
+        "href": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','43B00000','ДИСТАНЦИОННОЕ УПРАВЛЕНИЕ','26');",
+        "rawHref": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','43B00000','%D0%94%D0%98%D0%A1%D0%A2%D0%90%D0%9D%D0%A6%D0%98%D0%9E%D0%9D%D0%9D%D0%9E%D0%95 %D0%A3%D0%9F%D0%A0%D0%90%D0%92%D0%9B%D0%95%D0%9D%D0%98%D0%95','26');"
+      },
+      {
+        "name": "СИСТЕМЫ ПАРКОВКИ",
+        "href": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','42600000','СИСТЕМЫ ПАРКОВКИ','26');",
+        "rawHref": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','42600000','%D0%A1%D0%98%D0%A1%D0%A2%D0%95%D0%9C%D0%AB %D0%9F%D0%90%D0%A0%D0%9A%D0%9E%D0%92%D0%9A%D0%98','26');"
+      },
+      {
+        "name": "СИСТЕМЫ РЕГУЛИРОВАНИЯ СКОРОСТИ",
+        "href": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','43500000','СИСТЕМЫ РЕГУЛИРОВАНИЯ СКОРОСТИ','26');",
+        "rawHref": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','43500000','%D0%A1%D0%98%D0%A1%D0%A2%D0%95%D0%9C%D0%AB %D0%A0%D0%95%D0%93%D0%A3%D0%9B%D0%98%D0%A0%D0%9E%D0%92%D0%90%D0%9D%D0%98%D0%AF %D0%A1%D0%9A%D0%9E%D0%A0%D0%9E%D0%A1%D0%A2%D0%98','26');"
+      },
+      {
+        "name": "ЭЛЕКТРОННАЯ СИСТ.ПОДДЕРЖ.ЗАД.ДИСТАНЦИИ",
+        "href": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','42300000','ЭЛЕКТРОННАЯ СИСТ.ПОДДЕРЖ.ЗАД.ДИСТАНЦИИ','26');",
+        "rawHref": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','42300000','%D0%AD%D0%9B%D0%95%D0%9A%D0%A2%D0%A0%D0%9E%D0%9D%D0%9D%D0%90%D0%AF %D0%A1%D0%98%D0%A1%D0%A2.%D0%9F%D0%9E%D0%94%D0%94%D0%95%D0%A0%D0%96.%D0%97%D0%90%D0%94.%D0%94%D0%98%D0%A1%D0%A2%D0%90%D0%9D%D0%A6%D0%98%D0%98','26');"
+      }
+    ]
+  },
+  {
+    "category": "РУЛЕВОЕ УПР. И ГЕОМЕТРИЯ ПОДВЕСКИ",
+    "items": [
+      {
+        "name": "LENKRAD",
+        "href": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','4BC00000','LENKRAD','28');",
+        "rawHref": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','4BC00000','LENKRAD','28');"
+      },
+      {
+        "name": "НАСОС ГИДРОУСИЛИТЕЛЯ РУЛЕВОГО УПРАВЛЕНИЯ",
+        "href": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','4B000000','НАСОС ГИДРОУСИЛИТЕЛЯ РУЛЕВОГО УПРАВЛЕНИЯ','28');",
+        "rawHref": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','4B000000','%D0%9D%D0%90%D0%A1%D0%9E%D0%A1 %D0%93%D0%98%D0%94%D0%A0%D0%9E%D0%A3%D0%A1%D0%98%D0%9B%D0%98%D0%A2%D0%95%D0%9B%D0%AF %D0%A0%D0%A3%D0%9B%D0%95%D0%92%D0%9E%D0%93%D0%9E %D0%A3%D0%9F%D0%A0%D0%90%D0%92%D0%9B%D0%95%D0%9D%D0%98%D0%AF','28');"
+      },
+      {
+        "name": "РУЛЕВАЯ КОЛОНКА",
+        "href": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','4B900000','РУЛЕВАЯ КОЛОНКА','28');",
+        "rawHref": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','4B900000','%D0%A0%D0%A3%D0%9B%D0%95%D0%92%D0%90%D0%AF %D0%9A%D0%9E%D0%9B%D0%9E%D0%9D%D0%9A%D0%90','28');"
+      },
+      {
+        "name": "РУЛЕВОЕ УПРАВЛЕНИЕ С ГИДРОУСИЛИТЕЛЕМ",
+        "href": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','4A700000','РУЛЕВОЕ УПРАВЛЕНИЕ С ГИДРОУСИЛИТЕЛЕМ','28');",
+        "rawHref": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','4A700000','%D0%A0%D0%A3%D0%9B%D0%95%D0%92%D0%9E%D0%95 %D0%A3%D0%9F%D0%A0%D0%90%D0%92%D0%9B%D0%95%D0%9D%D0%98%D0%95 %D0%A1 %D0%93%D0%98%D0%94%D0%A0%D0%9E%D0%A3%D0%A1%D0%98%D0%9B%D0%98%D0%A2%D0%95%D0%9B%D0%95%D0%9C','28');"
+      },
+      {
+        "name": "СИСТЕМА СМАЗКИ",
+        "href": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','4B300000','СИСТЕМА СМАЗКИ','28');",
+        "rawHref": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','4B300000','%D0%A1%D0%98%D0%A1%D0%A2%D0%95%D0%9C%D0%90 %D0%A1%D0%9C%D0%90%D0%97%D0%9A%D0%98','28');"
+      },
+      {
+        "name": "СОЕДИНИТЕЛЬНЫЕ ДЕТАЛИ РУЛЕВОГО УПРАВЛЕН.",
+        "href": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','4AD00000','СОЕДИНИТЕЛЬНЫЕ ДЕТАЛИ РУЛЕВОГО УПРАВЛЕН.','28');",
+        "rawHref": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','4AD00000','%D0%A1%D0%9E%D0%95%D0%94%D0%98%D0%9D%D0%98%D0%A2%D0%95%D0%9B%D0%AC%D0%9D%D0%AB%D0%95 %D0%94%D0%95%D0%A2%D0%90%D0%9B%D0%98 %D0%A0%D0%A3%D0%9B%D0%95%D0%92%D0%9E%D0%93%D0%9E %D0%A3%D0%9F%D0%A0%D0%90%D0%92%D0%9B%D0%95%D0%9D.','28');"
+      }
+    ]
+  },
+  {
+    "category": "СИСТЕМА ВЫПУСКА ОГ",
+    "items": [
+      {
+        "name": "КАТАЛИЗАТОР/ПЕРЕДНИЙ ДОП.ГЛУШИТЕЛЬ",
+        "href": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','09F00000','КАТАЛИЗАТОР/ПЕРЕДНИЙ ДОП.ГЛУШИТЕЛЬ','30');",
+        "rawHref": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','09F00000','%D0%9A%D0%90%D0%A2%D0%90%D0%9B%D0%98%D0%97%D0%90%D0%A2%D0%9E%D0%A0/%D0%9F%D0%95%D0%A0%D0%95%D0%94%D0%9D%D0%98%D0%99 %D0%94%D0%9E%D0%9F.%D0%93%D0%9B%D0%A3%D0%A8%D0%98%D0%A2%D0%95%D0%9B%D0%AC','30');"
+      },
+      {
+        "name": "СИСТЕМА ВЫПУСКА ОГ ЗД",
+        "href": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','0A200000','СИСТЕМА ВЫПУСКА ОГ ЗД','30');",
+        "rawHref": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','0A200000','%D0%A1%D0%98%D0%A1%D0%A2%D0%95%D0%9C%D0%90 %D0%92%D0%AB%D0%9F%D0%A3%D0%A1%D0%9A%D0%90 %D0%9E%D0%93 %D0%97%D0%94','30');"
+      }
+    ]
+  },
+  {
+    "category": "СИСТЕМА ПОДАЧИ ТОПЛИВА",
+    "items": [
+      {
+        "name": "СИСТЕМА ВЕНТИЛЯЦИИ КАРТЕРА",
+        "href": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','04800000','СИСТЕМА ВЕНТИЛЯЦИИ КАРТЕРА','32');",
+        "rawHref": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','04800000','%D0%A1%D0%98%D0%A1%D0%A2%D0%95%D0%9C%D0%90 %D0%92%D0%95%D0%9D%D0%A2%D0%98%D0%9B%D0%AF%D0%A6%D0%98%D0%98 %D0%9A%D0%90%D0%A0%D0%A2%D0%95%D0%A0%D0%90','32');"
+      },
+      {
+        "name": "СИСТЕМА ПОДАЧИ",
+        "href": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','05700000','СИСТЕМА ПОДАЧИ','32');",
+        "rawHref": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','05700000','%D0%A1%D0%98%D0%A1%D0%A2%D0%95%D0%9C%D0%90 %D0%9F%D0%9E%D0%94%D0%90%D0%A7%D0%98','32');"
+      },
+      {
+        "name": "ТОПЛИВНЫЙ БАК",
+        "href": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','04500000','ТОПЛИВНЫЙ БАК','32');",
+        "rawHref": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','04500000','%D0%A2%D0%9E%D0%9F%D0%9B%D0%98%D0%92%D0%9D%D0%AB%D0%99 %D0%91%D0%90%D0%9A','32');"
+      }
+    ]
+  },
+  {
+    "category": "СЦЕПЛЕНИЕ",
+    "items": [
+      {
+        "name": "ПРИВОД УПРАВЛЕНИЯ СЦЕПЛЕНИЕМ",
+        "href": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','32A00000','ПРИВОД УПРАВЛЕНИЯ СЦЕПЛЕНИЕМ','34');",
+        "rawHref": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','32A00000','%D0%9F%D0%A0%D0%98%D0%92%D0%9E%D0%94 %D0%A3%D0%9F%D0%A0%D0%90%D0%92%D0%9B%D0%95%D0%9D%D0%98%D0%AF %D0%A1%D0%A6%D0%95%D0%9F%D0%9B%D0%95%D0%9D%D0%98%D0%95%D0%9C','34');"
+      },
+      {
+        "name": "СЦЕПЛЕНИЕ МЕХАНИЧЕСКОЕ",
+        "href": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','32700000','СЦЕПЛЕНИЕ МЕХАНИЧЕСКОЕ','34');",
+        "rawHref": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','32700000','%D0%A1%D0%A6%D0%95%D0%9F%D0%9B%D0%95%D0%9D%D0%98%D0%95 %D0%9C%D0%95%D0%A5%D0%90%D0%9D%D0%98%D0%A7%D0%95%D0%A1%D0%9A%D0%9E%D0%95','34');"
+      }
+    ]
+  },
+  {
+    "category": "ТЕХНИЧЕСКАЯ ЛИТЕРАТУРА",
+    "items": [
+      {
+        "name": "БОРТОВАЯ ДОКУМЕНТАЦИЯ",
+        "href": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','10200000','БОРТОВАЯ ДОКУМЕНТАЦИЯ','36');",
+        "rawHref": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','10200000','%D0%91%D0%9E%D0%A0%D0%A2%D0%9E%D0%92%D0%90%D0%AF %D0%94%D0%9E%D0%9A%D0%A3%D0%9C%D0%95%D0%9D%D0%A2%D0%90%D0%A6%D0%98%D0%AF','36');"
+      },
+      {
+        "name": "ДРУГАЯ ЛИТЕРАТУРА",
+        "href": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','11100000','ДРУГАЯ ЛИТЕРАТУРА','36');",
+        "rawHref": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','11100000','%D0%94%D0%A0%D0%A3%D0%93%D0%90%D0%AF %D0%9B%D0%98%D0%A2%D0%95%D0%A0%D0%90%D0%A2%D0%A3%D0%A0%D0%90','36');"
+      },
+      {
+        "name": "ТЕХНИЧЕСКАЯ ДОКУМЕНТАЦИЯ",
+        "href": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','10B00000','ТЕХНИЧЕСКАЯ ДОКУМЕНТАЦИЯ','36');",
+        "rawHref": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','10B00000','%D0%A2%D0%95%D0%A5%D0%9D%D0%98%D0%A7%D0%95%D0%A1%D0%9A%D0%90%D0%AF %D0%94%D0%9E%D0%9A%D0%A3%D0%9C%D0%95%D0%9D%D0%A2%D0%90%D0%A6%D0%98%D0%AF','36');"
+      }
+    ]
+  },
+  {
+    "category": "ЭЛЕКТРООБОРУДОВАНИЕ ДВИГАТЕЛЯ",
+    "items": [
+      {
+        "name": "ГЕНЕРАТОР",
+        "href": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','2AC00000','ГЕНЕРАТОР','38');",
+        "rawHref": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','2AC00000','%D0%93%D0%95%D0%9D%D0%95%D0%A0%D0%90%D0%A2%D0%9E%D0%A0','38');"
+      },
+      {
+        "name": "ДЕТАЛИ ГЕНЕРАТОРА",
+        "href": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','2B200000','ДЕТАЛИ ГЕНЕРАТОРА','38');",
+        "rawHref": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','2B200000','%D0%94%D0%95%D0%A2%D0%90%D0%9B%D0%98 %D0%93%D0%95%D0%9D%D0%95%D0%A0%D0%90%D0%A2%D0%9E%D0%A0%D0%90','38');"
+      },
+      {
+        "name": "ЖГУТ ПРОВОДОВ ДВИГАТЕЛЯ",
+        "href": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','2BE00000','ЖГУТ ПРОВОДОВ ДВИГАТЕЛЯ','38');",
+        "rawHref": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','2BE00000','%D0%96%D0%93%D0%A3%D0%A2 %D0%9F%D0%A0%D0%9E%D0%92%D0%9E%D0%94%D0%9E%D0%92 %D0%94%D0%92%D0%98%D0%93%D0%90%D0%A2%D0%95%D0%9B%D0%AF','38');"
+      },
+      {
+        "name": "ОТСЕК ЭБУ",
+        "href": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','2D600000','ОТСЕК ЭБУ','38');",
+        "rawHref": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','2D600000','%D0%9E%D0%A2%D0%A1%D0%95%D0%9A %D0%AD%D0%91%D0%A3','38');"
+      },
+      {
+        "name": "ПРОВОД БАТАРЕИ",
+        "href": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','2C100000','ПРОВОД БАТАРЕИ','38');",
+        "rawHref": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','2C100000','%D0%9F%D0%A0%D0%9E%D0%92%D0%9E%D0%94 %D0%91%D0%90%D0%A2%D0%90%D0%A0%D0%95%D0%98','38');"
+      },
+      {
+        "name": "РАЗЛИЧНЫЕ ЖГУТЫ ПРОВОДОВ",
+        "href": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','2C400000','РАЗЛИЧНЫЕ ЖГУТЫ ПРОВОДОВ','38');",
+        "rawHref": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','2C400000','%D0%A0%D0%90%D0%97%D0%9B%D0%98%D0%A7%D0%9D%D0%AB%D0%95 %D0%96%D0%93%D0%A3%D0%A2%D0%AB %D0%9F%D0%A0%D0%9E%D0%92%D0%9E%D0%94%D0%9E%D0%92','38');"
+      },
+      {
+        "name": "РАЗЛИЧНЫЕ РАЗЪЕМЫ И ШТЕКЕРНЫЕ СОЕДИНЕНИЯ",
+        "href": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','2D000000','РАЗЛИЧНЫЕ РАЗЪЕМЫ И ШТЕКЕРНЫЕ СОЕДИНЕНИЯ','38');",
+        "rawHref": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','2D000000','%D0%A0%D0%90%D0%97%D0%9B%D0%98%D0%A7%D0%9D%D0%AB%D0%95 %D0%A0%D0%90%D0%97%D0%AA%D0%95%D0%9C%D0%AB %D0%98 %D0%A8%D0%A2%D0%95%D0%9A%D0%95%D0%A0%D0%9D%D0%AB%D0%95 %D0%A1%D0%9E%D0%95%D0%94%D0%98%D0%9D%D0%95%D0%9D%D0%98%D0%AF','38');"
+      },
+      {
+        "name": "СИСТЕМА ЗАЖИГАНИЯ",
+        "href": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','29700000','СИСТЕМА ЗАЖИГАНИЯ','38');",
+        "rawHref": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','29700000','%D0%A1%D0%98%D0%A1%D0%A2%D0%95%D0%9C%D0%90 %D0%97%D0%90%D0%96%D0%98%D0%93%D0%90%D0%9D%D0%98%D0%AF','38');"
+      },
+      {
+        "name": "СТАРТЕР",
+        "href": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','2B800000','СТАРТЕР','38');",
+        "rawHref": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','2B800000','%D0%A1%D0%A2%D0%90%D0%A0%D0%A2%D0%95%D0%A0','38');"
+      },
+      {
+        "name": "ЭБУ",
+        "href": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','29A00000','ЭБУ','38');",
+        "rawHref": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','29A00000','%D0%AD%D0%91%D0%A3','38');"
+      },
+      {
+        "name": "ЭЛЕМЕНТЫ КРЕПЛЕНИЯ ЖГУТА ПРОВОДОВ",
+        "href": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','2CA00000','ЭЛЕМЕНТЫ КРЕПЛЕНИЯ ЖГУТА ПРОВОДОВ','38');",
+        "rawHref": "javascript:submit('1310c1c4-3a6e-49ee-adfe-72d8e70d7eb4','2CA00000','%D0%AD%D0%9B%D0%95%D0%9C%D0%95%D0%9D%D0%A2%D0%AB %D0%9A%D0%A0%D0%95%D0%9F%D0%9B%D0%95%D0%9D%D0%98%D0%AF %D0%96%D0%93%D0%A3%D0%A2%D0%90 %D0%9F%D0%A0%D0%9E%D0%92%D0%9E%D0%94%D0%9E%D0%92','38');"
+      }
+    ]
+  }
+]

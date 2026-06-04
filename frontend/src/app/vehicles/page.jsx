@@ -10,6 +10,22 @@ import { isApprovedSeller } from "@/lib/roles";
 import { useToast } from "@/context/toast-context";
 import { ApiError, apiFetch } from "@/lib/api";
 
+const STATUS_COLORS = {
+  pending_research: { bg: "rgba(251,191,36,0.12)", border: "rgba(251,191,36,0.3)", color: "#fbbf24" },
+  researching:      { bg: "rgba(56,189,248,0.12)",  border: "rgba(56,189,248,0.3)",  color: "#38bdf8" },
+  active:           { bg: "rgba(74,222,128,0.12)",  border: "rgba(74,222,128,0.3)",  color: "#4ade80" },
+  archived:         { bg: "rgba(148,163,184,0.12)", border: "rgba(148,163,184,0.3)", color: "#94a3b8" },
+};
+
+function StatusBadge({ status }) {
+  const c = STATUS_COLORS[status] || STATUS_COLORS.archived;
+  return (
+    <span style={{ background: c.bg, border: `1px solid ${c.border}`, color: c.color, borderRadius: 999, padding: "2px 10px", fontSize: 11, fontWeight: 600, fontFamily: "var(--ff-display)" }}>
+      {status?.replace(/_/g, " ")}
+    </span>
+  );
+}
+
 export default function VehiclesPage() {
   const router = useRouter();
   const { user, loading: authLoading } = useAuth();
@@ -103,21 +119,14 @@ export default function VehiclesPage() {
                   <div className="flex items-center justify-between gap-3 flex-wrap">
                     <div>
                       <p style={{ fontSize: 15, fontWeight: 700, color: "var(--text-primary)", fontFamily: "var(--ff-display)" }}>
-                        {[v.year, v.make, v.model].filter(Boolean).join(" ") || "Vehicle"}
+                        {[v.year, v.make_name, v.model_name].filter(Boolean).join(" ") || "Vehicle"}
                       </p>
                       <p style={{ fontFamily: "var(--ff-mono)", fontSize: 11, color: "var(--text-muted)", marginTop: 2 }}>{v.vin}</p>
                     </div>
                     <div className="flex flex-wrap gap-3" style={{ fontSize: 12, color: "var(--text-muted)" }}>
                       <span>{v.parts_count ?? 0} parts</span>
                       <span>{v.photos_count ?? 0} photos</span>
-                      <span style={{
-                        background: "var(--bg-elevated)", border: "1px solid var(--border)",
-                        borderRadius: "var(--radius-sm)", padding: "2px 8px",
-                        fontSize: 11, fontFamily: "var(--ff-display)", fontWeight: 600,
-                        color: "var(--text-secondary)",
-                      }}>
-                        {v.analytics_status}
-                      </span>
+                      <StatusBadge status={v.analytics_status} />
                     </div>
                   </div>
                 </Link>

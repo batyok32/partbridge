@@ -147,16 +147,19 @@ class SellerApplicationView(APIView):
     def post(self, request):
         user = request.user
         if user.is_seller:
+            print("Already a seller")
             return Response(
                 {"detail": "You are already an approved seller."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
         if not user.email_verified_at:
+            print("Email not verified")
             return Response(
                 {"detail": "Verify your email before applying to sell."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
         if SellerApplication.objects.filter(user=user, status=SellerApplication.Status.PENDING).exists():
+            print("Pending application exists")
             return Response(
                 {"detail": "You already have a pending application."},
                 status=status.HTTP_400_BAD_REQUEST,
@@ -283,10 +286,82 @@ class SellerPublicProfileView(APIView):
     def get(self, request, pk: int):
         user = get_object_or_404(User.objects.filter(pk=pk, is_seller=True))
         display_name = user.get_full_name().strip() or user.email.split("@")[0]
-        return Response(
-            {
-                "id": user.id,
-                "display_name": display_name,
-                "member_since": timezone.localtime(user.date_joined).date().isoformat(),
-            }
+
+        from django.db.models import Avg, Count
+        from orders.models import Order, OrderItem, SellerReview
+        from parts.models import Item as PartItem
+        from parts.serializers import ItemListSerializer
+        from vehicles.models import Vehicle
+
+        reviews_qs = SellerReview.objects.filter(seller=user)
+        rating_agg = reviews_qs.aggregate(avg=Avg("rating"), count=Count("id"))
+        rating_avg = round(rating_agg["avg"], 1) if rating_agg["avg"] else None
+        rating_count = rating_agg["count"] or 0
+        rating_breakdown = {str(r): reviews_qs.filter(rating=r).count() for r in range(1, 6)}
+
+        completed_sales = OrderItem.objects.filter(
+            item__vehicle__seller=user,
+            order__status=Order.Status.DELIVERED,
+        ).count()
+
+        active_items = (
+            PartItem.objects.filter(vehicle__seller=user, status=PartItem.Status.ACTIVE)
+            .select_related("category", "vehicle__generation__car_model__make", "vehicle__seller")
+            .prefetch_related("photos", "compatibilities")
+        )[:20]
+        listings_data = ItemListSerializer(active_items, many=True).data
+
+        recent_reviews_qs = (
+            reviews_qs.select_related("buyer", "order_item__item")
+            .order_by("-created_at")[:15]
         )
+        recent_reviews = []
+        for rev in recent_reviews_qs:
+            item_title = ""
+            try:
+                item_title = rev.order_item.item.title if rev.order_item and rev.order_item.item else ""
+            except Exception:
+                pass
+            recent_reviews.append({
+                "rating": rev.rating,
+                "body": rev.body,
+                "buyer_name": rev.buyer.first_name or rev.buyer.email.split("@")[0],
+                "item_title": item_title,
+                "created_at": rev.created_at.date().isoformat(),
+            })
+
+        vehicles_qs = (
+            Vehicle.objects.filter(seller=user, status=Vehicle.Status.ACTIVE)
+            .select_related("generation__car_model__make")[:10]
+        )
+        vehicles = []
+        for v in vehicles_qs:
+            make_name = ""
+            model_name = ""
+            gen_name = ""
+            if v.generation:
+                make_name = v.generation.car_model.make.name
+                model_name = v.generation.car_model.name
+                gen_name = v.generation.name or ""
+            item_count = PartItem.objects.filter(vehicle=v, status=PartItem.Status.ACTIVE).count()
+            vehicles.append({
+                "id": v.id,
+                "year": v.year,
+                "make_name": make_name,
+                "model_name": model_name,
+                "generation_name": gen_name,
+                "active_items_count": item_count,
+            })
+
+        return Response({
+            "id": user.id,
+            "display_name": display_name,
+            "member_since": timezone.localtime(user.date_joined).date().isoformat(),
+            "rating_avg": rating_avg,
+            "rating_count": rating_count,
+            "rating_breakdown": rating_breakdown,
+            "completed_sales": completed_sales,
+            "active_listings": listings_data,
+            "recent_reviews": recent_reviews,
+            "vehicles": vehicles,
+        })

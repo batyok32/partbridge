@@ -169,10 +169,41 @@ class ShippingAddressSerializer(serializers.ModelSerializer):
 
 
 class UserCarSerializer(serializers.ModelSerializer):
+    make_name = serializers.CharField(source="generation.car_model.make.name", read_only=True)
+    model_name = serializers.CharField(source="generation.car_model.name", read_only=True)
+    generation_name = serializers.CharField(source="generation.name", read_only=True)
+    generation_label = serializers.SerializerMethodField()
+    make_id = serializers.IntegerField(source="generation.car_model.make_id", read_only=True)
+    model_id = serializers.IntegerField(source="generation.car_model_id", read_only=True)
+    display_label = serializers.SerializerMethodField()
+
     class Meta:
         model = UserCar
-        fields = ("id", "user", "generation", "modification", "year", "nickname", "is_default", "created_at")
+        fields = (
+            "id", "user", "generation", "modification", "year", "nickname", "is_default",
+            "make_id", "model_id", "make_name", "model_name", "generation_name",
+            "generation_label", "display_label", "created_at",
+        )
         read_only_fields = ("id", "user", "created_at")
+
+    def get_generation_label(self, obj):
+        g = obj.generation
+        codes = g.chassis_codes or []
+        code = codes[0] if codes else (g.name or "")
+        start = g.production_start.year if g.production_start else ""
+        end = g.production_end.year if g.production_end else "present"
+        if code and start:
+            return f"{code} ({start}–{end})"
+        return g.name or ""
+
+    def get_display_label(self, obj):
+        parts = [str(obj.year), obj.generation.car_model.make.name, obj.generation.car_model.name]
+        if obj.generation.name:
+            parts.append(obj.generation.name)
+        # codes = obj.generation.chassis_codes or []
+        # if codes:
+        #     parts.append(codes[0])
+        return " ".join(parts)
 
     def create(self, validated_data):
         user = self.context["request"].user

@@ -3,14 +3,15 @@
 import React, { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { motion, useScroll, useTransform, AnimatePresence } from "framer-motion";
 
 import { useAuth } from "@/context/auth-context";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { apiFetch } from "@/lib/api";
-import { MAKES, MODELS_BY_MAKE } from "@/lib/cars-data";
-import { PARTS } from "@/lib/parts-data";
+import FeaturedCategories from "@/components/home/FeaturedCategories";
+import HomeCarHero from "@/components/home/HomeCarHero";
+import HowItWorksBuyer from "@/components/home/HowItWorksBuyer";
+import MakeStrip from "@/components/home/MakeStrip";
+import RecentParts from "@/components/home/RecentParts";
 
 /* ─── Scroll-triggered fade-in ─────────────────────────────────────────────── */
 
@@ -149,9 +150,6 @@ function SelectField({ value, onChange, placeholder, options, disabled = false }
 function PartSelectField({ value, onChange }) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
-  const [aiName, setAiName] = useState(null);
-  const [aiLoading, setAiLoading] = useState(false);
-  const [aiError, setAiError] = useState(false);
   const wrapRef = useRef(null);
   const inputRef = useRef(null);
 
@@ -168,22 +166,8 @@ function PartSelectField({ value, onChange }) {
   const filtered = q ? PARTS.filter(p => p.toLowerCase().includes(q)) : PARTS;
   const hasMatches = filtered.length > 0;
 
-  useEffect(() => {
-    if (!q || hasMatches) { setAiName(null); setAiError(false); return; }
-    if (aiLoading || aiName) return;
-    const t = setTimeout(async () => {
-      setAiLoading(true); setAiError(false);
-      try {
-        const data = await apiFetch("/browse/normalize-part/", { auth: false, method: "POST", body: JSON.stringify({ raw_name: query.trim() }) });
-        setAiName(data.normalized_name || query.trim());
-      } catch { setAiError(true); }
-      finally { setAiLoading(false); }
-    }, 600);
-    return () => clearTimeout(t);
-  }, [q, hasMatches]); // eslint-disable-line
-
-  function select(name) { onChange(name); setOpen(false); setQuery(""); setAiName(null); }
-  function clear(e) { e.stopPropagation(); onChange(""); setQuery(""); setAiName(null); }
+  function select(name) { onChange(name); setOpen(false); setQuery(""); }
+  function clear(e) { e.stopPropagation(); onChange(""); setQuery(""); }
 
   return (
     <div ref={wrapRef} className="relative flex-[2] min-w-[150px]">
@@ -252,31 +236,11 @@ function PartSelectField({ value, onChange }) {
                   </button>
                 </li>
               )) : (
-                <li className="px-4 py-3 text-sm" style={{ color: "var(--text-muted)" }}>No matching parts found.</li>
+                <li className="px-4 py-3 text-sm" style={{ color: "var(--text-muted)" }}>
+                  No match — press &ldquo;Find Parts&rdquo; to search anyway.
+                </li>
               )}
             </ul>
-            {q && !hasMatches && (
-              <div className="p-2" style={{ borderTop: "1px solid var(--border-subtle)" }}>
-                {aiName ? (
-                  <button
-                    type="button"
-                    onClick={() => select(aiName)}
-                    className="flex w-full items-center gap-2 rounded-[8px] px-3 py-2 text-left text-sm transition-colors"
-                    style={{ background: "var(--primary-muted)", color: "var(--primary)", border: "1px solid var(--primary-border-soft)" }}
-                  >
-                    <IcZap c="h-3.5 w-3.5 shrink-0" />
-                    <span>Use &ldquo;{aiName}&rdquo;</span>
-                  </button>
-                ) : aiError ? (
-                  <p className="px-2 py-1.5 text-xs" style={{ color: "var(--text-muted)" }}>No match found — press Find Parts to search anyway.</p>
-                ) : (
-                  <div className="flex items-center gap-2 px-3 py-2 text-sm" style={{ color: "var(--text-muted)" }}>
-                    <span className="h-3.5 w-3.5 shrink-0 animate-spin rounded-full border-2" style={{ borderColor: "var(--border)", borderTopColor: "var(--primary)" }} />
-                    Looking up part…
-                  </div>
-                )}
-              </div>
-            )}
           </motion.div>
         )}
       </AnimatePresence>
@@ -351,29 +315,13 @@ function FloatingShapes() {
 /* ─── Page ───────────────────────────────────────────────────────────────────── */
 
 export default function Home() {
-  const router = useRouter();
   const { user, loading: authLoading } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [year, setYear]   = useState("");
-  const [make, setMake]   = useState("");
-  const [model, setModel] = useState("");
-  const [partQuery, setPartQuery] = useState("");
 
   const heroRef = useRef(null);
   const { scrollYProgress } = useScroll({ target: heroRef, offset: ["start start", "end start"] });
   const heroY = useTransform(scrollYProgress, [0, 1], ["0%", "30%"]);
   const heroOpacity = useTransform(scrollYProgress, [0, 0.7], [1, 0]);
-
-  function handleSearch(e) {
-    e.preventDefault();
-    const params = new URLSearchParams();
-    if (year.trim())      params.set("year",  year.trim());
-    if (make.trim())      params.set("make",  make.trim());
-    if (model.trim())     params.set("model", model.trim());
-    if (partQuery.trim()) params.set("part",  partQuery.trim());
-    const qs = params.toString();
-    router.push(qs ? `/browse?${qs}` : "/browse");
-  }
 
   const stagger = {
     container: { hidden: {}, show: { transition: { staggerChildren: 0.12 } } },
@@ -524,31 +472,7 @@ export default function Home() {
               with verified condition and transparent shipping.
             </motion.p>
 
-            {/* Search bar */}
-            <motion.div variants={stagger.item} className="relative z-10 mx-auto mt-10 max-w-3xl">
-              <form onSubmit={handleSearch}>
-                <div className="rounded-[14px] p-2 shadow-xl"
-                     style={{ background: "var(--bg-elevated)", border: "1px solid var(--border)", boxShadow: "var(--shadow-md)" }}>
-                  <div className="flex flex-col gap-2 sm:flex-row">
-                    <SelectField value={year}  onChange={setYear}  placeholder="Year"  options={YEARS} />
-                    <SelectField value={make}  onChange={v => { setMake(v); setModel(""); }} placeholder="Make"  options={MAKES} />
-                    <SelectField value={model} onChange={setModel} placeholder="Model" options={make ? MODELS_BY_MAKE[make] || [] : []} disabled={!make} />
-                    <PartSelectField value={partQuery} onChange={setPartQuery} />
-                    <button
-                      type="submit"
-                      className="btn-forge h-11 gap-2 whitespace-nowrap"
-                      style={{ padding: "0 24px", borderRadius: "8px" }}
-                    >
-                      <IcSearch c="h-4 w-4" />
-                      Find Parts
-                    </button>
-                  </div>
-                </div>
-              </form>
-              <p className="mt-3 text-xs" style={{ color: "var(--text-disabled)", fontFamily: "var(--ff-body)" }}>
-                No account needed to browse. Search from thousands of parts across hundreds of vehicles.
-              </p>
-            </motion.div>
+            <HomeCarHero stagger={stagger} />
 
             {/* Stats */}
             <motion.div variants={stagger.item} className="mx-auto mt-14 flex flex-wrap items-center justify-center gap-12">
@@ -581,8 +505,13 @@ export default function Home() {
         </motion.div>
       </section>
 
-      {/* ── How It Works ───────────────────────────────────────────────────── */}
-      <section id="how-it-works" className="py-28 relative">
+      <FeaturedCategories />
+      <RecentParts />
+      <MakeStrip />
+      <HowItWorksBuyer />
+
+      {/* ── How It Works (sellers + legacy buyers) ─────────────────────────── */}
+      <section id="for-sellers" className="py-28 relative">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <Reveal className="text-center mb-16">
             <span className="section-label justify-center mb-4">Simple for Everyone</span>
@@ -700,36 +629,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ── Part Categories ─────────────────────────────────────────────────── */}
-      <section className="py-28">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <Reveal className="text-center mb-14">
-            <span className="section-label justify-center mb-4">Browse by Category</span>
-            <h2 className="heading-display text-4xl sm:text-5xl mt-2">Every Part, Organized</h2>
-          </Reveal>
-
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-8">
-            {CATEGORIES.map((cat, i) => (
-              <Reveal key={cat.name} delay={i * 40}>
-                <Link
-                  href="/browse"
-                  className="group flex flex-col items-center gap-3 rounded-[14px] p-5 transition-all duration-200 text-center"
-                  style={{ background: "var(--bg-surface)", border: "1px solid var(--border)" }}
-                  onMouseEnter={e => { e.currentTarget.style.borderColor = "var(--primary-border-strong)"; e.currentTarget.style.background = "var(--bg-elevated)"; e.currentTarget.style.transform = "translateY(-3px)"; e.currentTarget.style.boxShadow = "var(--shadow-lg)"; }}
-                  onMouseLeave={e => { e.currentTarget.style.borderColor = "var(--border)"; e.currentTarget.style.background = "var(--bg-surface)"; e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "none"; }}
-                >
-                  <div className="flex h-12 w-12 items-center justify-center rounded-full transition-all"
-                       style={{ background: "var(--primary-muted)", border: "1px solid var(--primary-border-soft)" }}>
-                    <cat.Icon c="h-5 w-5" style={{ color: "var(--primary)" }} />
-                  </div>
-                  <span className="text-xs font-semibold" style={{ color: "var(--text-secondary)", fontFamily: "var(--ff-body)", letterSpacing: "0.02em" }}>{cat.name}</span>
-                </Link>
-              </Reveal>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* ── CTA ─────────────────────────────────────────────────────────────── */}
       <section className="py-28 relative overflow-hidden">
         <div className="absolute inset-0 mesh-bg" />
@@ -759,7 +658,7 @@ export default function Home() {
                 List Your Vehicle <IcArrow c="h-4 w-4" />
               </Link>
               <Link
-                href="/browse"
+                href="/search"
                 className="btn-ghost"
                 style={{ padding: "13px 32px", fontSize: 15 }}
               >
@@ -791,7 +690,7 @@ export default function Home() {
             </Link>
 
             <nav className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2">
-              {[["Browse","/browse"],["Sign in","/login"],["Register","/register"]].map(([label, href]) => (
+              {[["Browse","/search"],["Sign in","/login"],["Register","/register"]].map(([label, href]) => (
                 <Link key={href} href={href} className="text-sm transition-colors link-underline"
                       style={{ color: "var(--text-muted)", fontFamily: "var(--ff-body)" }}
                       onMouseEnter={e=>e.currentTarget.style.color="var(--text-secondary)"}

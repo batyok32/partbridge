@@ -42,6 +42,7 @@ class Vehicle(models.Model):
     condition = models.CharField(max_length=16, choices=Condition.choices, blank=True)
     status = models.CharField(max_length=24, choices=Status.choices, default=Status.PENDING_RESEARCH)
     seller_zip = models.CharField(max_length=10, blank=True)
+    seller_state = models.CharField(max_length=2, blank=True, db_index=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -55,7 +56,8 @@ class Vehicle(models.Model):
 
 class VehiclePhoto(models.Model):
     vehicle = models.ForeignKey(Vehicle, on_delete=models.CASCADE, related_name="photos")
-    url = models.CharField(max_length=1024)
+    image = models.ImageField(upload_to="vehicle_photos/", null=True, blank=True)
+    url = models.CharField(max_length=1024, blank=True)
     thumbnail_url = models.CharField(max_length=1024, blank=True)
     sort_order = models.PositiveSmallIntegerField(default=0)
     is_primary = models.BooleanField(default=False)
@@ -64,6 +66,12 @@ class VehiclePhoto(models.Model):
 
     class Meta:
         ordering = ["sort_order", "id"]
+
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        if self.image and not self.url:
+            self.url = self.image.url
+            type(self).objects.filter(pk=self.pk).update(url=self.url)
 
     def __str__(self):
         return f"VehiclePhoto vehicle={self.vehicle_id} sort={self.sort_order}"

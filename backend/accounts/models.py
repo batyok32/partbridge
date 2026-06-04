@@ -43,6 +43,10 @@ class User(AbstractUser):
     phone = models.CharField(max_length=32, blank=True)
     is_seller = models.BooleanField(default=False)
     email_verified_at = models.DateTimeField(null=True, blank=True)
+    stripe_connect_account_id = models.CharField(max_length=64, blank=True)
+    stripe_connect_details_submitted = models.BooleanField(default=False)
+    stripe_connect_payouts_enabled = models.BooleanField(default=False)
+    stripe_connect_onboarded_at = models.DateTimeField(null=True, blank=True)
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []

@@ -32,7 +32,7 @@ export default function DashboardPage() {
   const quickLinks = [
     isBuyer  && { href: "/browse",   label: "Browse Parts",   desc: "Search the catalog" },
     isBuyer  && { href: "/cart",     label: "Cart",           desc: "Review your cart" },
-    isBuyer  && { href: "/orders",   label: "Purchases",      desc: "Your purchase history" },
+    isBuyer  && { href: "/purchases", label: "Purchases",      desc: "Your purchase history" },
     !isSeller && { href: "/seller/apply", label: app?.status === "pending" ? "Seller application (pending)" : "Become a seller", desc: "Apply to list vehicles and parts" },
     isSeller && { href: "/vehicles", label: "My Vehicles",    desc: "Manage donor vehicles" },
     isSeller && { href: "/orders",   label: "Orders",         desc: "Incoming orders" },
@@ -65,7 +65,7 @@ export default function DashboardPage() {
           <div>
             <p className="section-label mb-1">Account</p>
             <h1 className="heading-display text-2xl">
-              {user.name?.split(" ")[0] || "Dashboard"}
+              {user.first_name || user.email?.split("@")[0] || "Dashboard"}
             </h1>
             <p className="text-sm mt-1" style={{ color: "var(--text-muted)" }}>
               {user.email}

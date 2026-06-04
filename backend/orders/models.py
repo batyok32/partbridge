@@ -5,6 +5,10 @@ from django.db import models
 
 
 class CartItem(models.Model):
+    class ShippingMode(models.TextChoices):
+        STANDARD = "standard", "Standard"
+        ECONOMY = "economy", "Economy"
+
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
@@ -15,6 +19,11 @@ class CartItem(models.Model):
         on_delete=models.CASCADE,
         related_name="cart_items",
     )
+    shipping_mode = models.CharField(
+        max_length=16,
+        choices=ShippingMode.choices,
+        default=ShippingMode.STANDARD,
+    )
     added_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -22,6 +31,31 @@ class CartItem(models.Model):
 
     def __str__(self):
         return f"CartItem user={self.user_id} item={self.item_id}"
+
+
+class CartBundle(models.Model):
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="cart_bundles",
+    )
+    bundle = models.ForeignKey(
+        "bundles.Bundle",
+        on_delete=models.CASCADE,
+        related_name="cart_bundles",
+    )
+    shipping_mode = models.CharField(
+        max_length=16,
+        choices=CartItem.ShippingMode.choices,
+        default=CartItem.ShippingMode.STANDARD,
+    )
+    added_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = [("user", "bundle")]
+
+    def __str__(self):
+        return f"CartBundle user={self.user_id} bundle={self.bundle_id}"
 
 
 class Order(models.Model):
@@ -45,9 +79,11 @@ class Order(models.Model):
     status = models.CharField(max_length=16, choices=Status.choices, default=Status.PENDING)
     subtotal = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     shipping_cost = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    tax = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     total = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     vehicle_snapshot = models.JSONField(default=dict, blank=True)
     placed_at = models.DateTimeField(auto_now_add=True)
+    delivered_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         ordering = ["-placed_at"]
@@ -59,9 +95,18 @@ class Order(models.Model):
 class OrderItem(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name="order_items")
     item = models.ForeignKey("parts.Item", on_delete=models.PROTECT, related_name="order_items")
+    bundle = models.ForeignKey(
+        "bundles.Bundle",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="order_items",
+    )
     price_at_purchase = models.DecimalField(max_digits=10, decimal_places=2)
     item_snapshot = models.JSONField(default=dict, blank=True)
     selected_options = models.JSONField(null=True, blank=True)
+    payout_transferred = models.BooleanField(default=False)
+    transfer_eligible_at = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
         return f"OrderItem order={self.order_id} item={self.item_id}"

@@ -1,5 +1,8 @@
+from django.db.models import Count, Q
 from rest_framework import generics
 from rest_framework.permissions import AllowAny
+
+from parts.models import Item
 
 from .models import CarModel, Generation, Make, Modification
 from .serializers import CarModelSerializer, GenerationSerializer, MakeSerializer, ModificationSerializer
@@ -8,7 +11,20 @@ from .serializers import CarModelSerializer, GenerationSerializer, MakeSerialize
 class MakeListView(generics.ListAPIView):
     permission_classes = [AllowAny]
     serializer_class = MakeSerializer
-    queryset = Make.objects.all()
+
+    def get_queryset(self):
+        qs = Make.objects.all()
+        if self.request.query_params.get("with_counts") in ("1", "true", "yes"):
+            qs = qs.annotate(
+                listing_count=Count(
+                    "generations__vehicles__items",
+                    filter=Q(generations__vehicles__items__status=Item.Status.ACTIVE),
+                    distinct=True,
+                )
+            ).order_by("-listing_count", "name")
+        else:
+            qs = qs.order_by("name")
+        return qs
 
 
 class CarModelListView(generics.ListAPIView):

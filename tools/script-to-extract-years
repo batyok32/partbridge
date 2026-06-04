@@ -1,0 +1,103 @@
+(async function () {
+  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+  const results = [];
+
+  const years = [...document.querySelectorAll("a")].filter((a) =>
+    /^\d{4}$/.test(a.innerText.trim()),
+  );
+
+  for (let i = 0; i < years.length; i++) {
+    const currentYears = [...document.querySelectorAll("a")].filter((a) =>
+      /^\d{4}$/.test(a.innerText.trim()),
+    );
+
+    const yearEl = currentYears[i];
+
+    if (!yearEl) continue;
+
+    const year = yearEl.innerText.trim();
+
+    console.log("Opening:", year);
+
+    const href = yearEl.getAttribute("href") || "";
+
+    const toggleMatch = href.match(/ToggleNode\('(\d+)'\)/);
+
+    try {
+      yearEl.click();
+
+      await sleep(700);
+
+      let months = [];
+
+      // if ToggleNode exists
+      if (toggleMatch) {
+        const nodeId = toggleMatch[1];
+
+        const container = document.querySelector(`#d${nodeId}`);
+
+        if (container) {
+          months = [...container.querySelectorAll("a")]
+            .map((a) => ({
+              month: a.innerText.trim(),
+              href: a.href,
+            }))
+            .filter((x) => x.month);
+        }
+      }
+
+      // fallback:
+      if (!months.length) {
+        months = [...document.querySelectorAll("a")]
+          .map((a) => ({
+            month: a.innerText.trim(),
+            href: a.href,
+          }))
+          .filter(
+            (x) => x.month && !/^\d{4}$/.test(x.month) && x.month.length < 10,
+          );
+      }
+
+      results.push({
+        year,
+        months,
+      });
+
+      console.log(year, months);
+    } catch (e) {
+      console.error(year, e);
+    }
+  }
+
+  window.bmwYearMonths = results;
+
+  console.log("DONE", results);
+
+  // pretty JSON string
+  const json = JSON.stringify(results, null, 2);
+
+  // download file
+  const blob = new Blob([json], {
+    type: "application/json",
+  });
+
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement("a");
+
+  a.href = url;
+  a.download = "bmw_year_months.json";
+
+  document.body.appendChild(a);
+
+  a.click();
+
+  document.body.removeChild(a);
+
+  URL.revokeObjectURL(url);
+
+  console.log(results);
+
+  return results;
+})();

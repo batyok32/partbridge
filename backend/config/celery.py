@@ -26,4 +26,14 @@ app.conf.beat_schedule = {
         "task": "orders.tasks.auto_cancel_unconfirmed_paid_orders",
         "schedule": crontab(minute="*/15"),
     },
+    # Auto-deliver shipped orders after AUTO_DELIVER_DAYS days
+    "orders-auto-deliver-shipped": {
+        "task": "orders.tasks.auto_deliver_shipped_orders",
+        "schedule": crontab(minute=0, hour="*/4"),  # every 4 hours
+    },
+    # Transfer seller earnings for orders past their hold period
+    "orders-process-seller-payouts": {
+        "task": "orders.tasks.process_seller_payouts",
+        "schedule": crontab(minute=30, hour="*/2"),  # every 2 hours
+    },
 }

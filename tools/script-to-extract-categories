@@ -1,0 +1,114 @@
+(async function () {
+  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+
+  const results = [];
+  const seen = new Set();
+
+  function getTopCategories() {
+    return [...document.querySelectorAll("a")].filter((a) => {
+      const txt = a.innerText.trim();
+
+      const href = a.getAttribute("href") || "";
+
+      if (!href.includes("ToggleNode")) return false;
+
+      if (!txt) return false;
+
+      if (seen.has(txt)) return false;
+
+      const row = a.closest("tr");
+
+      if (!row) return false;
+
+      const indent = row.querySelectorAll("img").length;
+
+      return indent <= 2;
+    });
+  }
+
+  const categories = getTopCategories();
+
+  for (let i = 0; i < categories.length; i++) {
+    const currentCats = getTopCategories();
+
+    const cat = currentCats[i];
+
+    if (!cat) continue;
+
+    const categoryName = cat.innerText.trim();
+
+    seen.add(categoryName);
+
+    const href = cat.getAttribute("href");
+
+    const match = href.match(/ToggleNode\('(\d+)'\)/);
+
+    if (!match) continue;
+
+    const nodeId = match[1];
+
+    console.log("Opening:", categoryName);
+
+    cat.click();
+
+    await sleep(700);
+
+    const container = document.querySelector(`#d${nodeId}`);
+
+    let items = [];
+
+    if (container) {
+      items = [...container.querySelectorAll("a")]
+        .map((a) => {
+          const rawHref = a.href || "";
+
+          let decodedHref = rawHref;
+
+          try {
+            decodedHref = decodeURIComponent(rawHref);
+          } catch {}
+
+          return {
+            name: a.innerText.trim(),
+
+            href: decodedHref,
+
+            rawHref,
+          };
+        })
+        .filter((x) => x.name);
+    }
+
+    results.push({
+      category: categoryName,
+      items,
+    });
+  }
+
+  window.bmwCategoryItems = results;
+
+  const json = JSON.stringify(results, null, 2);
+
+  const blob = new Blob([json], {
+    type: "application/json",
+  });
+
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement("a");
+
+  a.href = url;
+  a.download = "bmw_category_items.json";
+
+  document.body.appendChild(a);
+
+  a.click();
+
+  document.body.removeChild(a);
+
+  URL.revokeObjectURL(url);
+
+  console.log("JSON downloaded");
+
+  return results;
+})();

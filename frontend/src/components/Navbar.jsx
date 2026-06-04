@@ -6,6 +6,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 import { useAuth } from "@/context/auth-context";
+import { useCart } from "@/context/cart-context";
 import { isApprovedSeller, isBuyerCapable } from "@/lib/roles";
 import { ThemeToggle } from "@/components/ThemeToggle";
 
@@ -94,8 +95,11 @@ function NavLink({ href, children, onClick }) {
 export function Navbar() {
   const pathname = usePathname();
   const { user, loading } = useAuth();
+  const { cartData } = useCart();
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+
+  const cartCount = cartData.items.length + cartData.bundles.length;
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 8);
@@ -127,7 +131,7 @@ export function Navbar() {
           className="hidden flex-1 items-center gap-1 md:flex"
           style={{ position: "relative" }}
         >
-          <NavLink href="/browse">Browse Parts</NavLink>
+          <NavLink href="/search">Browse Parts</NavLink>
           {user && !isSeller && (
             <NavLink href="/seller/apply">Sell on Partbridge</NavLink>
           )}
@@ -177,6 +181,7 @@ export function Navbar() {
                   style={{
                     color: "var(--text-muted)",
                     fontFamily: "var(--ff-body)",
+                    position: "relative",
                   }}
                   onMouseEnter={(e) =>
                     (e.currentTarget.style.color = "var(--text-primary)")
@@ -185,7 +190,32 @@ export function Navbar() {
                     (e.currentTarget.style.color = "var(--text-muted)")
                   }
                 >
-                  <CartIcon />
+                  <span style={{ position: "relative" }}>
+                    <CartIcon />
+                    {cartCount > 0 && (
+                      <span
+                        style={{
+                          position: "absolute",
+                          top: -6,
+                          right: -6,
+                          minWidth: 14,
+                          height: 14,
+                          borderRadius: 7,
+                          background: "var(--primary)",
+                          color: "#fff",
+                          fontSize: 9,
+                          fontWeight: 700,
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          padding: "0 3px",
+                          lineHeight: 1,
+                        }}
+                      >
+                        {cartCount > 99 ? "99+" : cartCount}
+                      </span>
+                    )}
+                  </span>
                   Cart
                 </Link>
               )}
@@ -316,10 +346,29 @@ export function Navbar() {
                       <Link
                         href="/cart"
                         onClick={close}
-                        className="px-3 py-2 text-sm font-medium"
+                        className="px-3 py-2 text-sm font-medium flex items-center gap-2"
                         style={{ color: "var(--text-secondary)" }}
                       >
                         Cart
+                        {cartCount > 0 && (
+                          <span
+                            style={{
+                              minWidth: 16,
+                              height: 16,
+                              borderRadius: 8,
+                              background: "var(--primary)",
+                              color: "#fff",
+                              fontSize: 10,
+                              fontWeight: 700,
+                              display: "inline-flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              padding: "0 4px",
+                            }}
+                          >
+                            {cartCount > 99 ? "99+" : cartCount}
+                          </span>
+                        )}
                       </Link>
                     )}
                     <Link

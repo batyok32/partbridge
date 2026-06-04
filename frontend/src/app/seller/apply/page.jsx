@@ -16,9 +16,7 @@ export default function SellerApplyPage() {
   const router = useRouter();
   const { user, loading, refreshUser } = useAuth();
   const toast = useToast();
-  const [businessName, setBusinessName] = useState("");
-  const [whySell, setWhySell] = useState("");
-  const [inventorySummary, setInventorySummary] = useState("");
+  const [bio, setBio] = useState("");
   const [pending, setPending] = useState(false);
 
   useEffect(() => {
@@ -38,17 +36,11 @@ export default function SellerApplyPage() {
     try {
       await apiFetch("/auth/seller-application", {
         method: "POST",
-        body: JSON.stringify({
-          business_name: businessName.trim(),
-          why_sell: whySell.trim(),
-          inventory_summary: inventorySummary.trim(),
-        }),
+        body: JSON.stringify({ bio: bio.trim() }),
       });
       toast.success("Application submitted.");
       await refreshUser();
-      setBusinessName("");
-      setWhySell("");
-      setInventorySummary("");
+      setBio("");
     } catch (err) {
       if (err instanceof ApiError) {
         const d = err.body;
@@ -117,44 +109,17 @@ export default function SellerApplyPage() {
 
           <form onSubmit={onSubmit} className="space-y-4">
             <div>
-              <label className={labelClass} style={{ color: "var(--text-muted)", fontFamily: "var(--ff-display)" }} htmlFor="biz">
-                Business or display name <span className="font-normal normal-case">(optional)</span>
-              </label>
-              <input
-                id="biz"
-                className="input-forge"
-                value={businessName}
-                onChange={(e) => setBusinessName(e.target.value)}
-                maxLength={200}
-                placeholder="e.g. Cascade Auto Recyclers"
-              />
-            </div>
-            <div>
-              <label className={labelClass} style={{ color: "var(--text-muted)", fontFamily: "var(--ff-display)" }} htmlFor="why">
-                Why do you want to sell here?
+              <label className={labelClass} style={{ color: "var(--text-muted)", fontFamily: "var(--ff-display)" }} htmlFor="bio">
+                Tell us about yourself
               </label>
               <textarea
-                id="why"
-                className="input-forge min-h-[120px] py-3 resize-y"
-                value={whySell}
-                onChange={(e) => setWhySell(e.target.value)}
+                id="bio"
+                className="input-forge min-h-[160px] py-3 resize-y"
+                value={bio}
+                onChange={(e) => setBio(e.target.value)}
                 required
                 minLength={20}
-                placeholder="A few sentences about your experience and how you will serve buyers."
-              />
-            </div>
-            <div>
-              <label className={labelClass} style={{ color: "var(--text-muted)", fontFamily: "var(--ff-display)" }} htmlFor="inv">
-                What will you list?
-              </label>
-              <textarea
-                id="inv"
-                className="input-forge min-h-[100px] py-3 resize-y"
-                value={inventorySummary}
-                onChange={(e) => setInventorySummary(e.target.value)}
-                required
-                minLength={10}
-                placeholder="Vehicle types, parts sources (yard, fleet, etc.), and roughly how often you add inventory."
+                placeholder="Describe your experience, what you plan to sell, and how you will serve buyers."
               />
             </div>
 

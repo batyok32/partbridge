@@ -2,21 +2,35 @@
 
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { motion } from "framer-motion";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 
 import { useAuth } from "@/context/auth-context";
 import { useToast } from "@/context/toast-context";
+import { useBuyerCar } from "@/context/car-context";
+import { useCart } from "@/context/cart-context";
+import CarSelector from "@/components/CarSelector";
 import { ApiError, apiFetch, getItem } from "@/lib/api";
 
 function formatMoney(v) {
   return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(Number(v));
 }
 
+function Stars({ value, size = 13 }) {
+  const filled = Math.round(Number(value) || 0);
+  return (
+    <span style={{ fontSize: size, letterSpacing: 1 }}>
+      {Array.from({ length: 5 }, (_, i) => (
+        <span key={i} style={{ color: i < filled ? "#fbbf24" : "var(--border)" }}>★</span>
+      ))}
+    </span>
+  );
+}
+
 function PhotoGallery({ urls }) {
   const scrollerRef = useRef(null);
   const [active, setActive] = useState(0);
-  const list = Array.isArray(urls) ? urls.filter(Boolean) : [];
+  const list = (urls || []).filter(Boolean);
   const n = list.length;
 
   useEffect(() => {
@@ -72,10 +86,63 @@ function PhotoGallery({ urls }) {
   );
 }
 
+function ThumbnailStrip({ photos }) {
+  if (!photos?.length) return null;
+  return (
+    <div className="flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none]" style={{ marginTop: 8 }}>
+      {photos.map((p, i) => (
+        <div
+          key={i}
+          className="shrink-0 rounded-lg overflow-hidden"
+          style={{ width: 60, height: 60, border: "1px solid var(--border)", background: "var(--bg-elevated)" }}
+        >
+          <img src={p.thumbnail_url || p.url} alt={p.label || ""} className="w-full h-full object-cover" />
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function CompatibilitySection({ compatibilities }) {
+  if (!compatibilities?.length) return null;
+  const byMake = {};
+  for (const c of compatibilities) {
+    if (!byMake[c.make_name]) byMake[c.make_name] = [];
+    byMake[c.make_name].push(c);
+  }
+  return (
+    <div style={{ background: "var(--bg-surface)", border: "1px solid var(--border)", borderRadius: "var(--radius-xl)", padding: "14px 16px" }}>
+      <p style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--text-muted)", marginBottom: 10 }}>
+        Also fits
+      </p>
+      <div className="space-y-2">
+        {Object.entries(byMake).map(([make, entries]) => (
+          <div key={make}>
+            <p style={{ fontSize: 11, fontWeight: 700, color: "var(--text-muted)", marginBottom: 4 }}>{make}</p>
+            <div className="flex flex-wrap gap-1.5">
+              {entries.map((e) => (
+                <span key={e.generation_id} style={{
+                  fontSize: 11, fontWeight: 600, background: "var(--bg-elevated)",
+                  border: "1px solid var(--border)", borderRadius: 5, padding: "2px 8px",
+                  color: "var(--text-secondary)",
+                }}>
+                  {e.model_name} {e.generation_label}
+                </span>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function PublicPartDetailPage() {
   const { id: rawId } = useParams();
   const { user } = useAuth();
   const toast = useToast();
+  const { car, setCar, hasCar, loaded: carLoaded } = useBuyerCar();
+  const cart = useCart();
 
   const id = useMemo(() => {
     const n = Number(rawId);
@@ -88,25 +155,54 @@ export default function PublicPartDetailPage() {
   const [adding, setAdding] = useState(false);
   const [messageBody, setMessageBody] = useState("");
   const [messaging, setMessaging] = useState(false);
+  const [showCarSelector, setShowCarSelector] = useState(false);
+
+  const inCart = id ? cart.itemIds.has(id) : false;
 
   useEffect(() => {
-    if (!id) return;
+    if (!id || !carLoaded) return;
+    let cancelled = false;
     setLoading(true);
-    getItem(id)
-      .then((data) => setItem(data))
+    setNotFound(false);
+
+    const params = {};
+    if (car?.generationId) params.generation = car.generationId;
+    if (car?.modificationId) params.modification = car.modificationId;
+
+    getItem(id, params)
+      .then((data) => { if (!cancelled) setItem(data); })
       .catch((e) => {
+        if (cancelled) return;
         if (e instanceof ApiError && e.status === 404) setNotFound(true);
-        else if (e instanceof ApiError) toast.error(e.message);
+        else toast.error(e?.message || "Could not load item.");
       })
-      .finally(() => setLoading(false));
-  }, [id, toast]);
+      .finally(() => { if (!cancelled) setLoading(false); });
+
+    return () => { cancelled = true; };
+  }, [id, car?.generationId, car?.modificationId, carLoaded, toast]);
 
   async function handleAddToCart() {
     if (!user) { window.location.href = `/login?next=/browse/parts/${id}`; return; }
     setAdding(true);
     try {
       await apiFetch("/cart/", { method: "POST", body: JSON.stringify({ item: id }) });
+      await cart.refresh();
       toast.success("Added to cart.");
+    } catch (e) {
+      if (e instanceof ApiError) toast.error(e.message);
+    } finally {
+      setAdding(false);
+    }
+  }
+
+  async function handleRemoveFromCart() {
+    const cartItemId = cart.getCartItemId(id);
+    if (!cartItemId) return;
+    setAdding(true);
+    try {
+      await apiFetch(`/cart/${cartItemId}/`, { method: "DELETE" });
+      await cart.refresh();
+      toast.success("Removed from cart.");
     } catch (e) {
       if (e instanceof ApiError) toast.error(e.message);
     } finally {
@@ -133,7 +229,7 @@ export default function PublicPartDetailPage() {
     }
   }
 
-  if (loading) {
+  if (!carLoaded || loading) {
     return <div className="mx-auto max-w-2xl px-6 py-16"><p style={{ color: "var(--text-muted)", fontSize: 13 }}>Loading…</p></div>;
   }
 
@@ -142,23 +238,112 @@ export default function PublicPartDetailPage() {
       <div className="mx-auto max-w-2xl px-6 py-16 text-center">
         <p style={{ fontSize: 32, marginBottom: 8 }}>🔍</p>
         <p style={{ color: "var(--text-muted)", fontSize: 14 }}>Part not found.</p>
-        <Link href="/browse" style={{ color: "var(--primary)", fontSize: 13, marginTop: 12, display: "inline-block" }}>← Browse parts</Link>
+        <Link href="/search" style={{ color: "var(--primary)", fontSize: 13, marginTop: 12, display: "inline-block" }}>← Browse parts</Link>
       </div>
     );
   }
 
-  const galleryUrls = (item.photos || []).map((p) => p.url).filter(Boolean);
+  const itemPhotoUrls = (item.photos || []).map((p) => p.url).filter(Boolean);
+  const galleryUrls = itemPhotoUrls.length > 0
+    ? itemPhotoUrls
+    : item.category_image_url ? [item.category_image_url] : [];
+  const vehiclePhotos = (item.vehicle_photos || []).filter((p) => p.url);
   const vehicleName = [item.vehicle_year, item.vehicle_make, item.vehicle_model].filter(Boolean).join(" ");
-  const survivingOptions = (item.options || []).filter((o) => !o.is_ai_eliminated);
+  const itemOptions = item.options || [];
+
+  const mod = item.vehicle_modification;
+  const donorSpecs = mod ? [
+    mod.engine_code && { label: "Engine", value: mod.engine_code },
+    mod.engine_displacement_cc && { label: "Displacement", value: `${(mod.engine_displacement_cc / 1000).toFixed(1)}L` },
+    mod.fuel_type && { label: "Fuel", value: mod.fuel_type.charAt(0).toUpperCase() + mod.fuel_type.slice(1) },
+    mod.transmission_type && { label: "Transmission", value: mod.transmission_type.toUpperCase() },
+    mod.drive_type && { label: "Drive", value: mod.drive_type.toUpperCase() },
+    mod.power_hp && { label: "Power", value: `${mod.power_hp} hp` },
+    mod.variant_name && { label: "Variant", value: mod.variant_name },
+  ].filter(Boolean) : [];
+  const verifiedCompats = item.verified_compatibilities || [];
+
+  const fitmentStatus = item.fitment?.status || null;
+  const showFitsBanner = hasCar && fitmentStatus === "fits";
+  const showUnknownFitment = hasCar && fitmentStatus === "unknown";
+
+  const vehicleLabel = [
+    item.vehicle_year,
+    item.vehicle_make,
+    item.vehicle_model,
+    item.vehicle_generation_label ? `(${item.vehicle_generation_label})` : null,
+  ].filter(Boolean).join(" ");
 
   return (
     <div className="mx-auto max-w-2xl px-4 sm:px-6 py-10">
-      <Link href="/browse" style={{ color: "var(--text-muted)", fontSize: 12, textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 4, marginBottom: 20 }}>
+      <Link href="/search" style={{ color: "var(--text-muted)", fontSize: 12, textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 4, marginBottom: 20 }}>
         ← Back to browse
       </Link>
 
-      <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35 }} className="space-y-6">
+      <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.35 }} className="space-y-5">
+
+        {/* Fitment banner */}
+        {showFitsBanner && (
+          <div className="rounded-xl px-4 py-3 flex items-center gap-2"
+            style={{ background: "rgba(34,197,94,0.1)", border: "1px solid rgba(34,197,94,0.3)" }}>
+            <span>✓</span>
+            <p style={{ fontSize: 13, fontWeight: 700, color: "#4ade80" }}>
+              Fits your {car.displayLabel || "car"}
+            </p>
+          </div>
+        )}
+        {showUnknownFitment && (
+          <div className="rounded-xl px-4 py-3"
+            style={{ background: "rgba(251,191,36,0.08)", border: "1px solid rgba(251,191,36,0.25)" }}>
+            <p style={{ fontSize: 12, color: "#fbbf24" }}>
+              Fitment not confirmed for your {car.displayLabel || "car"} — verify compatibility before ordering.
+            </p>
+          </div>
+        )}
+
+        {/* Car selector prompt */}
+        {!hasCar && (
+          <div className="rounded-xl overflow-hidden" style={{ background: "var(--bg-surface)", border: "1px solid var(--border)" }}>
+            <button
+              type="button"
+              onClick={() => setShowCarSelector((v) => !v)}
+              className="w-full text-left px-4 py-3 flex items-center justify-between gap-4"
+            >
+              <span style={{ fontSize: 13, color: "var(--text-secondary)" }}>Check if this fits your car</span>
+              <span style={{ fontSize: 11, fontWeight: 600, color: "var(--primary)", flexShrink: 0 }}>
+                {showCarSelector ? "Close ↑" : "Select car →"}
+              </span>
+            </button>
+            <AnimatePresence>
+              {showCarSelector && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: "auto", opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.2 }}
+                  style={{ borderTop: "1px solid var(--border)", padding: "14px 16px", overflow: "hidden" }}
+                >
+                  <CarSelector
+                    compact
+                    submitLabel="Check fitment"
+                    onSubmit={(payload) => { setCar(payload); setShowCarSelector(false); }}
+                  />
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        )}
+
         <PhotoGallery urls={galleryUrls} />
+
+        {vehiclePhotos.length > 0 && (
+          <div>
+            <p style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--text-muted)", marginBottom: 6 }}>
+              Donor vehicle photos
+            </p>
+            <ThumbnailStrip photos={vehiclePhotos} />
+          </div>
+        )}
 
         {/* Title + price */}
         <div>
@@ -171,7 +356,7 @@ export default function PublicPartDetailPage() {
           {vehicleName && (
             <p style={{ fontSize: 13, color: "var(--text-muted)", marginTop: 4 }}>From: {vehicleName}</p>
           )}
-          <p style={{ fontSize: 24, fontWeight: 700, color: "var(--text-primary)", fontFamily: "var(--ff-display)", marginTop: 10 }}>
+          <p style={{ fontSize: 26, fontWeight: 700, color: "var(--text-primary)", fontFamily: "var(--ff-display)", marginTop: 10 }}>
             {formatMoney(item.price)}
           </p>
         </div>
@@ -179,8 +364,8 @@ export default function PublicPartDetailPage() {
         {/* Badges */}
         <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
           {[
-            item.condition?.replace(/_/g, " "),
-            `📦 ${item.shipping_size}`,
+            item.condition && item.condition.replace(/_/g, " "),
+            item.shipping_size && `📦 ${item.shipping_size}`,
             item.oem_part_number ? `OEM ${item.oem_part_number}` : null,
           ].filter(Boolean).map((b, i) => (
             <span key={i} style={{ fontSize: 11, fontWeight: 600, background: "var(--bg-elevated)", border: "1px solid var(--border)", borderRadius: 6, padding: "3px 9px", color: "var(--text-secondary)" }}>
@@ -189,15 +374,91 @@ export default function PublicPartDetailPage() {
           ))}
         </div>
 
-        {/* Options */}
-        {survivingOptions.length > 0 && (
+        {/* Item attributes (Side, Bulb type, etc.) */}
+        {itemOptions.length > 0 && (
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+            {itemOptions.map((o) => (
+              <span
+                key={o.id}
+                style={{
+                  fontSize: 12, fontWeight: 600,
+                  background: "var(--bg-elevated)",
+                  border: "1px solid var(--border)",
+                  borderRadius: 7, padding: "5px 12px",
+                  color: "var(--text-primary)",
+                }}
+              >
+                {o.option_category_name}: {o.value}
+              </span>
+            ))}
+          </div>
+        )}
+
+        {/* Add to cart / In cart / Sold */}
+        {item?.status !== "hidden_in_assembly" && (
+          <div style={{ display: "flex", gap: 10 }}>
+            {item?.status !== "active" ? (
+              <div style={{
+                flex: 1, padding: "13px 0", fontSize: 14, fontWeight: 700,
+                fontFamily: "var(--ff-display)", borderRadius: 10,
+                background: "rgba(239,68,68,0.08)", border: "1px solid rgba(239,68,68,0.3)",
+                color: "#f87171", textAlign: "center",
+              }}>
+                Sold — no longer available
+              </div>
+            ) : inCart ? (
+              <button
+                type="button"
+                onClick={handleRemoveFromCart}
+                disabled={adding}
+                style={{
+                  flex: 1, padding: "13px 0", fontSize: 14, fontWeight: 700,
+                  fontFamily: "var(--ff-display)", borderRadius: 10,
+                  background: "var(--bg-elevated)", color: "var(--text-primary)", cursor: "pointer",
+                  opacity: adding ? 0.6 : 1,
+                  border: "1px solid var(--border)",
+                }}
+              >
+                {adding ? "Removing…" : "✓ In Cart — Remove"}
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={handleAddToCart}
+                disabled={adding}
+                style={{
+                  flex: 1, padding: "13px 0", fontSize: 14, fontWeight: 700,
+                  fontFamily: "var(--ff-display)", borderRadius: 10, border: "none",
+                  background: "var(--primary)", color: "#fff", cursor: "pointer",
+                  opacity: adding ? 0.6 : 1,
+                }}
+              >
+                {adding ? "Adding…" : "Add to cart"}
+              </button>
+            )}
+            <Link
+              href="/cart"
+              style={{
+                padding: "13px 20px", fontSize: 14, fontWeight: 600, borderRadius: 10,
+                border: "1px solid var(--border)", color: "var(--text-secondary)", textDecoration: "none",
+                display: "flex", alignItems: "center",
+              }}
+            >
+              Cart
+            </Link>
+          </div>
+        )}
+
+        {/* Donor vehicle specs from modification */}
+        {donorSpecs.length > 0 && (
           <div style={{ background: "var(--bg-surface)", border: "1px solid var(--border)", borderRadius: "var(--radius-xl)", padding: "14px 16px" }}>
-            <p style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--text-muted)", marginBottom: 8 }}>Options</p>
-            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-              {survivingOptions.map((o) => (
-                <span key={o.id} style={{ fontSize: 12, fontWeight: 600, background: "var(--bg-elevated)", border: "1px solid var(--border)", borderRadius: 6, padding: "3px 9px", color: "var(--text-primary)" }}>
-                  {o.option_category_name}: {o.value}
-                </span>
+            <p style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--text-muted)", marginBottom: 8 }}>Specifications</p>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "6px 16px" }}>
+              {donorSpecs.map((s) => (
+                <div key={s.label}>
+                  <span style={{ fontSize: 10, color: "var(--text-muted)", display: "block" }}>{s.label}</span>
+                  <span style={{ fontSize: 13, fontWeight: 600, color: "var(--text-primary)" }}>{s.value}</span>
+                </div>
               ))}
             </div>
           </div>
@@ -211,32 +472,61 @@ export default function PublicPartDetailPage() {
           </div>
         )}
 
-        {/* Actions */}
-        <div style={{ display: "flex", gap: 10 }}>
-          <button
-            type="button"
-            onClick={handleAddToCart}
-            disabled={adding}
-            style={{
-              flex: 1, padding: "12px 0", fontSize: 14, fontWeight: 700,
-              fontFamily: "var(--ff-display)", borderRadius: 10, border: "none",
-              background: "var(--primary)", color: "#fff", cursor: "pointer",
-              opacity: adding ? 0.6 : 1,
-            }}
-          >
-            {adding ? "Adding…" : "Add to cart"}
-          </button>
-          <Link
-            href="/cart"
-            style={{
-              padding: "12px 20px", fontSize: 14, fontWeight: 600, borderRadius: 10,
-              border: "1px solid var(--border)", color: "var(--text-secondary)", textDecoration: "none",
-              display: "flex", alignItems: "center",
-            }}
-          >
-            Cart
-          </Link>
-        </div>
+        {/* Donor vehicle */}
+        {vehicleLabel && (
+          <div style={{ background: "var(--bg-surface)", border: "1px solid var(--border)", borderRadius: "var(--radius-xl)", padding: "14px 16px" }}>
+            <p style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--text-muted)", marginBottom: 8 }}>Donor vehicle</p>
+            <p style={{ fontSize: 14, fontWeight: 700, color: "var(--text-primary)", fontFamily: "var(--ff-display)", marginBottom: 4 }}>
+              {vehicleLabel}
+            </p>
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+              {item.vehicle_mileage != null && (
+                <span style={{ fontSize: 12, color: "var(--text-muted)" }}>{item.vehicle_mileage.toLocaleString()} mi</span>
+              )}
+              {item.vehicle_condition && (
+                <span style={{ fontSize: 12, color: "var(--text-muted)" }}>· {item.vehicle_condition.replace(/_/g, " ")} condition</span>
+              )}
+            </div>
+            {item.vehicle_photos?.length > 0 && (
+              <ThumbnailStrip photos={item.vehicle_photos} />
+            )}
+          </div>
+        )}
+
+        {/* Compatibility */}
+        <CompatibilitySection compatibilities={verifiedCompats} />
+
+        {/* Seller */}
+        {item.seller_id && (
+          <div style={{ background: "var(--bg-surface)", border: "1px solid var(--border)", borderRadius: "var(--radius-xl)", padding: "14px 16px" }}>
+            <p style={{ fontSize: 11, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--text-muted)", marginBottom: 8 }}>Seller</p>
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <Link href={`/sellers/${item.seller_id}`} style={{ fontSize: 14, fontWeight: 700, color: "var(--text-primary)", fontFamily: "var(--ff-display)", textDecoration: "none" }}>
+                  {item.seller_name}
+                </Link>
+                <div className="flex items-center gap-2 mt-1 flex-wrap">
+                  {item.seller_rating_avg != null ? (
+                    <>
+                      <Stars value={item.seller_rating_avg} />
+                      <span style={{ fontSize: 12, color: "var(--text-muted)" }}>
+                        {item.seller_rating_avg.toFixed(1)} ({item.seller_review_count} reviews)
+                      </span>
+                    </>
+                  ) : (
+                    <span style={{ fontSize: 12, color: "var(--text-muted)" }}>No reviews yet</span>
+                  )}
+                </div>
+                {item.seller_member_since && (
+                  <p style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 2 }}>Member since {item.seller_member_since}</p>
+                )}
+              </div>
+              <Link href={`/sellers/${item.seller_id}`} style={{ fontSize: 12, fontWeight: 600, padding: "6px 14px", borderRadius: 8, border: "1px solid var(--border)", color: "var(--text-secondary)", textDecoration: "none", flexShrink: 0 }}>
+                Profile →
+              </Link>
+            </div>
+          </div>
+        )}
 
         {/* Message seller */}
         <div style={{ background: "var(--bg-surface)", border: "1px solid var(--border)", borderRadius: "var(--radius-xl)", padding: "16px" }}>
@@ -269,6 +559,7 @@ export default function PublicPartDetailPage() {
             </button>
           </form>
         </div>
+
       </motion.div>
     </div>
   );

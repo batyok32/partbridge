@@ -1,0 +1,3827 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Auto Parts Marketplace — Architecture & Logic v4</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Sora:wght@300;400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #0d0f14;
+        --bg2: #13161e;
+        --bg3: #1a1e28;
+        --bg4: #222736;
+        --border: #2a2f3d;
+        --border2: #363c50;
+        --text: #e2e6f0;
+        --text2: #9aa0b8;
+        --text3: #5c6278;
+        --purple: #8b7cf6;
+        --purple-d: #1e1a3a;
+        --teal: #2dd4bf;
+        --teal-d: #0d2926;
+        --amber: #f59e0b;
+        --amber-d: #271c04;
+        --coral: #f87171;
+        --coral-d: #2a0f0f;
+        --blue: #60a5fa;
+        --blue-d: #0d1f38;
+        --green: #4ade80;
+        --green-d: #0b2318;
+        --rose: #fb7185;
+        --rose-d: #2d0a14;
+        --violet: #a78bfa;
+        --violet-d: #1e1535;
+        --orange: #fb923c;
+        --orange-d: #2d1200;
+        --mono: "JetBrains Mono", monospace;
+        --sans: "Sora", sans-serif;
+      }
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      html {
+        scroll-behavior: smooth;
+      }
+      body {
+        background: var(--bg);
+        color: var(--text);
+        font-family: var(--sans);
+        font-size: 14px;
+        line-height: 1.7;
+        min-height: 100vh;
+      }
+      .layout {
+        display: grid;
+        grid-template-columns: 256px 1fr;
+        min-height: 100vh;
+      }
+
+      /* ── sidebar ── */
+      .sidebar {
+        background: var(--bg2);
+        border-right: 1px solid var(--border);
+        padding: 24px 0;
+        position: sticky;
+        top: 0;
+        height: 100vh;
+        overflow-y: auto;
+      }
+      .sidebar-logo {
+        padding: 0 20px 20px;
+        border-bottom: 1px solid var(--border);
+        margin-bottom: 12px;
+      }
+      .wordmark {
+        font-family: var(--mono);
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--purple);
+      }
+      .wordmark-sub {
+        font-size: 11px;
+        color: var(--text3);
+        margin-top: 2px;
+      }
+      .nav-group {
+        padding: 0 10px;
+        margin-bottom: 4px;
+      }
+      .nav-label {
+        font-family: var(--mono);
+        font-size: 9px;
+        font-weight: 700;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--text3);
+        padding: 8px 8px 4px;
+        display: block;
+      }
+      .nav-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 8px;
+        border-radius: 6px;
+        color: var(--text2);
+        text-decoration: none;
+        font-size: 12px;
+        transition:
+          background 0.15s,
+          color 0.15s;
+      }
+      .nav-item:hover {
+        background: var(--bg3);
+        color: var(--text);
+      }
+      .nav-item.active {
+        background: var(--bg4);
+        color: var(--purple);
+      }
+      .nav-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        flex-shrink: 0;
+      }
+
+      /* ── main ── */
+      .main {
+        padding: 48px 56px;
+        max-width: 1000px;
+      }
+      .page-header {
+        margin-bottom: 48px;
+        padding-bottom: 28px;
+        border-bottom: 1px solid var(--border);
+      }
+      .page-tag {
+        font-family: var(--mono);
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--purple);
+        margin-bottom: 10px;
+      }
+      .page-title {
+        font-size: 30px;
+        font-weight: 600;
+        letter-spacing: -0.02em;
+        line-height: 1.2;
+        margin-bottom: 10px;
+      }
+      .page-desc {
+        font-size: 13.5px;
+        color: var(--text2);
+        max-width: 640px;
+        line-height: 1.8;
+      }
+      .section {
+        margin-bottom: 60px;
+        scroll-margin-top: 28px;
+      }
+      .section-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 20px;
+      }
+      .section-icon {
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 15px;
+        flex-shrink: 0;
+      }
+      .section-title {
+        font-size: 17px;
+        font-weight: 600;
+        letter-spacing: -0.01em;
+      }
+      .section-sub {
+        font-size: 11px;
+        color: var(--text3);
+        font-family: var(--mono);
+        margin-top: 2px;
+      }
+      .section-note {
+        font-size: 12.5px;
+        color: var(--text2);
+        margin-bottom: 16px;
+        line-height: 1.7;
+        padding: 10px 14px;
+        background: var(--bg3);
+        border-left: 3px solid var(--purple);
+        border-radius: 0 6px 6px 0;
+      }
+
+      /* ── table cards ── */
+      .table-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(275px, 1fr));
+        gap: 12px;
+        margin-bottom: 20px;
+      }
+      .table-card {
+        background: var(--bg2);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        overflow: hidden;
+        transition: border-color 0.2s;
+      }
+      .table-card:hover {
+        border-color: var(--border2);
+      }
+      .tc-purple {
+        border-color: var(--purple);
+      }
+      .tc-purple .th {
+        background: var(--purple-d);
+      }
+      .tc-teal {
+        border-color: var(--teal);
+      }
+      .tc-teal .th {
+        background: var(--teal-d);
+      }
+      .tc-amber {
+        border-color: var(--amber);
+      }
+      .tc-amber .th {
+        background: var(--amber-d);
+      }
+      .tc-coral {
+        border-color: var(--coral);
+      }
+      .tc-coral .th {
+        background: var(--coral-d);
+      }
+      .tc-blue {
+        border-color: var(--blue);
+      }
+      .tc-blue .th {
+        background: var(--blue-d);
+      }
+      .tc-green {
+        border-color: var(--green);
+      }
+      .tc-green .th {
+        background: var(--green-d);
+      }
+      .tc-rose {
+        border-color: var(--rose);
+      }
+      .tc-rose .th {
+        background: var(--rose-d);
+      }
+      .tc-violet {
+        border-color: var(--violet);
+      }
+      .tc-violet .th {
+        background: var(--violet-d);
+      }
+      .tc-orange {
+        border-color: var(--orange);
+      }
+      .tc-orange .th {
+        background: var(--orange-d);
+      }
+      .th {
+        padding: 9px 14px;
+        background: var(--bg3);
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .tn {
+        font-family: var(--mono);
+        font-size: 12px;
+        font-weight: 700;
+        color: var(--text);
+      }
+      .tb {
+        font-family: var(--mono);
+        font-size: 9px;
+        font-weight: 700;
+        letter-spacing: 0.09em;
+        text-transform: uppercase;
+        padding: 2px 6px;
+        border-radius: 4px;
+      }
+      .b-catalog {
+        background: var(--teal-d);
+        color: var(--teal);
+      }
+      .b-core {
+        background: var(--purple-d);
+        color: var(--purple);
+      }
+      .b-ai {
+        background: var(--amber-d);
+        color: var(--amber);
+      }
+      .b-user {
+        background: var(--blue-d);
+        color: var(--blue);
+      }
+      .b-order {
+        background: var(--coral-d);
+        color: var(--coral);
+      }
+      .b-msg {
+        background: var(--green-d);
+        color: var(--green);
+      }
+      .b-media {
+        background: var(--rose-d);
+        color: var(--rose);
+      }
+      .b-pay {
+        background: var(--violet-d);
+        color: var(--violet);
+      }
+      .b-fix {
+        background: var(--orange-d);
+        color: var(--orange);
+      }
+      .tf {
+        padding: 6px 0;
+      }
+      .fr {
+        display: grid;
+        grid-template-columns: 18px 1fr auto;
+        align-items: center;
+        gap: 8px;
+        padding: 3px 14px;
+        font-size: 11.5px;
+      }
+      .fr:hover {
+        background: var(--bg3);
+      }
+      .pk {
+        font-family: var(--mono);
+        font-size: 9px;
+        font-weight: 700;
+        color: var(--amber);
+      }
+      .fk {
+        font-family: var(--mono);
+        font-size: 9px;
+        font-weight: 700;
+        color: var(--blue);
+      }
+      .dot {
+        width: 5px;
+        height: 5px;
+        border-radius: 50%;
+        background: var(--border2);
+      }
+      .fn {
+        font-family: var(--mono);
+        font-size: 11px;
+        color: var(--text);
+      }
+      .ft {
+        font-family: var(--mono);
+        font-size: 10px;
+        color: var(--text3);
+      }
+      .fn2 {
+        grid-column: 2/4;
+        font-size: 10px;
+        color: var(--text3);
+        font-style: italic;
+        line-height: 1.4;
+        padding-bottom: 1px;
+      }
+      .fd {
+        height: 1px;
+        background: var(--border);
+        margin: 3px 0;
+      }
+
+      /* ── relations ── */
+      .rel-block {
+        background: var(--bg2);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 14px 18px;
+        margin-top: 12px;
+      }
+      .rel-title {
+        font-family: var(--mono);
+        font-size: 9px;
+        font-weight: 700;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--text3);
+        margin-bottom: 8px;
+      }
+      .rel-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 4px 0;
+        border-bottom: 1px solid var(--border);
+        font-size: 11.5px;
+      }
+      .rel-row:last-child {
+        border-bottom: none;
+      }
+      .rf {
+        font-family: var(--mono);
+        font-size: 10.5px;
+        color: var(--purple);
+        min-width: 165px;
+      }
+      .ra {
+        font-family: var(--mono);
+        font-size: 10.5px;
+        color: var(--text3);
+      }
+      .rt {
+        font-family: var(--mono);
+        font-size: 10.5px;
+        color: var(--teal);
+        min-width: 165px;
+      }
+      .rl {
+        font-size: 10.5px;
+        color: var(--text3);
+        flex: 1;
+      }
+
+      /* ── shipping tables ── */
+      .ship-card {
+        background: var(--bg2);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        overflow: hidden;
+        margin-bottom: 14px;
+      }
+      .ship-sec {
+        padding: 12px 16px;
+        border-bottom: 1px solid var(--border);
+      }
+      .ship-sec:last-child {
+        border-bottom: none;
+      }
+      .ship-sec-title {
+        font-family: var(--mono);
+        font-size: 9px;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--text3);
+        margin-bottom: 8px;
+      }
+      .st {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 11.5px;
+      }
+      .st th {
+        background: var(--bg3);
+        padding: 7px 10px;
+        text-align: left;
+        font-family: var(--mono);
+        font-size: 9px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--text3);
+        border-bottom: 1px solid var(--border);
+      }
+      .st td {
+        padding: 7px 10px;
+        border-bottom: 1px solid var(--border);
+        color: var(--text2);
+      }
+      .st tr:last-child td {
+        border-bottom: none;
+      }
+      .st tr:hover td {
+        background: var(--bg3);
+        color: var(--text);
+      }
+      .st td:first-child {
+        font-family: var(--mono);
+        color: var(--text);
+        font-weight: 500;
+      }
+      .cs {
+        color: var(--teal);
+      }
+      .cm {
+        color: var(--blue);
+      }
+      .cl {
+        color: var(--amber);
+      }
+      .cx {
+        color: var(--coral);
+      }
+
+      /* ── logic chapters ── */
+      .chapter {
+        background: var(--bg2);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        margin-bottom: 10px;
+        overflow: hidden;
+      }
+      .ch-head {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 14px 18px;
+        cursor: pointer;
+        user-select: none;
+        transition: background 0.15s;
+      }
+      .ch-head:hover {
+        background: var(--bg3);
+      }
+      .ch-ico {
+        width: 30px;
+        height: 30px;
+        border-radius: 7px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 15px;
+        flex-shrink: 0;
+      }
+      .ch-meta {
+        flex: 1;
+      }
+      .ch-title {
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--text);
+      }
+      .ch-tables {
+        font-family: var(--mono);
+        font-size: 9.5px;
+        color: var(--text3);
+        margin-top: 1px;
+      }
+      .ch-caret {
+        font-size: 11px;
+        color: var(--text3);
+        transition: transform 0.2s;
+      }
+      .chapter.open .ch-caret {
+        transform: rotate(90deg);
+      }
+      .ch-body {
+        display: none;
+        padding: 4px 22px 22px;
+        border-top: 1px solid var(--border);
+      }
+      .chapter.open .ch-body {
+        display: block;
+      }
+      .step {
+        margin-top: 18px;
+      }
+      .step-label {
+        font-family: var(--mono);
+        font-size: 9px;
+        font-weight: 700;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--text3);
+        margin-bottom: 2px;
+      }
+      .step-title {
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--text);
+        margin-bottom: 5px;
+      }
+      .step-body {
+        font-size: 12.5px;
+        color: var(--text2);
+        line-height: 1.75;
+      }
+      .step-body p {
+        margin-top: 7px;
+      }
+      .step-body p:first-child {
+        margin-top: 0;
+      }
+      .sdiv {
+        height: 1px;
+        background: var(--border);
+        margin: 16px 0 0;
+      }
+      .pill {
+        display: inline-block;
+        font-family: var(--mono);
+        font-size: 10px;
+        font-weight: 700;
+        border-radius: 4px;
+        padding: 1px 6px;
+        margin: 1px 2px;
+        white-space: nowrap;
+      }
+      .pp {
+        background: var(--purple-d);
+        color: var(--purple);
+      }
+      .pt {
+        background: var(--teal-d);
+        color: var(--teal);
+      }
+      .pa {
+        background: var(--amber-d);
+        color: var(--amber);
+      }
+      .pc {
+        background: var(--coral-d);
+        color: var(--coral);
+      }
+      .pb {
+        background: var(--blue-d);
+        color: var(--blue);
+      }
+      .pg {
+        background: var(--green-d);
+        color: var(--green);
+      }
+      .pv {
+        background: var(--violet-d);
+        color: var(--violet);
+      }
+      .po {
+        background: var(--orange-d);
+        color: var(--orange);
+      }
+      .db {
+        font-family: var(--mono);
+        font-size: 11px;
+        background: var(--bg4);
+        border: 1px solid var(--border2);
+        border-radius: 3px;
+        padding: 1px 5px;
+        color: var(--amber);
+      }
+      .note {
+        margin-top: 9px;
+        padding: 9px 12px;
+        background: var(--bg3);
+        border-left: 3px solid var(--border2);
+        border-radius: 0 6px 6px 0;
+        font-size: 11.5px;
+        color: var(--text3);
+        line-height: 1.65;
+      }
+      .note strong {
+        color: var(--text2);
+      }
+      ::-webkit-scrollbar {
+        width: 5px;
+        height: 5px;
+      }
+      ::-webkit-scrollbar-track {
+        background: var(--bg);
+      }
+      ::-webkit-scrollbar-thumb {
+        background: var(--border2);
+        border-radius: 3px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="layout">
+      <!-- ═══════ SIDEBAR ═══════ -->
+      <aside class="sidebar">
+        <div class="sidebar-logo">
+          <div class="wordmark">AutoParts DB</div>
+          <div class="wordmark-sub">Architecture & Logic — v4</div>
+        </div>
+
+        <div class="nav-group">
+          <span class="nav-label">Schema</span>
+          <a class="nav-item" href="#s-catalog"
+            ><span class="nav-dot" style="background: #2dd4bf"></span>Vehicle
+            catalog</a
+          >
+          <a class="nav-item" href="#s-parts"
+            ><span class="nav-dot" style="background: #8b7cf6"></span>Parts &
+            categories</a
+          >
+          <a class="nav-item" href="#s-media"
+            ><span class="nav-dot" style="background: #fb7185"></span>Photos &
+            media</a
+          >
+          <a class="nav-item" href="#s-bundles"
+            ><span class="nav-dot" style="background: #f59e0b"></span>Bundles</a
+          >
+          <a class="nav-item" href="#s-users"
+            ><span class="nav-dot" style="background: #60a5fa"></span>Users &
+            sellers</a
+          >
+          <a class="nav-item" href="#s-commerce"
+            ><span class="nav-dot" style="background: #f87171"></span>Orders &
+            payments</a
+          >
+          <a class="nav-item" href="#s-shipping"
+            ><span class="nav-dot" style="background: #c084fc"></span>Shipping
+            rates</a
+          >
+          <a class="nav-item" href="#s-disputes"
+            ><span class="nav-dot" style="background: #fb923c"></span>Disputes &
+            returns</a
+          >
+          <a class="nav-item" href="#s-msg"
+            ><span class="nav-dot" style="background: #4ade80"></span
+            >Messaging</a
+          >
+        </div>
+
+        <div class="nav-group">
+          <span class="nav-label">Logic</span>
+          <a class="nav-item" href="#l-catalog"
+            ><span class="nav-dot" style="background: #2dd4bf"></span>Catalog &
+            compatibility</a
+          >
+          <a class="nav-item" href="#l-ai"
+            ><span class="nav-dot" style="background: #8b7cf6"></span>AI
+            research process</a
+          >
+          <a class="nav-item" href="#l-options"
+            ><span class="nav-dot" style="background: #f59e0b"></span>Options &
+            elimination</a
+          >
+          <a class="nav-item" href="#l-bundles"
+            ><span class="nav-dot" style="background: #f59e0b"></span>Bundle
+            rules</a
+          >
+          <a class="nav-item" href="#l-sellers"
+            ><span class="nav-dot" style="background: #60a5fa"></span>Seller
+            pipeline</a
+          >
+          <a class="nav-item" href="#l-orders"
+            ><span class="nav-dot" style="background: #f87171"></span>Orders &
+            payments</a
+          >
+          <a class="nav-item" href="#l-shipping"
+            ><span class="nav-dot" style="background: #c084fc"></span>Shipping
+            flow</a
+          >
+          <a class="nav-item" href="#l-disputes"
+            ><span class="nav-dot" style="background: #fb923c"></span>Disputes &
+            returns</a
+          >
+          <a class="nav-item" href="#l-msg"
+            ><span class="nav-dot" style="background: #4ade80"></span
+            >Messaging</a
+          >
+        </div>
+      </aside>
+
+      <!-- ═══════ MAIN ═══════ -->
+      <main class="main">
+        <div class="page-header">
+          <div class="page-tag">Internal documentation — v4</div>
+          <div class="page-title">
+            Auto Parts Marketplace<br />Architecture & Logic
+          </div>
+          <div class="page-desc">
+            Complete database schema covering the full four-level vehicle
+            catalog (Make → CarModel → Generation → Modification), AI-driven
+            option elimination, multi-car buyer profiles, payments, disputes,
+            photos, and manual shipping. Every table, every relationship, every
+            business rule documented.
+          </div>
+        </div>
+
+        <!-- ══════════════════════════════════════════════
+     S1 — VEHICLE CATALOG
+══════════════════════════════════════════════ -->
+        <section class="section" id="s-catalog">
+          <div class="section-header">
+            <div class="section-icon" style="background: #0d2926">🗂️</div>
+            <div>
+              <div class="section-title">Vehicle catalog</div>
+              <div class="section-sub">
+                Make · CarModel · Generation · Modification · UserCar
+              </div>
+            </div>
+          </div>
+          <div class="section-note">
+            Four-level hierarchy imported from the OEM catalog.
+            <strong>Make → CarModel → Generation → Modification.</strong>
+            Generation is the chassis entry (MA70, E82, JZA80) with month-level
+            production dates. Modification is the deepest atom — one row per
+            exact production configuration (chassis code, transmission, cab
+            type). ItemCompatibility targets either Generation or Modification
+            depending on which level the part fitment requires.
+          </div>
+
+          <div class="table-grid">
+            <div class="table-card tc-teal">
+              <div class="th">
+                <span class="tn">Make</span
+                ><span class="tb b-catalog">CATALOG</span>
+              </div>
+              <div class="tf">
+                <div class="fr">
+                  <span class="pk">PK</span><span class="fn">id</span
+                  ><span class="ft">uuid</span>
+                </div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">name</span
+                  ><span class="ft">string</span>
+                </div>
+                <div class="fn2">Toyota, BMW, Ford, Honda…</div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">slug</span
+                  ><span class="ft">string</span>
+                </div>
+                <div class="fn2">toyota, bmw — for URLs</div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">country</span
+                  ><span class="ft">string?</span>
+                </div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">logo_url</span
+                  ><span class="ft">string?</span>
+                </div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">created_at</span
+                  ><span class="ft">timestamp</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="table-card tc-teal">
+              <div class="th">
+                <span class="tn">CarModel</span
+                ><span class="tb b-catalog">CATALOG</span>
+              </div>
+              <div class="tf">
+                <div class="fr">
+                  <span class="pk">PK</span><span class="fn">id</span
+                  ><span class="ft">uuid</span>
+                </div>
+                <div class="fr">
+                  <span class="fk">FK</span><span class="fn">make_id</span
+                  ><span class="ft">uuid</span>
+                </div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">name</span
+                  ><span class="ft">string</span>
+                </div>
+                <div class="fn2">Supra, Camry, Tacoma, 3 Series…</div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">slug</span
+                  ><span class="ft">string</span>
+                </div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">created_at</span
+                  ><span class="ft">timestamp</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="table-card tc-teal">
+              <div class="th">
+                <span class="tn">Generation</span
+                ><span class="tb b-catalog">CATALOG</span>
+              </div>
+              <div class="tf">
+                <div class="fr">
+                  <span class="pk">PK</span><span class="fn">id</span
+                  ><span class="ft">uuid</span>
+                </div>
+                <div class="fr">
+                  <span class="fk">FK</span><span class="fn">car_model_id</span
+                  ><span class="ft">uuid</span>
+                </div>
+                <div class="fr">
+                  <span class="fk">FK</span><span class="fn">make_id</span
+                  ><span class="ft">uuid</span>
+                </div>
+                <div class="fn2">Redundant FK for fast queries</div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">chassis_codes</span
+                  ><span class="ft">text[]</span>
+                </div>
+                <div class="fn2">["MA70"] or ["DB03","DB23","DB43"]</div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">name</span
+                  ><span class="ft">string?</span>
+                </div>
+                <div class="fn2">E82 Coupe, JZA80, F30 — display label</div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">body_style</span
+                  ><span class="ft">string?</span>
+                </div>
+                <div class="fn2">coupe, sedan, convertible, truck…</div>
+                <div class="fr">
+                  <span class="dot"></span
+                  ><span class="fn">production_start</span
+                  ><span class="ft">date</span>
+                </div>
+                <div class="fn2">First day of start month e.g. 1986-01-01</div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">production_end</span
+                  ><span class="ft">date?</span>
+                </div>
+                <div class="fn2">NULL = still in production</div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">region</span
+                  ><span class="ft">string?</span>
+                </div>
+                <div class="fn2">US, EU, JP, global</div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">created_at</span
+                  ><span class="ft">timestamp</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="table-card tc-teal">
+              <div class="th">
+                <span class="tn">Modification</span
+                ><span class="tb b-catalog">CATALOG</span>
+              </div>
+              <div class="tf">
+                <div class="fr">
+                  <span class="pk">PK</span><span class="fn">id</span
+                  ><span class="ft">uuid</span>
+                </div>
+                <div class="fr">
+                  <span class="fk">FK</span><span class="fn">generation_id</span
+                  ><span class="ft">uuid</span>
+                </div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">code</span
+                  ><span class="ft">string</span>
+                </div>
+                <div class="fn2">TZNA40L-PRZSZA, N52N, 128i…</div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">variant_name</span
+                  ><span class="ft">string?</span>
+                </div>
+                <div class="fn2">128i, 135i, M Coupe, Supra RZ…</div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">engine_code</span
+                  ><span class="ft">string?</span>
+                </div>
+                <div class="fn2">N51, N52N, N54, 2JZ-GTE…</div>
+                <div class="fr">
+                  <span class="dot"></span
+                  ><span class="fn">engine_displacement_cc</span
+                  ><span class="ft">int?</span>
+                </div>
+                <div class="fn2">1400, 1600, 3000…</div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">fuel_type</span
+                  ><span class="ft">string?</span>
+                </div>
+                <div class="fn2">petrol, diesel, hybrid, electric</div>
+                <div class="fr">
+                  <span class="dot"></span
+                  ><span class="fn">transmission_type</span
+                  ><span class="ft">string?</span>
+                </div>
+                <div class="fn2">ATM, MTM, CVT</div>
+                <div class="fr">
+                  <span class="dot"></span
+                  ><span class="fn">transmission_detail</span
+                  ><span class="ft">string?</span>
+                </div>
+                <div class="fn2">ATM 8-SPEED FLOOR SHIFT</div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">cab_type</span
+                  ><span class="ft">string?</span>
+                </div>
+                <div class="fn2">DOUBLE CAB, LARGE CAB (trucks)</div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">drive_type</span
+                  ><span class="ft">string?</span>
+                </div>
+                <div class="fn2">FWD, RWD, AWD, 4WD</div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">power_hp</span
+                  ><span class="ft">int?</span>
+                </div>
+                <div class="fr">
+                  <span class="dot"></span
+                  ><span class="fn">production_start</span
+                  ><span class="ft">date</span>
+                </div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">production_end</span
+                  ><span class="ft">date?</span>
+                </div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">created_at</span
+                  ><span class="ft">timestamp</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="table-card tc-purple">
+              <div class="th">
+                <span class="tn">Vehicle</span
+                ><span class="tb b-core">CORE</span>
+              </div>
+              <div class="tf">
+                <div class="fr">
+                  <span class="pk">PK</span><span class="fn">id</span
+                  ><span class="ft">uuid</span>
+                </div>
+                <div class="fr">
+                  <span class="fk">FK</span><span class="fn">generation_id</span
+                  ><span class="ft">uuid</span>
+                </div>
+                <div class="fr">
+                  <span class="fk">FK</span
+                  ><span class="fn">modification_id</span
+                  ><span class="ft">uuid?</span>
+                </div>
+                <div class="fn2">Optional — if seller knows exact mod</div>
+                <div class="fr">
+                  <span class="fk">FK</span><span class="fn">seller_id</span
+                  ><span class="ft">uuid</span>
+                </div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">vin</span
+                  ><span class="ft">string?</span>
+                </div>
+                <div class="fn2">17-char alphanumeric</div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">year</span
+                  ><span class="ft">int</span>
+                </div>
+                <div class="fn2">Exact production year of this car</div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">color</span
+                  ><span class="ft">string?</span>
+                </div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">mileage</span
+                  ><span class="ft">int?</span>
+                </div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">condition</span
+                  ><span class="ft">enum</span>
+                </div>
+                <div class="fn2">excellent · good · fair · poor</div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">status</span
+                  ><span class="ft">enum</span>
+                </div>
+                <div class="fn2">
+                  pending_research · researching · active · archived
+                </div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">seller_zip</span
+                  ><span class="ft">string</span>
+                </div>
+                <div class="fn2">Origin ZIP for shipping cost calc</div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">created_at</span
+                  ><span class="ft">timestamp</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="table-card tc-blue">
+              <div class="th">
+                <span class="tn">UserCar</span
+                ><span class="tb b-user">USER</span>
+              </div>
+              <div class="tf">
+                <div class="fr">
+                  <span class="pk">PK</span><span class="fn">id</span
+                  ><span class="ft">uuid</span>
+                </div>
+                <div class="fr">
+                  <span class="fk">FK</span><span class="fn">user_id</span
+                  ><span class="ft">uuid</span>
+                </div>
+                <div class="fr">
+                  <span class="fk">FK</span><span class="fn">generation_id</span
+                  ><span class="ft">uuid</span>
+                </div>
+                <div class="fr">
+                  <span class="fk">FK</span
+                  ><span class="fn">modification_id</span
+                  ><span class="ft">uuid?</span>
+                </div>
+                <div class="fn2">If buyer knows their exact spec</div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">year</span
+                  ><span class="ft">int</span>
+                </div>
+                <div class="fn2">Buyer's exact production year</div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">nickname</span
+                  ><span class="ft">string?</span>
+                </div>
+                <div class="fn2">"My daily", "Project car"</div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">is_default</span
+                  ><span class="ft">bool</span>
+                </div>
+                <div class="fn2">Primary car for compatibility checks</div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">created_at</span
+                  ><span class="ft">timestamp</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="table-card tc-purple">
+              <div class="th">
+                <span class="tn">ItemCompatibility</span
+                ><span class="tb b-core">CORE</span>
+              </div>
+              <div class="tf">
+                <div class="fr">
+                  <span class="pk">PK</span><span class="fn">id</span
+                  ><span class="ft">uuid</span>
+                </div>
+                <div class="fr">
+                  <span class="fk">FK</span><span class="fn">item_id</span
+                  ><span class="ft">uuid</span>
+                </div>
+                <div class="fr">
+                  <span class="fk">FK</span><span class="fn">generation_id</span
+                  ><span class="ft">uuid</span>
+                </div>
+                <div class="fr">
+                  <span class="fk">FK</span
+                  ><span class="fn">modification_id</span
+                  ><span class="ft">uuid?</span>
+                </div>
+                <div class="fn2">NULL = fits whole generation</div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">compat_level</span
+                  ><span class="ft">enum</span>
+                </div>
+                <div class="fn2">generation · modification</div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">year_from</span
+                  ><span class="ft">int?</span>
+                </div>
+                <div class="fn2">Optional sub-range within generation</div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">year_to</span
+                  ><span class="ft">int?</span>
+                </div>
+                <div class="fr">
+                  <span class="dot"></span
+                  ><span class="fn">confidence_score</span
+                  ><span class="ft">float</span>
+                </div>
+                <div class="fn2">0.0 → 1.0</div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">source</span
+                  ><span class="ft">enum</span>
+                </div>
+                <div class="fn2">ai · manual · oem_data</div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">is_verified</span
+                  ><span class="ft">bool</span>
+                </div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">notes</span
+                  ><span class="ft">text?</span>
+                </div>
+                <div class="fn2">Fitment caveats</div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">created_at</span
+                  ><span class="ft">timestamp</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="rel-block">
+            <div class="rel-title">Relationships</div>
+            <div class="rel-row">
+              <span class="rf">Make</span><span class="ra">||──o{</span
+              ><span class="rt">CarModel</span
+              ><span class="rl">one make has many models</span>
+            </div>
+            <div class="rel-row">
+              <span class="rf">CarModel</span><span class="ra">||──o{</span
+              ><span class="rt">Generation</span
+              ><span class="rl">one model has many chassis generations</span>
+            </div>
+            <div class="rel-row">
+              <span class="rf">Generation</span><span class="ra">||──o{</span
+              ><span class="rt">Modification</span
+              ><span class="rl"
+                >one generation has many exact configurations</span
+              >
+            </div>
+            <div class="rel-row">
+              <span class="rf">Generation</span><span class="ra">||──o{</span
+              ><span class="rt">Vehicle</span
+              ><span class="rl"
+                >one generation → many physical seller cars</span
+              >
+            </div>
+            <div class="rel-row">
+              <span class="rf">Modification</span><span class="ra">|o──o{</span
+              ><span class="rt">Vehicle</span
+              ><span class="rl">optional — if seller knows exact mod</span>
+            </div>
+            <div class="rel-row">
+              <span class="rf">Generation</span><span class="ra">||──o{</span
+              ><span class="rt">UserCar</span
+              ><span class="rl">buyer's saved car at generation level</span>
+            </div>
+            <div class="rel-row">
+              <span class="rf">Modification</span><span class="ra">|o──o{</span
+              ><span class="rt">UserCar</span
+              ><span class="rl">optional — buyer's specific config</span>
+            </div>
+            <div class="rel-row">
+              <span class="rf">Item</span><span class="ra">||──o{</span
+              ><span class="rt">ItemCompatibility</span
+              ><span class="rl">one item fits many generations/mods</span>
+            </div>
+            <div class="rel-row">
+              <span class="rf">Generation</span><span class="ra">||──o{</span
+              ><span class="rt">ItemCompatibility</span
+              ><span class="rl">generation-level compatibility</span>
+            </div>
+            <div class="rel-row">
+              <span class="rf">Modification</span><span class="ra">|o──o{</span
+              ><span class="rt">ItemCompatibility</span
+              ><span class="rl"
+                >mod-level compatibility (engine-specific parts)</span
+              >
+            </div>
+          </div>
+        </section>
+
+        <!-- ══════════════════════════════════════════════
+     S2 — PARTS & CATEGORIES
+══════════════════════════════════════════════ -->
+        <section class="section" id="s-parts">
+          <div class="section-header">
+            <div class="section-icon" style="background: #1e1a3a">🔧</div>
+            <div>
+              <div class="section-title">Parts & categories</div>
+              <div class="section-sub">
+                Category · OptionCategory · ItemOptionConfig · Option · Item ·
+                Variation
+              </div>
+            </div>
+          </div>
+          <div class="section-note">
+            <strong>Key fix from v3:</strong>
+            <code>is_buyer_question</code> moved off OptionCategory and onto
+            <strong>ItemOptionConfig</strong> — a per-item junction that records
+            which option categories apply to this specific item and whether the
+            buyer needs to answer that question (depends on how many options
+            survive AI elimination for this item, not on the category globally).
+          </div>
+
+          <div class="table-grid">
+            <div class="table-card">
+              <div class="th">
+                <span class="tn">Category</span
+                ><span class="tb b-core">CORE</span>
+              </div>
+              <div class="tf">
+                <div class="fr">
+                  <span class="pk">PK</span><span class="fn">id</span
+                  ><span class="ft">uuid</span>
+                </div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">name</span
+                  ><span class="ft">string</span>
+                </div>
+                <div class="fn2">Headlight, Alternator, Bumper Cover…</div>
+                <div class="fr">
+                  <span class="fk">FK</span><span class="fn">parent_id</span
+                  ><span class="ft">uuid?</span>
+                </div>
+                <div class="fn2">Self-ref hierarchy. NULL = top level</div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">slug</span
+                  ><span class="ft">string</span>
+                </div>
+                <div class="fr">
+                  <span class="dot"></span
+                  ><span class="fn">shipping_size_default</span
+                  ><span class="ft">enum</span>
+                </div>
+                <div class="fn2">
+                  small · medium · large · xl — AI start hint
+                </div>
+              </div>
+            </div>
+
+            <div class="table-card tc-amber">
+              <div class="th">
+                <span class="tn">OptionCategory</span
+                ><span class="tb b-ai">AI DRIVEN</span>
+              </div>
+              <div class="tf">
+                <div class="fr">
+                  <span class="pk">PK</span><span class="fn">id</span
+                  ><span class="ft">uuid</span>
+                </div>
+                <div class="fr">
+                  <span class="fk">FK</span><span class="fn">category_id</span
+                  ><span class="ft">uuid</span>
+                </div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">name</span
+                  ><span class="ft">string</span>
+                </div>
+                <div class="fn2">Side, Engine size, Transmission, Style…</div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">type</span
+                  ><span class="ft">enum</span>
+                </div>
+                <div class="fn2">
+                  side · engine · transmission · trim · other
+                </div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">description</span
+                  ><span class="ft">text?</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="table-card tc-amber">
+              <div class="th">
+                <span class="tn">ItemOptionConfig</span
+                ><span class="tb b-fix">NEW FIX</span>
+              </div>
+              <div class="tf">
+                <div class="fr">
+                  <span class="pk">PK</span><span class="fn">id</span
+                  ><span class="ft">uuid</span>
+                </div>
+                <div class="fr">
+                  <span class="fk">FK</span><span class="fn">item_id</span
+                  ><span class="ft">uuid</span>
+                </div>
+                <div class="fr">
+                  <span class="fk">FK</span
+                  ><span class="fn">option_category_id</span
+                  ><span class="ft">uuid</span>
+                </div>
+                <div class="fr">
+                  <span class="dot"></span
+                  ><span class="fn">is_buyer_question</span
+                  ><span class="ft">bool</span>
+                </div>
+                <div class="fn2">Ask buyer at checkout? Set per-item by AI</div>
+                <div class="fr">
+                  <span class="dot"></span
+                  ><span class="fn">surviving_count</span
+                  ><span class="ft">int</span>
+                </div>
+                <div class="fn2">How many options survived AI elimination</div>
+              </div>
+            </div>
+
+            <div class="table-card tc-amber">
+              <div class="th">
+                <span class="tn">Option</span
+                ><span class="tb b-ai">AI DRIVEN</span>
+              </div>
+              <div class="tf">
+                <div class="fr">
+                  <span class="pk">PK</span><span class="fn">id</span
+                  ><span class="ft">uuid</span>
+                </div>
+                <div class="fr">
+                  <span class="fk">FK</span><span class="fn">item_id</span
+                  ><span class="ft">uuid</span>
+                </div>
+                <div class="fr">
+                  <span class="fk">FK</span
+                  ><span class="fn">option_category_id</span
+                  ><span class="ft">uuid</span>
+                </div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">value</span
+                  ><span class="ft">string</span>
+                </div>
+                <div class="fn2">left · right · 1.6L · N52N · M-sport…</div>
+                <div class="fr">
+                  <span class="dot"></span
+                  ><span class="fn">is_ai_eliminated</span
+                  ><span class="ft">bool</span>
+                </div>
+                <div class="fn2">AI ruled this out for this vehicle</div>
+                <div class="fr">
+                  <span class="dot"></span
+                  ><span class="fn">elimination_reason</span
+                  ><span class="ft">text?</span>
+                </div>
+                <div class="fn2">Why it was eliminated</div>
+              </div>
+            </div>
+
+            <div class="table-card tc-purple">
+              <div class="th">
+                <span class="tn">Item</span><span class="tb b-core">CORE</span>
+              </div>
+              <div class="tf">
+                <div class="fr">
+                  <span class="pk">PK</span><span class="fn">id</span
+                  ><span class="ft">uuid</span>
+                </div>
+                <div class="fr">
+                  <span class="fk">FK</span><span class="fn">vehicle_id</span
+                  ><span class="ft">uuid</span>
+                </div>
+                <div class="fr">
+                  <span class="fk">FK</span><span class="fn">category_id</span
+                  ><span class="ft">uuid</span>
+                </div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">title</span
+                  ><span class="ft">string</span>
+                </div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">description</span
+                  ><span class="ft">text</span>
+                </div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">price</span
+                  ><span class="ft">decimal</span>
+                </div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">status</span
+                  ><span class="ft">enum</span>
+                </div>
+                <div class="fn2">
+                  active · sold · removed · hidden_in_assembly
+                </div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">condition</span
+                  ><span class="ft">enum</span>
+                </div>
+                <div class="fn2">excellent · good · fair · for_parts</div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">weight_lbs</span
+                  ><span class="ft">decimal?</span>
+                </div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">dim_l_in</span
+                  ><span class="ft">decimal?</span>
+                </div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">dim_w_in</span
+                  ><span class="ft">decimal?</span>
+                </div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">dim_h_in</span
+                  ><span class="ft">decimal?</span>
+                </div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">shipping_size</span
+                  ><span class="ft">enum</span>
+                </div>
+                <div class="fn2">
+                  small · medium · large · xl — auto-calculated
+                </div>
+                <div class="fr">
+                  <span class="dot"></span
+                  ><span class="fn">oem_part_number</span
+                  ><span class="ft">string?</span>
+                </div>
+                <div class="fn2">From catalog data source</div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">created_at</span
+                  ><span class="ft">timestamp</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="table-card">
+              <div class="th">
+                <span class="tn">Variation</span
+                ><span class="tb b-ai">AI DRAFT</span>
+              </div>
+              <div class="tf">
+                <div class="fr">
+                  <span class="pk">PK</span><span class="fn">id</span
+                  ><span class="ft">uuid</span>
+                </div>
+                <div class="fr">
+                  <span class="fk">FK</span><span class="fn">vehicle_id</span
+                  ><span class="ft">uuid</span>
+                </div>
+                <div class="fr">
+                  <span class="fk">FK</span><span class="fn">item_id</span
+                  ><span class="ft">uuid?</span>
+                </div>
+                <div class="fn2">NULL until approved → becomes Item</div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">item_snapshot</span
+                  ><span class="ft">jsonb</span>
+                </div>
+                <div class="fn2">Full draft at research time</div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">ai_confidence</span
+                  ><span class="ft">enum</span>
+                </div>
+                <div class="fn2">high · medium · low</div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">review_status</span
+                  ><span class="ft">enum</span>
+                </div>
+                <div class="fn2">pending · approved · rejected</div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">created_at</span
+                  ><span class="ft">timestamp</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="rel-block">
+            <div class="rel-title">Relationships</div>
+            <div class="rel-row">
+              <span class="rf">Category</span><span class="ra">||──o{</span
+              ><span class="rt">Category</span
+              ><span class="rl">self-ref parent hierarchy</span>
+            </div>
+            <div class="rel-row">
+              <span class="rf">Category</span><span class="ra">||──o{</span
+              ><span class="rt">OptionCategory</span
+              ><span class="rl">part type has variation dimensions</span>
+            </div>
+            <div class="rel-row">
+              <span class="rf">Item</span><span class="ra">||──o{</span
+              ><span class="rt">ItemOptionConfig</span
+              ><span class="rl"
+                >which option categories apply to this item</span
+              >
+            </div>
+            <div class="rel-row">
+              <span class="rf">OptionCategory</span
+              ><span class="ra">||──o{</span
+              ><span class="rt">ItemOptionConfig</span
+              ><span class="rl">per-item buyer question flag lives here</span>
+            </div>
+            <div class="rel-row">
+              <span class="rf">Item</span><span class="ra">||──o{</span
+              ><span class="rt">Option</span
+              ><span class="rl"
+                >item's confirmed + eliminated option values</span
+              >
+            </div>
+            <div class="rel-row">
+              <span class="rf">Vehicle</span><span class="ra">||──o{</span
+              ><span class="rt">Item</span
+              ><span class="rl">one vehicle yields many listed parts</span>
+            </div>
+            <div class="rel-row">
+              <span class="rf">Item</span><span class="ra">||──o{</span
+              ><span class="rt">Variation</span
+              ><span class="rl">AI draft → approved → Item</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- ══════════════════════════════════════════════
+     S3 — PHOTOS & MEDIA
+══════════════════════════════════════════════ -->
+        <section class="section" id="s-media">
+          <div class="section-header">
+            <div class="section-icon" style="background: #2d0a14">📷</div>
+            <div>
+              <div class="section-title">Photos & media</div>
+              <div class="section-sub">VehiclePhoto · ItemPhoto</div>
+            </div>
+          </div>
+          <div class="section-note">
+            Photos are a first-class concern — they are the primary trust signal
+            on a used parts marketplace. Two separate tables: one for the
+            overall vehicle upload, one per listed item. Both support ordering
+            and a primary flag for the hero image.
+          </div>
+
+          <div class="table-grid">
+            <div class="table-card tc-rose">
+              <div class="th">
+                <span class="tn">VehiclePhoto</span
+                ><span class="tb b-media">MEDIA</span>
+              </div>
+              <div class="tf">
+                <div class="fr">
+                  <span class="pk">PK</span><span class="fn">id</span
+                  ><span class="ft">uuid</span>
+                </div>
+                <div class="fr">
+                  <span class="fk">FK</span><span class="fn">vehicle_id</span
+                  ><span class="ft">uuid</span>
+                </div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">url</span
+                  ><span class="ft">string</span>
+                </div>
+                <div class="fn2">CDN URL to stored image</div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">thumbnail_url</span
+                  ><span class="ft">string?</span>
+                </div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">sort_order</span
+                  ><span class="ft">int</span>
+                </div>
+                <div class="fn2">0 = first shown, ascending</div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">is_primary</span
+                  ><span class="ft">bool</span>
+                </div>
+                <div class="fn2">Hero image for vehicle listing</div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">label</span
+                  ><span class="ft">string?</span>
+                </div>
+                <div class="fn2">front, rear, engine bay, interior…</div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">uploaded_at</span
+                  ><span class="ft">timestamp</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="table-card tc-rose">
+              <div class="th">
+                <span class="tn">ItemPhoto</span
+                ><span class="tb b-media">MEDIA</span>
+              </div>
+              <div class="tf">
+                <div class="fr">
+                  <span class="pk">PK</span><span class="fn">id</span
+                  ><span class="ft">uuid</span>
+                </div>
+                <div class="fr">
+                  <span class="fk">FK</span><span class="fn">item_id</span
+                  ><span class="ft">uuid</span>
+                </div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">url</span
+                  ><span class="ft">string</span>
+                </div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">thumbnail_url</span
+                  ><span class="ft">string?</span>
+                </div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">sort_order</span
+                  ><span class="ft">int</span>
+                </div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">is_primary</span
+                  ><span class="ft">bool</span>
+                </div>
+                <div class="fn2">Hero image for the item listing</div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">label</span
+                  ><span class="ft">string?</span>
+                </div>
+                <div class="fn2">front, back, connector, damage…</div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">uploaded_at</span
+                  ><span class="ft">timestamp</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ══════════════════════════════════════════════
+     S4 — BUNDLES
+══════════════════════════════════════════════ -->
+        <section class="section" id="s-bundles">
+          <div class="section-header">
+            <div class="section-icon" style="background: #271c04">📦</div>
+            <div>
+              <div class="section-title">Bundles</div>
+              <div class="section-sub">
+                BundleCategory · Bundle · BundleItem
+              </div>
+            </div>
+          </div>
+          <div class="table-grid">
+            <div class="table-card">
+              <div class="th">
+                <span class="tn">BundleCategory</span
+                ><span class="tb b-ai">TEMPLATE</span>
+              </div>
+              <div class="tf">
+                <div class="fr">
+                  <span class="pk">PK</span><span class="fn">id</span
+                  ><span class="ft">uuid</span>
+                </div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">name</span
+                  ><span class="ft">string</span>
+                </div>
+                <div class="fn2">Engine assembly, Left suspension kit…</div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">type</span
+                  ><span class="ft">enum</span>
+                </div>
+                <div class="fn2">assembly · discount</div>
+                <div class="fr">
+                  <span class="dot"></span
+                  ><span class="fn">category_filters</span
+                  ><span class="ft">jsonb</span>
+                </div>
+                <div class="fn2">Category IDs that trigger this template</div>
+              </div>
+            </div>
+            <div class="table-card">
+              <div class="th">
+                <span class="tn">Bundle</span><span class="tb b-ai">AUTO</span>
+              </div>
+              <div class="tf">
+                <div class="fr">
+                  <span class="pk">PK</span><span class="fn">id</span
+                  ><span class="ft">uuid</span>
+                </div>
+                <div class="fr">
+                  <span class="fk">FK</span
+                  ><span class="fn">bundle_category_id</span
+                  ><span class="ft">uuid</span>
+                </div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">name</span
+                  ><span class="ft">string</span>
+                </div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">discount_pct</span
+                  ><span class="ft">decimal</span>
+                </div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">status</span
+                  ><span class="ft">enum</span>
+                </div>
+                <div class="fn2">active · disbanded</div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">created_at</span
+                  ><span class="ft">timestamp</span>
+                </div>
+              </div>
+            </div>
+            <div class="table-card">
+              <div class="th">
+                <span class="tn">BundleItem</span
+                ><span class="tb b-ai">JUNCTION</span>
+              </div>
+              <div class="tf">
+                <div class="fr">
+                  <span class="pk">PK</span><span class="fn">id</span
+                  ><span class="ft">uuid</span>
+                </div>
+                <div class="fr">
+                  <span class="fk">FK</span><span class="fn">bundle_id</span
+                  ><span class="ft">uuid</span>
+                </div>
+                <div class="fr">
+                  <span class="fk">FK</span><span class="fn">item_id</span
+                  ><span class="ft">uuid</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ══════════════════════════════════════════════
+     S5 — USERS & SELLERS
+══════════════════════════════════════════════ -->
+        <section class="section" id="s-users">
+          <div class="section-header">
+            <div class="section-icon" style="background: #0d1f38">👤</div>
+            <div>
+              <div class="section-title">Users & sellers</div>
+              <div class="section-sub">
+                User · UserCar · SellerApplication · SellerVerificationDoc ·
+                SellerReview · ShippingAddress
+              </div>
+            </div>
+          </div>
+          <div class="section-note">
+            <strong>Key fix from v3:</strong> <code>saved_car_id</code> removed
+            from User. Buyers now have a <strong>UserCar</strong> table —
+            multiple cars per buyer, each with generation + optional
+            modification, year, nickname, and a default flag. Seller ZIP moved
+            to Vehicle (each vehicle has its own origin location).
+          </div>
+
+          <div class="table-grid">
+            <div class="table-card tc-blue">
+              <div class="th">
+                <span class="tn">User</span><span class="tb b-user">USER</span>
+              </div>
+              <div class="tf">
+                <div class="fr">
+                  <span class="pk">PK</span><span class="fn">id</span
+                  ><span class="ft">uuid</span>
+                </div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">email</span
+                  ><span class="ft">string</span>
+                </div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">password_hash</span
+                  ><span class="ft">string</span>
+                </div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">first_name</span
+                  ><span class="ft">string?</span>
+                </div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">last_name</span
+                  ><span class="ft">string?</span>
+                </div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">phone</span
+                  ><span class="ft">string?</span>
+                </div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">is_seller</span
+                  ><span class="ft">bool</span>
+                </div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">is_admin</span
+                  ><span class="ft">bool</span>
+                </div>
+                <div class="fr">
+                  <span class="dot"></span
+                  ><span class="fn">email_verified_at</span
+                  ><span class="ft">timestamp?</span>
+                </div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">created_at</span
+                  ><span class="ft">timestamp</span>
+                </div>
+              </div>
+            </div>
+            <div class="table-card">
+              <div class="th">
+                <span class="tn">SellerApplication</span
+                ><span class="tb b-user">USER</span>
+              </div>
+              <div class="tf">
+                <div class="fr">
+                  <span class="pk">PK</span><span class="fn">id</span
+                  ><span class="ft">uuid</span>
+                </div>
+                <div class="fr">
+                  <span class="fk">FK</span><span class="fn">user_id</span
+                  ><span class="ft">uuid</span>
+                </div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">status</span
+                  ><span class="ft">enum</span>
+                </div>
+                <div class="fn2">pending · approved · rejected</div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">bio</span
+                  ><span class="ft">text</span>
+                </div>
+                <div class="fr">
+                  <span class="dot"></span
+                  ><span class="fn">rejection_reason</span
+                  ><span class="ft">text?</span>
+                </div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">submitted_at</span
+                  ><span class="ft">timestamp</span>
+                </div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">reviewed_at</span
+                  ><span class="ft">timestamp?</span>
+                </div>
+              </div>
+            </div>
+            <div class="table-card">
+              <div class="th">
+                <span class="tn">SellerVerificationDoc</span
+                ><span class="tb b-user">USER</span>
+              </div>
+              <div class="tf">
+                <div class="fr">
+                  <span class="pk">PK</span><span class="fn">id</span
+                  ><span class="ft">uuid</span>
+                </div>
+                <div class="fr">
+                  <span class="fk">FK</span><span class="fn">user_id</span
+                  ><span class="ft">uuid</span>
+                </div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">doc_type</span
+                  ><span class="ft">string</span>
+                </div>
+                <div class="fn2">
+                  gov_id · business_license · dealer_license
+                </div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">file_url</span
+                  ><span class="ft">string</span>
+                </div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">uploaded_at</span
+                  ><span class="ft">timestamp</span>
+                </div>
+              </div>
+            </div>
+            <div class="table-card">
+              <div class="th">
+                <span class="tn">SellerReview</span
+                ><span class="tb b-user">USER</span>
+              </div>
+              <div class="tf">
+                <div class="fr">
+                  <span class="pk">PK</span><span class="fn">id</span
+                  ><span class="ft">uuid</span>
+                </div>
+                <div class="fr">
+                  <span class="fk">FK</span><span class="fn">seller_id</span
+                  ><span class="ft">uuid</span>
+                </div>
+                <div class="fr">
+                  <span class="fk">FK</span><span class="fn">buyer_id</span
+                  ><span class="ft">uuid</span>
+                </div>
+                <div class="fr">
+                  <span class="fk">FK</span><span class="fn">order_item_id</span
+                  ><span class="ft">uuid</span>
+                </div>
+                <div class="fn2">Tied to the specific order item</div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">rating</span
+                  ><span class="ft">int</span>
+                </div>
+                <div class="fn2">1–5</div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">body</span
+                  ><span class="ft">text?</span>
+                </div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">created_at</span
+                  ><span class="ft">timestamp</span>
+                </div>
+              </div>
+            </div>
+            <div class="table-card">
+              <div class="th">
+                <span class="tn">ShippingAddress</span
+                ><span class="tb b-user">USER</span>
+              </div>
+              <div class="tf">
+                <div class="fr">
+                  <span class="pk">PK</span><span class="fn">id</span
+                  ><span class="ft">uuid</span>
+                </div>
+                <div class="fr">
+                  <span class="fk">FK</span><span class="fn">user_id</span
+                  ><span class="ft">uuid</span>
+                </div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">full_name</span
+                  ><span class="ft">string</span>
+                </div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">line1</span
+                  ><span class="ft">string</span>
+                </div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">line2</span
+                  ><span class="ft">string?</span>
+                </div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">city</span
+                  ><span class="ft">string</span>
+                </div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">state</span
+                  ><span class="ft">string</span>
+                </div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">zip</span
+                  ><span class="ft">string</span>
+                </div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">is_default</span
+                  ><span class="ft">bool</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ══════════════════════════════════════════════
+     S6 — ORDERS & PAYMENTS
+══════════════════════════════════════════════ -->
+        <section class="section" id="s-commerce">
+          <div class="section-header">
+            <div class="section-icon" style="background: #2a0f0f">🛒</div>
+            <div>
+              <div class="section-title">Orders & payments</div>
+              <div class="section-sub">
+                CartItem · Order · OrderItem · Payment
+              </div>
+            </div>
+          </div>
+          <div class="section-note">
+            <strong>Key fix from v3:</strong>
+            <strong>Payment table added</strong> — tracks whether money actually
+            moved, payment status, provider reference, and refund records.
+            <code>quantity</code> removed from CartItem and OrderItem — auto
+            parts are always 1 unique physical item. Snapshots remain on
+            OrderItem for dispute protection.
+          </div>
+
+          <div class="table-grid">
+            <div class="table-card">
+              <div class="th">
+                <span class="tn">CartItem</span
+                ><span class="tb b-order">ORDER</span>
+              </div>
+              <div class="tf">
+                <div class="fr">
+                  <span class="pk">PK</span><span class="fn">id</span
+                  ><span class="ft">uuid</span>
+                </div>
+                <div class="fr">
+                  <span class="fk">FK</span><span class="fn">user_id</span
+                  ><span class="ft">uuid</span>
+                </div>
+                <div class="fr">
+                  <span class="fk">FK</span><span class="fn">item_id</span
+                  ><span class="ft">uuid</span>
+                </div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">added_at</span
+                  ><span class="ft">timestamp</span>
+                </div>
+                <div class="fn2">No quantity — each item is unique</div>
+              </div>
+            </div>
+            <div class="table-card tc-coral">
+              <div class="th">
+                <span class="tn">Order</span
+                ><span class="tb b-order">ORDER</span>
+              </div>
+              <div class="tf">
+                <div class="fr">
+                  <span class="pk">PK</span><span class="fn">id</span
+                  ><span class="ft">uuid</span>
+                </div>
+                <div class="fr">
+                  <span class="fk">FK</span><span class="fn">buyer_id</span
+                  ><span class="ft">uuid</span>
+                </div>
+                <div class="fr">
+                  <span class="fk">FK</span
+                  ><span class="fn">shipping_address_id</span
+                  ><span class="ft">uuid</span>
+                </div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">status</span
+                  ><span class="ft">enum</span>
+                </div>
+                <div class="fn2">
+                  pending · confirmed · shipped · delivered · cancelled
+                </div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">subtotal</span
+                  ><span class="ft">decimal</span>
+                </div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">shipping_cost</span
+                  ><span class="ft">decimal</span>
+                </div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">total</span
+                  ><span class="ft">decimal</span>
+                </div>
+                <div class="fr">
+                  <span class="dot"></span
+                  ><span class="fn">vehicle_snapshot</span
+                  ><span class="ft">jsonb</span>
+                </div>
+                <div class="fn2">Seller vehicle at purchase time</div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">placed_at</span
+                  ><span class="ft">timestamp</span>
+                </div>
+              </div>
+            </div>
+            <div class="table-card">
+              <div class="th">
+                <span class="tn">OrderItem</span
+                ><span class="tb b-order">ORDER</span>
+              </div>
+              <div class="tf">
+                <div class="fr">
+                  <span class="pk">PK</span><span class="fn">id</span
+                  ><span class="ft">uuid</span>
+                </div>
+                <div class="fr">
+                  <span class="fk">FK</span><span class="fn">order_id</span
+                  ><span class="ft">uuid</span>
+                </div>
+                <div class="fr">
+                  <span class="fk">FK</span><span class="fn">item_id</span
+                  ><span class="ft">uuid</span>
+                </div>
+                <div class="fr">
+                  <span class="dot"></span
+                  ><span class="fn">price_at_purchase</span
+                  ><span class="ft">decimal</span>
+                </div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">item_snapshot</span
+                  ><span class="ft">jsonb</span>
+                </div>
+                <div class="fn2">Full item + options copy at checkout</div>
+                <div class="fr">
+                  <span class="dot"></span
+                  ><span class="fn">selected_options</span
+                  ><span class="ft">jsonb?</span>
+                </div>
+                <div class="fn2">
+                  Buyer's answers at checkout (engine, side…)
+                </div>
+              </div>
+            </div>
+            <div class="table-card tc-violet">
+              <div class="th">
+                <span class="tn">Payment</span><span class="tb b-pay">NEW</span>
+              </div>
+              <div class="tf">
+                <div class="fr">
+                  <span class="pk">PK</span><span class="fn">id</span
+                  ><span class="ft">uuid</span>
+                </div>
+                <div class="fr">
+                  <span class="fk">FK</span><span class="fn">order_id</span
+                  ><span class="ft">uuid</span>
+                </div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">status</span
+                  ><span class="ft">enum</span>
+                </div>
+                <div class="fn2">
+                  pending · captured · failed · refunded · partial_refund
+                </div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">amount</span
+                  ><span class="ft">decimal</span>
+                </div>
+                <div class="fr">
+                  <span class="dot"></span
+                  ><span class="fn">refunded_amount</span
+                  ><span class="ft">decimal</span>
+                </div>
+                <div class="fn2">0 until any refund</div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">provider</span
+                  ><span class="ft">string</span>
+                </div>
+                <div class="fn2">stripe, paypal, manual…</div>
+                <div class="fr">
+                  <span class="dot"></span
+                  ><span class="fn">provider_reference</span
+                  ><span class="ft">string?</span>
+                </div>
+                <div class="fn2">Stripe charge ID, PayPal txn ID…</div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">payment_method</span
+                  ><span class="ft">string?</span>
+                </div>
+                <div class="fn2">card_visa, card_mc, paypal, bank…</div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">paid_at</span
+                  ><span class="ft">timestamp?</span>
+                </div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">refunded_at</span
+                  ><span class="ft">timestamp?</span>
+                </div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">created_at</span
+                  ><span class="ft">timestamp</span>
+                </div>
+              </div>
+            </div>
+            <div class="table-card">
+              <div class="th">
+                <span class="tn">ShippingRequest</span
+                ><span class="tb b-order">ORDER</span>
+              </div>
+              <div class="tf">
+                <div class="fr">
+                  <span class="pk">PK</span><span class="fn">id</span
+                  ><span class="ft">uuid</span>
+                </div>
+                <div class="fr">
+                  <span class="fk">FK</span><span class="fn">order_item_id</span
+                  ><span class="ft">uuid</span>
+                </div>
+                <div class="fr">
+                  <span class="fk">FK</span><span class="fn">seller_id</span
+                  ><span class="ft">uuid</span>
+                </div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">method</span
+                  ><span class="ft">enum</span>
+                </div>
+                <div class="fn2">pickup · parcel · freight</div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">shipping_size</span
+                  ><span class="ft">enum</span>
+                </div>
+                <div class="fn2">small · medium · large · xl</div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">origin_zip</span
+                  ><span class="ft">string</span>
+                </div>
+                <div class="fn2">Copied from Vehicle.seller_zip</div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">dest_zip</span
+                  ><span class="ft">string</span>
+                </div>
+                <div class="fn2">Copied from ShippingAddress.zip</div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">quoted_cost</span
+                  ><span class="ft">decimal?</span>
+                </div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">actual_cost</span
+                  ><span class="ft">decimal?</span>
+                </div>
+                <div class="fn2">Real cost after manual quote</div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">carrier</span
+                  ><span class="ft">string?</span>
+                </div>
+                <div class="fr">
+                  <span class="dot"></span
+                  ><span class="fn">tracking_number</span
+                  ><span class="ft">string?</span>
+                </div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">label_url</span
+                  ><span class="ft">string?</span>
+                </div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">estimated_days</span
+                  ><span class="ft">int?</span>
+                </div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">is_delivered</span
+                  ><span class="ft">bool</span>
+                </div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">delivered_at</span
+                  ><span class="ft">timestamp?</span>
+                </div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">created_at</span
+                  ><span class="ft">timestamp</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="rel-block">
+            <div class="rel-title">Relationships</div>
+            <div class="rel-row">
+              <span class="rf">User</span><span class="ra">||──o{</span
+              ><span class="rt">Order</span
+              ><span class="rl">buyer places many orders</span>
+            </div>
+            <div class="rel-row">
+              <span class="rf">Order</span><span class="ra">||──o{</span
+              ><span class="rt">OrderItem</span
+              ><span class="rl">one order has multiple items</span>
+            </div>
+            <div class="rel-row">
+              <span class="rf">Order</span><span class="ra">||──||</span
+              ><span class="rt">Payment</span
+              ><span class="rl">one payment per order</span>
+            </div>
+            <div class="rel-row">
+              <span class="rf">OrderItem</span><span class="ra">||──o{</span
+              ><span class="rt">ShippingRequest</span
+              ><span class="rl">one shipping task per item</span>
+            </div>
+            <div class="rel-row">
+              <span class="rf">OrderItem</span><span class="ra">||──o|</span
+              ><span class="rt">SellerReview</span
+              ><span class="rl">optional review after delivery</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- ══════════════════════════════════════════════
+     S7 — SHIPPING RATES
+══════════════════════════════════════════════ -->
+        <section class="section" id="s-shipping">
+          <div class="section-header">
+            <div class="section-icon" style="background: #1a1230">📐</div>
+            <div>
+              <div class="section-title">
+                Shipping size categories & rate tables
+              </div>
+              <div class="section-sub">
+                Manual quotes — no API. Support team handles all shipping.
+              </div>
+            </div>
+          </div>
+
+          <div class="ship-card">
+            <div class="ship-sec">
+              <div class="ship-sec-title">
+                Size categories — auto-calculated from Item dimensions at
+                creation
+              </div>
+              <table class="st">
+                <thead>
+                  <tr>
+                    <th>Category</th>
+                    <th>Max Dimensions</th>
+                    <th>Weight</th>
+                    <th>Typical parts</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><span class="cs">Small</span></td>
+                    <td>≤ 12 × 12 × 12 in</td>
+                    <td>≤ 10 lb</td>
+                    <td>Sensors, switches, ignition coils, ABS sensors</td>
+                  </tr>
+                  <tr>
+                    <td><span class="cm">Medium</span></td>
+                    <td>≤ 24 × 24 × 12 in</td>
+                    <td>10–40 lb</td>
+                    <td>Alternators, starters, radiators</td>
+                  </tr>
+                  <tr>
+                    <td><span class="cl">Large</span></td>
+                    <td>Any side &gt; 24 in OR girth &gt; 100 in</td>
+                    <td>40–150 lb</td>
+                    <td>Bumpers, hoods, doors, exhausts, driveshafts</td>
+                  </tr>
+                  <tr>
+                    <td><span class="cx">Extra Large</span></td>
+                    <td>Palletized or &gt; 96 in length</td>
+                    <td>150–500+ lb</td>
+                    <td>Engines, transmissions, subframes, rear axle</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="ship-sec">
+              <div class="ship-sec-title">
+                Upgrade rules — if ANY condition is true, bump to next category
+              </div>
+              <table class="st">
+                <thead>
+                  <tr>
+                    <th>Upgrade</th>
+                    <th>Conditions that trigger it</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>
+                      <span class="cs">Small</span> →
+                      <span class="cm">Medium</span>
+                    </td>
+                    <td>Longest side &gt; 12" OR weight &gt; 10 lb</td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span class="cm">Medium</span> →
+                      <span class="cl">Large</span>
+                    </td>
+                    <td>
+                      Longest side &gt; 48" OR L+W+H &gt; 84" OR weight &gt; 40
+                      lb
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <span class="cl">Large</span> →
+                      <span class="cx">Extra Large</span>
+                    </td>
+                    <td>
+                      Weight &gt; 150 lb OR pallet required OR length &gt; 96"
+                      OR L+girth &gt; 130"
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="ship-sec">
+              <div class="ship-sec-title">BMW E90 reference examples</div>
+              <table class="st">
+                <thead>
+                  <tr>
+                    <th>Part</th>
+                    <th>Dimensions (in)</th>
+                    <th>Weight</th>
+                    <th>Category</th>
+                    <th>Reason</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>ABS Sensor</td>
+                    <td>8×6×4</td>
+                    <td>1 lb</td>
+                    <td><span class="cs">Small</span></td>
+                    <td>All dims ≤ 12"</td>
+                  </tr>
+                  <tr>
+                    <td>Alternator</td>
+                    <td>14×12×12</td>
+                    <td>16 lb</td>
+                    <td><span class="cm">Medium</span></td>
+                    <td>14" side bumps from Small</td>
+                  </tr>
+                  <tr>
+                    <td>Radiator</td>
+                    <td>30×24×6</td>
+                    <td>18 lb</td>
+                    <td><span class="cm">Medium</span></td>
+                    <td>Within medium range</td>
+                  </tr>
+                  <tr>
+                    <td>Driveshaft</td>
+                    <td>60×8×8</td>
+                    <td>25 lb</td>
+                    <td><span class="cl">Large</span></td>
+                    <td>60" side &gt; 48"</td>
+                  </tr>
+                  <tr>
+                    <td>Front Bumper</td>
+                    <td>80×25×20</td>
+                    <td>40 lb</td>
+                    <td><span class="cl">Large</span></td>
+                    <td>80" side</td>
+                  </tr>
+                  <tr>
+                    <td>Hood</td>
+                    <td>65×55×10</td>
+                    <td>55 lb</td>
+                    <td><span class="cl">Large</span></td>
+                    <td>Dims &amp; weight</td>
+                  </tr>
+                  <tr>
+                    <td>Transmission</td>
+                    <td>40×32×30</td>
+                    <td>180 lb</td>
+                    <td><span class="cx">Extra Large</span></td>
+                    <td>180 lb &gt; 150 lb</td>
+                  </tr>
+                  <tr>
+                    <td>Engine</td>
+                    <td>48×40×36</td>
+                    <td>400 lb</td>
+                    <td><span class="cx">Extra Large</span></td>
+                    <td>400 lb, pallet required</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="ship-sec">
+              <div class="ship-sec-title">
+                Base rates by destination state (approximate)
+              </div>
+              <table class="st">
+                <thead>
+                  <tr>
+                    <th>Destination</th>
+                    <th><span class="cs">Small</span></th>
+                    <th><span class="cm">Medium</span></th>
+                    <th><span class="cl">Large</span></th>
+                    <th><span class="cx">Extra Large</span></th>
+                    <th>Transit</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Oregon</td>
+                    <td>$7</td>
+                    <td>$20</td>
+                    <td>$450</td>
+                    <td>$550</td>
+                    <td>2 days</td>
+                  </tr>
+                  <tr>
+                    <td>Nevada</td>
+                    <td>$10</td>
+                    <td>$35</td>
+                    <td>$550</td>
+                    <td>$680</td>
+                    <td>4 days</td>
+                  </tr>
+                  <tr>
+                    <td>Colorado</td>
+                    <td>$15</td>
+                    <td>$30</td>
+                    <td>$550</td>
+                    <td>$750</td>
+                    <td>6 days</td>
+                  </tr>
+                  <tr>
+                    <td>Texas</td>
+                    <td>$15</td>
+                    <td>$50</td>
+                    <td>$600</td>
+                    <td>$700</td>
+                    <td>5 days</td>
+                  </tr>
+                  <tr>
+                    <td>Florida</td>
+                    <td>$15</td>
+                    <td>$50</td>
+                    <td>$600</td>
+                    <td>$850</td>
+                    <td>6 days</td>
+                  </tr>
+                  <tr>
+                    <td>New York</td>
+                    <td>$15</td>
+                    <td>$50</td>
+                    <td>$650</td>
+                    <td>$900</td>
+                    <td>9 days</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="ship-sec">
+              <div class="ship-sec-title">Future pricing — distance bands</div>
+              <table class="st">
+                <thead>
+                  <tr>
+                    <th>Size</th>
+                    <th>0–600 mi</th>
+                    <th>600–1,500 mi</th>
+                    <th>1,500–3,500 mi</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><span class="cs">Small</span></td>
+                    <td>$7–10</td>
+                    <td>$10–15</td>
+                    <td>$15</td>
+                  </tr>
+                  <tr>
+                    <td><span class="cm">Medium</span></td>
+                    <td>$20–35</td>
+                    <td>$30–40</td>
+                    <td>$50</td>
+                  </tr>
+                  <tr>
+                    <td><span class="cl">Large</span></td>
+                    <td>$450–550</td>
+                    <td>$550</td>
+                    <td>$600–650</td>
+                  </tr>
+                  <tr>
+                    <td><span class="cx">Extra Large</span></td>
+                    <td>$550–680</td>
+                    <td>$680–750</td>
+                    <td>$850–900</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ══════════════════════════════════════════════
+     S8 — DISPUTES & RETURNS
+══════════════════════════════════════════════ -->
+        <section class="section" id="s-disputes">
+          <div class="section-header">
+            <div class="section-icon" style="background: #2d1200">⚖️</div>
+            <div>
+              <div class="section-title">Disputes & returns</div>
+              <div class="section-sub">Dispute · DisputeMessage</div>
+            </div>
+          </div>
+          <div class="section-note">
+            <strong>New in v4.</strong> Every used parts marketplace will have
+            quality disputes — "this part doesn't work", "wrong part sent", "not
+            as described". Without these tables, support handles everything in
+            email with no audit trail. Dispute links to an OrderItem, has a
+            status lifecycle, and has its own internal message thread between
+            buyer, seller, and support.
+          </div>
+
+          <div class="table-grid">
+            <div class="table-card tc-orange">
+              <div class="th">
+                <span class="tn">Dispute</span><span class="tb b-fix">NEW</span>
+              </div>
+              <div class="tf">
+                <div class="fr">
+                  <span class="pk">PK</span><span class="fn">id</span
+                  ><span class="ft">uuid</span>
+                </div>
+                <div class="fr">
+                  <span class="fk">FK</span><span class="fn">order_item_id</span
+                  ><span class="ft">uuid</span>
+                </div>
+                <div class="fr">
+                  <span class="fk">FK</span><span class="fn">buyer_id</span
+                  ><span class="ft">uuid</span>
+                </div>
+                <div class="fr">
+                  <span class="fk">FK</span><span class="fn">seller_id</span
+                  ><span class="ft">uuid</span>
+                </div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">reason</span
+                  ><span class="ft">enum</span>
+                </div>
+                <div class="fn2">
+                  not_as_described · wrong_part · not_received · damaged · other
+                </div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">description</span
+                  ><span class="ft">text</span>
+                </div>
+                <div class="fn2">Buyer explains the problem</div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">status</span
+                  ><span class="ft">enum</span>
+                </div>
+                <div class="fn2">
+                  open · under_review · resolved_refund · resolved_return ·
+                  resolved_no_action · closed
+                </div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">resolution</span
+                  ><span class="ft">text?</span>
+                </div>
+                <div class="fn2">Admin notes on how it was resolved</div>
+                <div class="fr">
+                  <span class="fk">FK</span><span class="fn">resolved_by</span
+                  ><span class="ft">uuid?</span>
+                </div>
+                <div class="fn2">Admin user who closed it</div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">refund_amount</span
+                  ><span class="ft">decimal?</span>
+                </div>
+                <div class="fn2">If resolution = refund</div>
+                <div class="fr">
+                  <span class="dot"></span
+                  ><span class="fn">return_required</span
+                  ><span class="ft">bool</span>
+                </div>
+                <div class="fn2">Does buyer need to ship part back?</div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">opened_at</span
+                  ><span class="ft">timestamp</span>
+                </div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">resolved_at</span
+                  ><span class="ft">timestamp?</span>
+                </div>
+              </div>
+            </div>
+            <div class="table-card">
+              <div class="th">
+                <span class="tn">DisputeMessage</span
+                ><span class="tb b-fix">NEW</span>
+              </div>
+              <div class="tf">
+                <div class="fr">
+                  <span class="pk">PK</span><span class="fn">id</span
+                  ><span class="ft">uuid</span>
+                </div>
+                <div class="fr">
+                  <span class="fk">FK</span><span class="fn">dispute_id</span
+                  ><span class="ft">uuid</span>
+                </div>
+                <div class="fr">
+                  <span class="fk">FK</span><span class="fn">sender_id</span
+                  ><span class="ft">uuid</span>
+                </div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">sender_role</span
+                  ><span class="ft">enum</span>
+                </div>
+                <div class="fn2">buyer · seller · support</div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">body</span
+                  ><span class="ft">text</span>
+                </div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">attachment_url</span
+                  ><span class="ft">string?</span>
+                </div>
+                <div class="fn2">Photo evidence buyer/seller uploads</div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">sent_at</span
+                  ><span class="ft">timestamp</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="rel-block">
+            <div class="rel-title">Relationships</div>
+            <div class="rel-row">
+              <span class="rf">OrderItem</span><span class="ra">||──o|</span
+              ><span class="rt">Dispute</span
+              ><span class="rl">one dispute per order item max</span>
+            </div>
+            <div class="rel-row">
+              <span class="rf">Dispute</span><span class="ra">||──o{</span
+              ><span class="rt">DisputeMessage</span
+              ><span class="rl">threaded conversation between parties</span>
+            </div>
+            <div class="rel-row">
+              <span class="rf">Dispute</span><span class="ra">}o──||</span
+              ><span class="rt">Payment</span
+              ><span class="rl"
+                >refund triggers Payment.refunded_amount update</span
+              >
+            </div>
+          </div>
+        </section>
+
+        <!-- ══════════════════════════════════════════════
+     S9 — MESSAGING
+══════════════════════════════════════════════ -->
+        <section class="section" id="s-msg">
+          <div class="section-header">
+            <div class="section-icon" style="background: #0b2318">💬</div>
+            <div>
+              <div class="section-title">Messaging</div>
+              <div class="section-sub">Thread · Message</div>
+            </div>
+          </div>
+          <div class="table-grid">
+            <div class="table-card tc-green">
+              <div class="th">
+                <span class="tn">Thread</span><span class="tb b-msg">MSG</span>
+              </div>
+              <div class="tf">
+                <div class="fr">
+                  <span class="pk">PK</span><span class="fn">id</span
+                  ><span class="ft">uuid</span>
+                </div>
+                <div class="fr">
+                  <span class="fk">FK</span><span class="fn">buyer_id</span
+                  ><span class="ft">uuid</span>
+                </div>
+                <div class="fr">
+                  <span class="fk">FK</span><span class="fn">seller_id</span
+                  ><span class="ft">uuid</span>
+                </div>
+                <div class="fr">
+                  <span class="fk">FK</span><span class="fn">item_id</span
+                  ><span class="ft">uuid</span>
+                </div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">created_at</span
+                  ><span class="ft">timestamp</span>
+                </div>
+                <div class="fr">
+                  <span class="dot"></span
+                  ><span class="fn">last_message_at</span
+                  ><span class="ft">timestamp?</span>
+                </div>
+                <div class="fn2">For inbox sorting</div>
+              </div>
+            </div>
+            <div class="table-card">
+              <div class="th">
+                <span class="tn">Message</span><span class="tb b-msg">MSG</span>
+              </div>
+              <div class="tf">
+                <div class="fr">
+                  <span class="pk">PK</span><span class="fn">id</span
+                  ><span class="ft">uuid</span>
+                </div>
+                <div class="fr">
+                  <span class="fk">FK</span><span class="fn">thread_id</span
+                  ><span class="ft">uuid</span>
+                </div>
+                <div class="fr">
+                  <span class="fk">FK</span><span class="fn">sender_id</span
+                  ><span class="ft">uuid</span>
+                </div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">body</span
+                  ><span class="ft">text</span>
+                </div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">is_read</span
+                  ><span class="ft">bool</span>
+                </div>
+                <div class="fr">
+                  <span class="dot"></span><span class="fn">sent_at</span
+                  ><span class="ft">timestamp</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ════════════════════════════════════════════════════
+     LOGIC HEADER
+════════════════════════════════════════════════════ -->
+        <div class="page-header" style="margin-top: 24px">
+          <div class="page-tag">Business logic</div>
+          <div class="page-title">Deep logic documentation</div>
+          <div class="page-desc">
+            Every step written plainly. Which tables are touched, what data is
+            written, what happens next. Click any chapter to expand.
+          </div>
+        </div>
+
+        <!-- ══ L1 — CATALOG & COMPATIBILITY ══ -->
+        <section class="section" id="l-catalog">
+          <div class="section-header">
+            <div class="section-icon" style="background: #0d2926">🗂️</div>
+            <div>
+              <div class="section-title">Catalog & compatibility</div>
+              <div class="section-sub">
+                Make · CarModel · Generation · Modification · ItemCompatibility
+                · UserCar
+              </div>
+            </div>
+          </div>
+
+          <div class="chapter open" id="lc1">
+            <div class="ch-head" onclick="tog('lc1')">
+              <div class="ch-ico" style="background: #0d2926">📖</div>
+              <div class="ch-meta">
+                <div class="ch-title">
+                  The four-level hierarchy and why each level exists
+                </div>
+                <div class="ch-tables">
+                  Make · CarModel · Generation · Modification
+                </div>
+              </div>
+              <span class="ch-caret">▶</span>
+            </div>
+            <div class="ch-body">
+              <div class="step">
+                <div class="step-body">
+                  <p>
+                    <span class="pill pt">Make</span> — The manufacturer.
+                    Toyota, BMW, Ford. ~50 rows total. Never changes.
+                  </p>
+                  <p>
+                    <span class="pill pt">CarModel</span> — The consumer product
+                    name. Supra, Tacoma, 3 Series. Belongs to a Make. This is
+                    purely a marketing label — "Supra" means nothing
+                    mechanically without knowing the generation.
+                  </p>
+                  <p>
+                    <span class="pill pt">Generation</span> — The chassis entry.
+                    This is the real fitment anchor. MA70 Supra, JZA80 Supra,
+                    E82 BMW 1 Series Coupe. Each row has a
+                    <span class="db">production_start</span> and
+                    <span class="db">production_end</span> as full dates (stored
+                    as first day of the month, e.g. 1986-01-01).
+                    <span class="db">chassis_codes</span> is an array — ["MA70"]
+                    for simple cases, ["DB03","DB23","DB43"] when the catalog
+                    groups multiple codes that are mechanically identical. Two
+                    MA70 generations (1986–1988 and 1988–1993) are two separate
+                    rows because the catalog treats them as distinct — that date
+                    boundary usually marks a facelift or technical update that
+                    affects parts.
+                  </p>
+                  <p>
+                    <span class="pill pt">Modification</span> — The deepest
+                    atom. One row per exact production configuration.
+                    TZNA40L-PRZSZA is a specific Tacoma: automatic, 8-speed
+                    floor shift, double cab, from December 2023. This level
+                    matters for engine-specific parts (alternators, intake
+                    manifolds) and configuration-specific parts (transmissions).
+                    For body parts — a door panel — the Generation level is
+                    enough.
+                  </p>
+                </div>
+              </div>
+              <div class="sdiv"></div>
+              <div class="step">
+                <div class="step-label">The compatibility level decision</div>
+                <div class="step-title">
+                  ItemCompatibility has a compat_level field — "generation" or
+                  "modification" — so you know how broadly a match applies
+                </div>
+                <div class="step-body">
+                  <p>
+                    A door handle fits the whole E82 generation — every engine,
+                    every trim. That compatibility record has
+                    <span class="db">compat_level = generation</span> and
+                    <span class="db">modification_id = null</span>. When any
+                    buyer with any E82 variant checks, it matches.
+                  </p>
+                  <p>
+                    A specific engine alternator (N52N engine only) fits only
+                    Modifications that have
+                    <span class="db">engine_code = N52N</span>. That
+                    compatibility record has
+                    <span class="db">compat_level = modification</span> and
+                    points to specific Modification rows. A buyer with an N54
+                    E82 does NOT get a match.
+                  </p>
+                  <p>
+                    The <span class="db">year_from</span> and
+                    <span class="db">year_to</span> fields on ItemCompatibility
+                    let you express sub-ranges within a generation. For example,
+                    a headlight that changed design in mid-production: "fits E90
+                    sedan, but only from 2008 onward." Generation ID is set,
+                    modification_id is null, year_from = 2008.
+                  </p>
+                </div>
+              </div>
+              <div class="sdiv"></div>
+              <div class="step">
+                <div class="step-label">Buyer's saved cars — UserCar</div>
+                <div class="step-title">
+                  Buyers can save multiple cars. Each has a generation +
+                  optional modification + exact year.
+                </div>
+                <div class="step-body">
+                  <p>
+                    When a buyer registers, they can add their car(s) via the
+                    Make → CarModel → Generation → Modification cascade. They
+                    also enter their exact production year (because a Generation
+                    spans multiple years and the year matters for sub-range
+                    compatibility). They can save a nickname ("daily driver",
+                    "project car") and mark one as default for the main
+                    compatibility check.
+                  </p>
+                  <p>
+                    The compatibility check at browse time: SELECT * FROM
+                    ItemCompatibility WHERE generation_id = [buyer's generation]
+                    AND (modification_id IS NULL OR modification_id = [buyer's
+                    modification]) AND (year_from IS NULL OR year_from &lt;=
+                    [buyer's year]) AND (year_to IS NULL OR year_to &gt;=
+                    [buyer's year]) AND is_verified = true. If a row is found →
+                    green "Fits your car" badge. If not → "Compatibility
+                    unknown."
+                  </p>
+                  <div class="note">
+                    <strong
+                      >Buyer's modification also eliminates checkout
+                      questions.</strong
+                    >
+                    If the buyer saved their modification (they know they have
+                    an N52N engine), the system already knows the answer to
+                    "what engine is your car?" — no question is shown at
+                    checkout for engine-specific options.
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ══ L2 — AI RESEARCH ══ -->
+        <section class="section" id="l-ai">
+          <div class="section-header">
+            <div class="section-icon" style="background: #1e1a3a">🤖</div>
+            <div>
+              <div class="section-title">AI research process</div>
+              <div class="section-sub">
+                Vehicle → Variation → Item → ItemOptionConfig → Option →
+                ItemCompatibility → ItemPhoto
+              </div>
+            </div>
+          </div>
+
+          <div class="chapter" id="la1">
+            <div class="ch-head" onclick="tog('la1')">
+              <div class="ch-ico" style="background: #1e1a3a">1️⃣</div>
+              <div class="ch-meta">
+                <div class="ch-title">
+                  Seller uploads vehicle → Vehicle row created, photos stored
+                </div>
+                <div class="ch-tables">Vehicle · VehiclePhoto</div>
+              </div>
+              <span class="ch-caret">▶</span>
+            </div>
+            <div class="ch-body">
+              <div class="step">
+                <div class="step-body">
+                  <p>
+                    Seller picks Make → CarModel → Generation from the catalog.
+                    Optionally drills down to Modification if they know their
+                    exact config. Fills in <span class="db">year</span> (exact
+                    production year), <span class="db">vin</span>,
+                    <span class="db">color</span>,
+                    <span class="db">mileage</span>,
+                    <span class="db">condition</span>, and critically
+                    <span class="db">seller_zip</span> (needed for shipping
+                    quotes). Uploads photos of the car. Each photo → one
+                    <span class="pill pc">VehiclePhoto</span> row with
+                    sort_order and label (front, rear, engine bay, interior).
+                    Vehicle <span class="db">status = pending_research</span>.
+                    AI job is queued. Zero Item rows exist yet.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="chapter" id="la2">
+            <div class="ch-head" onclick="tog('la2')">
+              <div class="ch-ico" style="background: #1e1a3a">2️⃣</div>
+              <div class="ch-meta">
+                <div class="ch-title">
+                  AI builds the research checklist from categories + options
+                </div>
+                <div class="ch-tables">
+                  Category · OptionCategory · Generation · Modification
+                </div>
+              </div>
+              <span class="ch-caret">▶</span>
+            </div>
+            <div class="ch-body">
+              <div class="step">
+                <div class="step-body">
+                  <p>
+                    System reads the full
+                    <span class="pill pp">Category</span> tree with all
+                    <span class="pill pa">OptionCategories</span> attached. It
+                    also reads the vehicle's
+                    <span class="pill pt">Generation</span> and
+                    <span class="pill pt">Modification</span> (if set). The
+                    Modification gives the AI the engine code, transmission
+                    type, cab type, drive type — all the specific properties of
+                    this vehicle that will drive option elimination. This
+                    combination becomes the research checklist: for every part
+                    category, what are all theoretically possible options, and
+                    which ones can already be ruled out from the vehicle's known
+                    specs?
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="chapter" id="la3">
+            <div class="ch-head" onclick="tog('la3')">
+              <div class="ch-ico" style="background: #1e1a3a">3️⃣</div>
+              <div class="ch-meta">
+                <div class="ch-title">
+                  AI confirms parts, eliminates options, creates Variations +
+                  ItemOptionConfig
+                </div>
+                <div class="ch-tables">
+                  Variation · Option · ItemOptionConfig
+                </div>
+              </div>
+              <span class="ch-caret">▶</span>
+            </div>
+            <div class="ch-body">
+              <div class="step">
+                <div class="step-body">
+                  <p>
+                    For each confirmed part, the AI creates a
+                    <span class="pill pa">Variation</span> draft. Then it
+                    creates all possible
+                    <span class="pill pa">Option</span> rows — and immediately
+                    marks the invalid ones with
+                    <span class="db">is_ai_eliminated = true</span> plus an
+                    <span class="db">elimination_reason</span>. Example:
+                    "Vehicle Modification has engine_code = N52N. Options for
+                    engine sizes B46/N51/N54 are eliminated."
+                  </p>
+                  <p>
+                    After elimination, the AI creates one
+                    <span class="pill pa">ItemOptionConfig</span> row per
+                    OptionCategory that applies to this item. It counts the
+                    surviving options and sets
+                    <span class="db">surviving_count</span>. If surviving_count
+                    = 1, <span class="db">is_buyer_question = false</span> — the
+                    answer is already known. If surviving_count &gt; 1,
+                    <span class="db">is_buyer_question = true</span> — the buyer
+                    must answer at checkout. This flag is per-item
+                    per-option-category, not global, which is the fix from v3.
+                  </p>
+                  <p>
+                    All photos the seller uploaded are now analyzed by AI
+                    per-part: it picks the best matching vehicle photos for each
+                    item and creates <span class="pill pc">ItemPhoto</span> rows
+                    automatically. Seller can add more or reorder later.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="chapter" id="la4">
+            <div class="ch-head" onclick="tog('la4')">
+              <div class="ch-ico" style="background: #1e1a3a">4️⃣</div>
+              <div class="ch-meta">
+                <div class="ch-title">
+                  AI compatibility pass — generation or modification level per
+                  part
+                </div>
+                <div class="ch-tables">ItemCompatibility · compat_level</div>
+              </div>
+              <span class="ch-caret">▶</span>
+            </div>
+            <div class="ch-body">
+              <div class="step">
+                <div class="step-body">
+                  <p>
+                    For each confirmed part the AI determines: does this part's
+                    fitment depend on engine or transmission? If yes →
+                    compatibility records are at
+                    <span class="db">compat_level = modification</span>,
+                    pointing to specific Modification rows with the right engine
+                    code. If no (body panel, trim piece, glass) →
+                    <span class="db">compat_level = generation</span>, covering
+                    all Modifications under this Generation.
+                  </p>
+                  <p>
+                    The AI also cross-references the catalog database to find
+                    other generations this part fits. A 2JZ-GTE alternator might
+                    fit JZA80 Supra, JZZ30 Soarer, and JZX100 Chaser — all share
+                    the same engine. Each confirmed match gets an
+                    ItemCompatibility row: source = ai, is_verified = false
+                    initially, confidence_score set.
+                  </p>
+                  <div class="note">
+                    <strong>Auto-verification threshold:</strong> rows with
+                    confidence_score ≥ 0.85 → is_verified = true automatically.
+                    Below 0.85 → sits in human review queue. Source = oem_data
+                    rows always auto-verify (they come from the authoritative
+                    catalog).
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="chapter" id="la5">
+            <div class="ch-head" onclick="tog('la5')">
+              <div class="ch-ico" style="background: #1e1a3a">5️⃣</div>
+              <div class="ch-meta">
+                <div class="ch-title">
+                  Variations approved → live Items created → seller notified
+                </div>
+                <div class="ch-tables">
+                  Item · status = active · seller analytics report
+                </div>
+              </div>
+              <span class="ch-caret">▶</span>
+            </div>
+            <div class="ch-body">
+              <div class="step">
+                <div class="step-body">
+                  <p>
+                    After review, Variation
+                    <span class="db">review_status = approved</span>. System
+                    creates a real <span class="pill pp">Item</span> row. Status
+                    = active. ItemCompatibility rows already point to it.
+                    <span class="db">shipping_size</span> is auto-calculated
+                    from dimensions using the size rules.
+                    <span class="db">oem_part_number</span> is populated from
+                    catalog data if available.
+                  </p>
+                  <p>
+                    Seller receives notification + analytics report: part count,
+                    estimated total revenue, highest-demand parts, recommended
+                    pricing, packaging tutorial per shipping size category.
+                    Vehicle <span class="db">status = active</span>.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ══ L3 — OPTIONS & ELIMINATION ══ -->
+        <section class="section" id="l-options">
+          <div class="section-header">
+            <div class="section-icon" style="background: #271c04">⚙️</div>
+            <div>
+              <div class="section-title">
+                Options, elimination & buyer questions
+              </div>
+              <div class="section-sub">
+                OptionCategory · ItemOptionConfig · Option ·
+                UserCar.modification_id
+              </div>
+            </div>
+          </div>
+
+          <div class="chapter open" id="lo1">
+            <div class="ch-head" onclick="tog('lo1')">
+              <div class="ch-ico" style="background: #271c04">🔍</div>
+              <div class="ch-meta">
+                <div class="ch-title">
+                  Full flow: from vehicle specs to buyer question (or no
+                  question)
+                </div>
+                <div class="ch-tables">
+                  Modification → Option elimination → ItemOptionConfig →
+                  checkout
+                </div>
+              </div>
+              <span class="ch-caret">▶</span>
+            </div>
+            <div class="ch-body">
+              <div class="step">
+                <div class="step-label">Step 1 — AI reads vehicle specs</div>
+                <div class="step-body">
+                  <p>
+                    AI reads <span class="db">engine_code</span>,
+                    <span class="db">transmission_type</span>,
+                    <span class="db">drive_type</span> from the vehicle's
+                    <span class="pill pt">Modification</span>. These are the
+                    facts it uses to eliminate impossible options.
+                  </p>
+                </div>
+              </div>
+              <div class="sdiv"></div>
+              <div class="step">
+                <div class="step-label">
+                  Step 2 — All options created, invalid ones eliminated
+                </div>
+                <div class="step-body">
+                  <p>
+                    For an alternator on a BMW E82 128i with N52N engine:
+                    OptionCategory "Engine" has possible values N51, N52N, N54,
+                    N55. AI creates four Option rows. N51 → eliminated (wrong
+                    engine family). N54 → eliminated (turbocharged, different
+                    alternator). N55 → eliminated (different generation). N52N →
+                    is_ai_eliminated = false. One survives.
+                  </p>
+                  <p>
+                    For a car that came with BOTH N51 and N52N (some markets):
+                    both survive elimination. Now the buyer must answer.
+                    ItemOptionConfig for this item's "Engine" category:
+                    surviving_count = 2, is_buyer_question = true.
+                  </p>
+                </div>
+              </div>
+              <div class="sdiv"></div>
+              <div class="step">
+                <div class="step-label">
+                  Step 3 — At checkout, buyer sees only required questions
+                </div>
+                <div class="step-body">
+                  <p>
+                    System reads ItemOptionConfig rows for the item where
+                    is_buyer_question = true. For each one, it shows the buyer
+                    the surviving (non-eliminated) options from the Option
+                    table. Buyer picks. Their answers are saved in
+                    OrderItem.<span class="db">selected_options</span> JSON.
+                  </p>
+                  <p>
+                    If the buyer has a UserCar with a modification_id saved, the
+                    system cross-checks: does their modification's engine_code
+                    match one of the surviving options? If yes → answer is
+                    pre-filled and the question is skipped. The buyer gets a
+                    smoother checkout and fewer clicks.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ══ L4 — BUNDLES ══ -->
+        <section class="section" id="l-bundles">
+          <div class="section-header">
+            <div class="section-icon" style="background: #271c04">📦</div>
+            <div>
+              <div class="section-title">Bundle rules</div>
+              <div class="section-sub">
+                BundleCategory · Bundle · BundleItem · Item.status
+              </div>
+            </div>
+          </div>
+          <div class="chapter" id="lb1">
+            <div class="ch-head" onclick="tog('lb1')">
+              <div class="ch-ico" style="background: #271c04">🏗️</div>
+              <div class="ch-meta">
+                <div class="ch-title">
+                  Assembly bundles — sell whole, break apart only if damaged
+                </div>
+                <div class="ch-tables">
+                  type = assembly · status = hidden_in_assembly
+                </div>
+              </div>
+              <span class="ch-caret">▶</span>
+            </div>
+            <div class="ch-body">
+              <div class="step">
+                <div class="step-body">
+                  <p>
+                    When AI confirms all sub-parts of an assembly template exist
+                    and are in good condition, a Bundle is auto-created.
+                    Sub-items get
+                    <span class="db">status = hidden_in_assembly</span> —
+                    invisible as individual listings. Only the bundle listing
+                    shows. If any sub-part is damaged: bundle → disbanded, good
+                    sub-parts → active individual listings, damaged part →
+                    removed or for_parts condition.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="chapter" id="lb2">
+            <div class="ch-head" onclick="tog('lb2')">
+              <div class="ch-ico" style="background: #271c04">🎁</div>
+              <div class="ch-meta">
+                <div class="ch-title">
+                  Discount bundles — auto-create alongside individual listings,
+                  auto-disband as items sell
+                </div>
+                <div class="ch-tables">
+                  type = discount · three disband rules
+                </div>
+              </div>
+              <span class="ch-caret">▶</span>
+            </div>
+            <div class="ch-body">
+              <div class="step">
+                <div class="step-body">
+                  <p>
+                    When all items matching a discount template are active, a
+                    Bundle is created alongside them. Individual items still
+                    show separately. Three auto-disband rules trigger on any
+                    item status → sold:
+                  </p>
+                  <p>
+                    <strong>Rule 1</strong> — Whole bundle purchased: all items
+                    → sold, bundle → closed.
+                  </p>
+                  <p>
+                    <strong>Rule 2</strong> — One item sells individually:
+                    remove from BundleItem, recalculate discount for remaining
+                    count.
+                  </p>
+                  <p>
+                    <strong>Rule 3</strong> — Bundle drops to 1 item: delete the
+                    bundle. Last item becomes a normal standalone listing.
+                  </p>
+                  <div class="note">
+                    Runs as a DB trigger or background job on every Item.status
+                    change to "sold".
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ══ L5 — SELLER PIPELINE ══ -->
+        <section class="section" id="l-sellers">
+          <div class="section-header">
+            <div class="section-icon" style="background: #0d1f38">👤</div>
+            <div>
+              <div class="section-title">
+                User registration & seller pipeline
+              </div>
+              <div class="section-sub">
+                User · SellerApplication · SellerVerificationDoc
+              </div>
+            </div>
+          </div>
+          <div class="chapter" id="ls1">
+            <div class="ch-head" onclick="tog('ls1')">
+              <div class="ch-ico" style="background: #0d1f38">📧</div>
+              <div class="ch-meta">
+                <div class="ch-title">
+                  Registration → application → approval → vehicle upload
+                </div>
+                <div class="ch-tables">
+                  User · SellerApplication · SellerVerificationDoc
+                </div>
+              </div>
+              <span class="ch-caret">▶</span>
+            </div>
+            <div class="ch-body">
+              <div class="step">
+                <div class="step-label">Registration</div>
+                <div class="step-body">
+                  <p>
+                    Email → 6-digit code → password.
+                    <span class="db">email_verified_at</span> set.
+                    <span class="db">is_seller = false</span>. They are a buyer
+                    by default.
+                  </p>
+                </div>
+              </div>
+              <div class="sdiv"></div>
+              <div class="step">
+                <div class="step-label">Seller application</div>
+                <div class="step-body">
+                  <p>
+                    User fills out SellerApplication (bio, sourcing method,
+                    expected volume). Uploads SellerVerificationDocs (one row
+                    per document). Status = pending.
+                  </p>
+                </div>
+              </div>
+              <div class="sdiv"></div>
+              <div class="step">
+                <div class="step-label">Admin review</div>
+                <div class="step-body">
+                  <p>
+                    Admin approves → <span class="db">is_seller = true</span>,
+                    SellerApplication status = approved,
+                    <span class="db">reviewed_at</span> set. Seller sees "List a
+                    vehicle" UI.
+                  </p>
+                  <p>
+                    Admin rejects → status = rejected,
+                    <span class="db">rejection_reason</span> filled. User can
+                    reapply by creating a new SellerApplication row.
+                  </p>
+                </div>
+              </div>
+              <div class="sdiv"></div>
+              <div class="step">
+                <div class="step-label">After vehicle research completes</div>
+                <div class="step-body">
+                  <p>
+                    Seller receives analytics report: part count, estimated
+                    revenue, demand data, pricing recommendations, shipping
+                    tutorial per size category. Report generated 24–48h after
+                    vehicle upload.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ══ L6 — ORDERS & PAYMENTS ══ -->
+        <section class="section" id="l-orders">
+          <div class="section-header">
+            <div class="section-icon" style="background: #2a0f0f">💳</div>
+            <div>
+              <div class="section-title">Orders & payments</div>
+              <div class="section-sub">
+                CartItem · Order · OrderItem · Payment
+              </div>
+            </div>
+          </div>
+          <div class="chapter" id="lor1">
+            <div class="ch-head" onclick="tog('lor1')">
+              <div class="ch-ico" style="background: #2a0f0f">🛒</div>
+              <div class="ch-meta">
+                <div class="ch-title">
+                  Cart → checkout → order → payment capture
+                </div>
+                <div class="ch-tables">
+                  CartItem · Order · OrderItem · Payment
+                </div>
+              </div>
+              <span class="ch-caret">▶</span>
+            </div>
+            <div class="ch-body">
+              <div class="step">
+                <div class="step-label">Adding to cart</div>
+                <div class="step-body">
+                  <p>
+                    Buyer clicks "Add to cart" → one
+                    <span class="pill pc">CartItem</span> row per item. No
+                    quantity field — each item is one unique physical part. You
+                    can't buy two of the same item because only one exists.
+                  </p>
+                </div>
+              </div>
+              <div class="sdiv"></div>
+              <div class="step">
+                <div class="step-label">
+                  Checkout — buyer questions answered
+                </div>
+                <div class="step-body">
+                  <p>
+                    For each CartItem, system reads ItemOptionConfig rows where
+                    <span class="db">is_buyer_question = true</span>. Buyer
+                    answers each question (engine size, side, etc.) unless their
+                    saved UserCar already answers it. Answers collected in
+                    memory until order placement.
+                  </p>
+                </div>
+              </div>
+              <div class="sdiv"></div>
+              <div class="step">
+                <div class="step-label">Order placed</div>
+                <div class="step-body">
+                  <p>
+                    One <span class="pill pc">Order</span> row created. One
+                    <span class="pill pc">OrderItem</span> per cart line —
+                    stores <span class="db">price_at_purchase</span>, full
+                    <span class="db">item_snapshot</span> JSON, and
+                    <span class="db">selected_options</span> JSON (buyer's
+                    checkout answers). Order stores
+                    <span class="db">vehicle_snapshot</span>. All CartItem rows
+                    deleted.
+                  </p>
+                  <p>
+                    One <span class="pill pv">Payment</span> row created
+                    immediately with <span class="db">status = pending</span>.
+                    Payment provider is called. On success:
+                    <span class="db">status = captured</span>,
+                    <span class="db">paid_at</span> set,
+                    <span class="db">provider_reference</span> stored (Stripe
+                    charge ID etc.). On failure:
+                    <span class="db">status = failed</span>, Order stays
+                    pending, buyer is shown an error and can retry.
+                  </p>
+                </div>
+              </div>
+              <div class="sdiv"></div>
+              <div class="step">
+                <div class="step-label">Refunds</div>
+                <div class="step-body">
+                  <p>
+                    When a dispute resolves with a refund:
+                    <span class="db">Payment.refunded_amount</span> is updated,
+                    <span class="db">Payment.status</span> → refunded (full) or
+                    partial_refund, <span class="db">refunded_at</span> set. The
+                    refund goes through the same payment provider reference.
+                    Full audit trail preserved.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ══ L7 — SHIPPING ══ -->
+        <section class="section" id="l-shipping">
+          <div class="section-header">
+            <div class="section-icon" style="background: #1a1230">🚚</div>
+            <div>
+              <div class="section-title">Shipping flow</div>
+              <div class="section-sub">
+                ShippingRequest — all manual, no API
+              </div>
+            </div>
+          </div>
+          <div class="chapter" id="lsh1">
+            <div class="ch-head" onclick="tog('lsh1')">
+              <div class="ch-ico" style="background: #1a1230">📦</div>
+              <div class="ch-meta">
+                <div class="ch-title">
+                  From order placed to part delivered — full manual flow
+                </div>
+                <div class="ch-tables">
+                  ShippingRequest · Item.shipping_size · origin_zip · dest_zip
+                </div>
+              </div>
+              <span class="ch-caret">▶</span>
+            </div>
+            <div class="ch-body">
+              <div class="step">
+                <div class="step-label">
+                  Size already known at item creation
+                </div>
+                <div class="step-body">
+                  <p>
+                    When an Item is created from a Variation,
+                    <span class="db">shipping_size</span> is auto-calculated:
+                    system reads weight_lbs + dim_l_in + dim_w_in + dim_h_in and
+                    applies the upgrade rules in order (Small → Medium → Large →
+                    Extra Large). Result stored on Item. Buyer sees the size
+                    category and estimated cost at browse time before even
+                    adding to cart.
+                  </p>
+                </div>
+              </div>
+              <div class="sdiv"></div>
+              <div class="step">
+                <div class="step-label">
+                  After payment — ShippingRequest created
+                </div>
+                <div class="step-body">
+                  <p>
+                    For each OrderItem that isn't pickup, one
+                    <span class="pill pc">ShippingRequest</span> row is created.
+                    It copies <span class="db">origin_zip</span> from
+                    Vehicle.seller_zip and <span class="db">dest_zip</span> from
+                    the buyer's ShippingAddress. Support team sees a queue of
+                    open ShippingRequests.
+                  </p>
+                  <p>
+                    <span class="pill pt">Pickup</span> — buyer gets a
+                    confirmation code. Shows up at seller's location. Support
+                    marks delivered when confirmed. 30-day quality guarantee
+                    starts.
+                  </p>
+                  <p>
+                    <span class="pill pt">Parcel</span> (Small/Medium) — support
+                    contacts USPS/FedEx/UPS, gets actual quote, stores as
+                    <span class="db">actual_cost</span>, purchases label, saves
+                    as <span class="db">label_url</span>, emails to seller.
+                    Seller prints, attaches, drops off. Tracking number entered
+                    manually.
+                  </p>
+                  <p>
+                    <span class="pill pt">Freight</span> (Large/Extra Large) —
+                    support contacts freight carriers manually, arranges pickup,
+                    enters tracking. For engines/transmissions: pallet
+                    arrangement included.
+                  </p>
+                </div>
+              </div>
+              <div class="sdiv"></div>
+              <div class="step">
+                <div class="step-label">Delivery confirmed</div>
+                <div class="step-body">
+                  <p>
+                    Carrier confirms delivery → support sets
+                    <span class="db">is_delivered = true</span> and
+                    <span class="db">delivered_at</span> on ShippingRequest.
+                    Order status → delivered. Buyer notified. Prompted to leave
+                    SellerReview (linked to the specific OrderItem, not just the
+                    seller).
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ══ L8 — DISPUTES ══ -->
+        <section class="section" id="l-disputes">
+          <div class="section-header">
+            <div class="section-icon" style="background: #2d1200">⚖️</div>
+            <div>
+              <div class="section-title">Disputes & returns</div>
+              <div class="section-sub">
+                Dispute · DisputeMessage · Payment refund
+              </div>
+            </div>
+          </div>
+          <div class="chapter" id="ld1">
+            <div class="ch-head" onclick="tog('ld1')">
+              <div class="ch-ico" style="background: #2d1200">🔴</div>
+              <div class="ch-meta">
+                <div class="ch-title">
+                  Buyer opens a dispute → evidence collected → admin resolves →
+                  payment updated
+                </div>
+                <div class="ch-tables">Dispute · DisputeMessage · Payment</div>
+              </div>
+              <span class="ch-caret">▶</span>
+            </div>
+            <div class="ch-body">
+              <div class="step">
+                <div class="step-label">Opening a dispute</div>
+                <div class="step-body">
+                  <p>
+                    Buyer clicks "Open dispute" on a delivered OrderItem. They
+                    pick a reason (not_as_described, wrong_part, not_received,
+                    damaged, other) and write a description. A
+                    <span class="pill po">Dispute</span> row is created: status
+                    = open. Seller and admin are notified immediately.
+                  </p>
+                </div>
+              </div>
+              <div class="sdiv"></div>
+              <div class="step">
+                <div class="step-label">Evidence phase</div>
+                <div class="step-body">
+                  <p>
+                    Buyer, seller, and support all post
+                    <span class="pill po">DisputeMessage</span> rows. The
+                    <span class="db">sender_role</span> field
+                    (buyer/seller/support) keeps it clear who said what. Buyers
+                    and sellers can attach photos as
+                    <span class="db">attachment_url</span> — pictures of the
+                    part, damage, packaging. Dispute status → under_review.
+                  </p>
+                </div>
+              </div>
+              <div class="sdiv"></div>
+              <div class="step">
+                <div class="step-label">Admin resolution</div>
+                <div class="step-body">
+                  <p>
+                    Admin reviews the full DisputeMessage thread and both the
+                    item_snapshot and vehicle_snapshot from the OrderItem/Order.
+                    They pick a resolution:
+                  </p>
+                  <p>
+                    <span class="pill pt">resolved_refund</span> — buyer gets
+                    money back. Admin sets
+                    <span class="db">refund_amount</span>, marks
+                    <span class="db">return_required</span> if part must come
+                    back. Payment.refunded_amount updated, Payment.status →
+                    refunded or partial_refund.
+                  </p>
+                  <p>
+                    <span class="pill pa">resolved_return</span> — buyer returns
+                    the part, gets refund after. ShippingRequest created in
+                    reverse direction.
+                  </p>
+                  <p>
+                    <span class="pill pg">resolved_no_action</span> — dispute
+                    not valid. Explained in resolution notes. Case closed.
+                  </p>
+                  <p>
+                    Admin fills <span class="db">resolution</span> text, sets
+                    <span class="db">resolved_by</span> (their user ID), sets
+                    <span class="db">resolved_at</span>. Dispute status →
+                    closed. Both parties notified.
+                  </p>
+                  <div class="note">
+                    <strong
+                      >The item_snapshot on OrderItem is what makes disputes
+                      fair.</strong
+                    >
+                    It's a frozen copy of exactly what was listed — title,
+                    description, options, photos at checkout time. Seller can't
+                    edit the listing after sale to cover their tracks. Admin
+                    always sees exactly what the buyer was promised.
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ══ L9 — MESSAGING ══ -->
+        <section class="section" id="l-msg">
+          <div class="section-header">
+            <div class="section-icon" style="background: #0b2318">💬</div>
+            <div>
+              <div class="section-title">Messaging</div>
+              <div class="section-sub">Thread · Message</div>
+            </div>
+          </div>
+          <div class="chapter" id="lm1">
+            <div class="ch-head" onclick="tog('lm1')">
+              <div class="ch-ico" style="background: #0b2318">✉️</div>
+              <div class="ch-meta">
+                <div class="ch-title">
+                  One thread per buyer × seller × item. Inbox sorted by last
+                  message.
+                </div>
+                <div class="ch-tables">Thread · Message</div>
+              </div>
+              <span class="ch-caret">▶</span>
+            </div>
+            <div class="ch-body">
+              <div class="step">
+                <div class="step-body">
+                  <p>
+                    Buyer clicks "Message seller" on a listing → one
+                    <span class="pill pg">Thread</span> row created with
+                    buyer_id, seller_id, item_id. All messages are
+                    <span class="pill pg">Message</span> rows with sender_id and
+                    is_read flag. Different item = new thread.
+                    <span class="db">last_message_at</span> on Thread is updated
+                    on every new message — used to sort the inbox by most recent
+                    activity. Simple private inbox, no AI, no automation.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script>
+      function tog(id) {
+        document.getElementById(id).classList.toggle("open");
+      }
+      const navItems = document.querySelectorAll(".nav-item");
+      function setActive() {
+        let cur = "";
+        document.querySelectorAll("section[id]").forEach((s) => {
+          if (window.scrollY >= s.offsetTop - 100) cur = s.id;
+        });
+        navItems.forEach((i) =>
+          i.classList.toggle("active", i.getAttribute("href") === "#" + cur),
+        );
+      }
+      window.addEventListener("scroll", setActive, { passive: true });
+      setActive();
+    </script>
+  </body>
+</html>

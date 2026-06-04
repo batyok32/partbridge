@@ -170,6 +170,13 @@ PERPLEXITY_API_KEY = os.environ.get("PERPLEXITY_API_KEY", "")
 CLAUDE_API_KEY = os.environ.get("CLAUDE_API_KEY", "")
 STRIPE_SECRET_KEY = os.environ.get("STRIPE_SECRET_KEY", "")
 STRIPE_WEBHOOK_SECRET = os.environ.get("STRIPE_WEBHOOK_SECRET", "")
+STRIPE_CONNECT_WEBHOOK_SECRET = os.environ.get("STRIPE_CONNECT_WEBHOOK_SECRET", "")
+# Platform fee deducted before transferring to seller Connect account (decimal, e.g. "0.05" = 5%)
+PLATFORM_FEE_RATE = os.environ.get("PLATFORM_FEE_RATE", "0.05")
+# Days after shipping before an order is auto-marked delivered
+AUTO_DELIVER_DAYS = int(os.environ.get("AUTO_DELIVER_DAYS", "7"))
+# Hours after delivery before seller payout is eligible
+PAYOUT_HOLD_HOURS = int(os.environ.get("PAYOUT_HOLD_HOURS", "24"))
 # When set (e.g. 1), Stripe Checkout charges this USD total instead of real order amounts (testing only; unset in production).
 STRIPE_CHECKOUT_TEST_AMOUNT_USD = os.environ.get("STRIPE_CHECKOUT_TEST_AMOUNT_USD", "").strip()
 TRACKING_WEBHOOK_SECRET = os.environ.get("TRACKING_WEBHOOK_SECRET", "")

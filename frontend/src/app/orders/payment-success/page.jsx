@@ -13,22 +13,34 @@ export default function OrderPaymentSuccessPage() {
   useEffect(() => {
     if (ran.current || typeof window === "undefined") return;
     ran.current = true;
+
     const params = new URLSearchParams(window.location.search);
-    const sessionId = params.get("session_id");
-    if (!sessionId) {
+    const piId = params.get("payment_intent");
+    const redirectStatus = params.get("redirect_status");
+
+    if (!piId) {
       setPhase("error");
-      setDetail("Missing session. Return to purchases and try again.");
+      setDetail("Missing payment reference. Return to purchases and check your order status.");
       return;
     }
+    if (redirectStatus === "failed") {
+      setPhase("error");
+      setDetail("Payment failed. Please try again from your cart.");
+      return;
+    }
+
     void (async () => {
       try {
-        await apiFetch(`/orders/checkout-session/verify/?session_id=${encodeURIComponent(sessionId)}`);
+        await apiFetch("/cart/verify-payment/", {
+          method: "POST",
+          body: JSON.stringify({ payment_intent_id: piId }),
+        });
         setPhase("ok");
         window.history.replaceState({}, "", "/orders/payment-success");
       } catch (e) {
         setPhase("error");
         if (e instanceof ApiError) setDetail(e.message);
-        else setDetail("Could not confirm payment.");
+        else setDetail("Could not confirm payment — check your purchases for order status.");
       }
     })();
   }, []);
@@ -50,7 +62,7 @@ export default function OrderPaymentSuccessPage() {
             <p className="text-3xl mb-3">✓</p>
             <p className="heading-display text-xl mb-2">Payment successful</p>
             <p className="text-sm mb-6" style={{ color: "var(--text-muted)" }}>
-              Your order is paid and moving into escrow. The seller will be notified.
+              Your order is confirmed and moving into escrow. The seller will be notified.
             </p>
             <Link href="/purchases" className="btn-forge inline-flex px-6 py-3 text-sm">
               View purchases

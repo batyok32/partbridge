@@ -151,8 +151,15 @@ export async function apiFetchRaw(path, init = {}) {
 
 // ─── Catalog API ─────────────────────────────────────────────────────────────
 
-export async function getMakes() {
-  return apiFetch(`${CATALOG_URL}/makes/`, { auth: false });
+export async function getMakes(params = {}) {
+  const q = new URLSearchParams(params).toString();
+  const suffix = q ? `?${q}` : "";
+  return apiFetch(`${CATALOG_URL}/makes/${suffix}`, { auth: false });
+}
+
+export async function getMakesWithCounts() {
+  const data = await getMakes({ with_counts: "1" });
+  return Array.isArray(data) ? data : data?.results || [];
 }
 
 export async function getModels(makeId) {
@@ -175,15 +182,37 @@ export async function getModifications(generationId) {
 export async function getItems(filters = {}) {
   const params = new URLSearchParams(filters).toString();
   const q = params ? `?${params}` : "";
-  return apiFetch(`${PARTS_URL}/items/${q}`, { auth: false });
+  const data = await apiFetch(`${PARTS_URL}/items/${q}`, { auth: false });
+  if (data && typeof data === "object" && Array.isArray(data.results)) {
+    return data;
+  }
+  const list = Array.isArray(data) ? data : data?.results || [];
+  return { count: list.length, results: list };
 }
 
-export async function getItem(id) {
-  return apiFetch(`${PARTS_URL}/items/${id}/`, { auth: false });
+export async function getFeaturedCategories(filters = {}) {
+  const params = new URLSearchParams(filters).toString();
+  const q = params ? `?${params}` : "";
+  const data = await apiFetch(`${PARTS_URL}/home/featured-categories/${q}`, { auth: false });
+  return Array.isArray(data) ? data : [];
 }
 
-export async function getCategories() {
-  return apiFetch(`${PARTS_URL}/categories/`, { auth: false });
+export async function getHomeRecent(filters = {}) {
+  const params = new URLSearchParams(filters).toString();
+  const q = params ? `?${params}` : "";
+  const data = await apiFetch(`${PARTS_URL}/home/recent/${q}`, { auth: false });
+  return Array.isArray(data) ? data : [];
+}
+
+export async function getItem(id, params = {}) {
+  const qs = Object.keys(params).length ? "?" + new URLSearchParams(params).toString() : "";
+  return apiFetch(`${PARTS_URL}/items/${id}/${qs}`, { auth: false });
+}
+
+export async function getCategories(params = {}) {
+  const q = new URLSearchParams(params).toString();
+  const suffix = q ? `?${q}` : "";
+  return apiFetch(`${PARTS_URL}/categories/${suffix}`, { auth: false });
 }
 
 // ─── UserCar API ──────────────────────────────────────────────────────────────
@@ -220,6 +249,10 @@ export async function createOrder(data) {
   });
 }
 
+export async function confirmOrderDelivery(orderId) {
+  return apiFetch(`/orders/${orderId}/confirm-delivery/`, { method: "POST" });
+}
+
 // ─── Cart API ─────────────────────────────────────────────────────────────────
 
 export async function getCart() {
@@ -235,6 +268,24 @@ export async function addToCart(itemId) {
 
 export async function removeFromCart(cartItemId) {
   return apiFetch(`/cart/${cartItemId}/`, { method: "DELETE" });
+}
+
+export async function removeCartBundle(bundleId) {
+  return apiFetch(`/cart/bundle/${bundleId}/remove/`, { method: "DELETE" });
+}
+
+export async function setCartItemShippingMode(cartItemId, mode) {
+  return apiFetch(`/cart/${cartItemId}/`, {
+    method: "PATCH",
+    body: JSON.stringify({ shipping_mode: mode }),
+  });
+}
+
+export async function setCartBundleShippingMode(bundleId, mode) {
+  return apiFetch(`/cart/bundle/${bundleId}/`, {
+    method: "PATCH",
+    body: JSON.stringify({ shipping_mode: mode }),
+  });
 }
 
 // ─── Disputes API ─────────────────────────────────────────────────────────────
@@ -284,6 +335,74 @@ export async function sendMessage(threadId, body) {
 
 export async function markThreadRead(threadId) {
   return apiFetch(`/messages/threads/${threadId}/mark-read/`, { method: "POST" });
+}
+
+// ─── Option Filters API ──────────────────────────────────────────────────────
+
+export async function getOptionFilters(params = {}) {
+  const qs = Object.keys(params).length ? "?" + new URLSearchParams(params).toString() : "";
+  return apiFetch(`${PARTS_URL}/option-filters/${qs}`, { auth: false });
+}
+
+export async function getOptionCategories(categorySlug) {
+  const qs = categorySlug ? `?category=${categorySlug}` : "";
+  return apiFetch(`${PARTS_URL}/option-categories/${qs}`, { auth: false });
+}
+
+export async function getPartNumberAutocomplete(q) {
+  if (!q || q.length < 2) return [];
+  const qs = new URLSearchParams({ q }).toString();
+  return apiFetch(`${PARTS_URL}/part-number-autocomplete/?${qs}`, { auth: false });
+}
+
+// ─── Vehicle Item CRUD ───────────────────────────────────────────────────────
+
+export async function getVehicleItem(vehicleId, itemId) {
+  return apiFetch(`/vehicles/${vehicleId}/items/${itemId}/`);
+}
+
+export async function createVehicleItem(vehicleId, data) {
+  return apiFetch(`/vehicles/${vehicleId}/items/`, {
+    method: "POST",
+    body: JSON.stringify(data),
+  });
+}
+
+export async function updateVehicleItem(vehicleId, itemId, data) {
+  return apiFetch(`/vehicles/${vehicleId}/items/${itemId}/`, {
+    method: "PATCH",
+    body: JSON.stringify(data),
+  });
+}
+
+export async function deleteVehicleItem(vehicleId, itemId) {
+  return apiFetch(`/vehicles/${vehicleId}/items/${itemId}/`, { method: "DELETE" });
+}
+
+export async function addItemPhoto(vehicleId, itemId, body) {
+  return apiFetch(`/vehicles/${vehicleId}/items/${itemId}/photos/`, {
+    method: "POST",
+    body,
+  });
+}
+
+export async function deleteItemPhoto(vehicleId, itemId, photoId) {
+  return apiFetch(`/vehicles/${vehicleId}/items/${itemId}/photos/${photoId}/`, { method: "DELETE" });
+}
+
+// ─── Bundles API ─────────────────────────────────────────────────────────────
+
+export async function getBundles(params = {}) {
+  const qs = Object.keys(params).length ? "?" + new URLSearchParams(params).toString() : "";
+  return apiFetch(`${BUNDLES_URL}/search/${qs}`, { auth: false });
+}
+
+export async function getBundle(id) {
+  return apiFetch(`${BUNDLES_URL}/${id}/`, { auth: false });
+}
+
+export async function addBundleToCart(bundleId) {
+  return apiFetch(`/cart/bundle/${bundleId}/`, { method: "POST" });
 }
 
 export { API_URL };

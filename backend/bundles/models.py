@@ -8,7 +8,7 @@ class BundleCategory(models.Model):
 
     name = models.CharField(max_length=128)
     type = models.CharField(max_length=16, choices=BundleType.choices, default=BundleType.DISCOUNT)
-    category_filters = models.JSONField(default=dict, blank=True)
+    image = models.ImageField(upload_to="bundle_categories/", null=True, blank=True)
 
     class Meta:
         verbose_name_plural = "Bundle categories"
@@ -24,7 +24,16 @@ class Bundle(models.Model):
 
     bundle_category = models.ForeignKey(BundleCategory, on_delete=models.CASCADE, related_name="bundles")
     name = models.CharField(max_length=255)
+    category = models.ForeignKey(
+        "parts.Category",
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+        related_name="assembly_bundles",
+        help_text="Category for the synthetic assembly item. Required for assembly bundles.",
+    )
     discount_pct = models.DecimalField(max_digits=5, decimal_places=2, default=0)
+    fixed_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     status = models.CharField(max_length=16, choices=Status.choices, default=Status.ACTIVE)
     created_at = models.DateTimeField(auto_now_add=True)
 

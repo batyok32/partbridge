@@ -4,9 +4,11 @@ from .models import CarModel, Generation, Make, Modification
 
 
 class MakeSerializer(serializers.ModelSerializer):
+    listing_count = serializers.IntegerField(read_only=True, required=False)
+
     class Meta:
         model = Make
-        fields = ("id", "name", "slug", "country", "logo_url", "created_at")
+        fields = ("id", "name", "slug", "country", "logo_url", "listing_count", "created_at")
 
 
 class CarModelSerializer(serializers.ModelSerializer):

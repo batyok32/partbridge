@@ -63,6 +63,8 @@ class StripeWebhookView(APIView):
                 (obj.get("last_payment_error") or {}).get("message") if isinstance(obj.get("last_payment_error"), dict) else obj.get("last_payment_error"),
             )
             return Response({"received": True}, status=200)
+        if etype == "account.updated":
+            return self._on_account_updated(event)
 
         return Response({"received": True, "ignored": etype}, status=200)
 
@@ -105,6 +107,23 @@ class StripeWebhookView(APIView):
             return Response({"received": True, "order_id": last_ok, "order_ids": order_ids}, status=200)
         return Response({"received": True, "detail": "finalize_failed", "order_ids": order_ids}, status=200)
 
+    def _on_account_updated(self, event: dict) -> Response:
+        """Sync Connect account verification flags when Stripe notifies us."""
+        obj = (event.get("data") or {}).get("object") or {}
+        account_id = obj.get("id") or ""
+        if not account_id:
+            return Response({"received": True}, status=200)
+        from accounts.models import User
+        try:
+            user = User.objects.get(stripe_connect_account_id=account_id)
+        except User.DoesNotExist:
+            logger.warning("account.updated: no user with connect_account=%s", account_id)
+            return Response({"received": True}, status=200)
+        from .stripe_connect import sync_account_status
+        result = sync_account_status(user)
+        logger.info("account.updated account=%s result=%s", account_id, result)
+        return Response({"received": True}, status=200)
+
     def _on_payment_intent_succeeded(self, event: dict) -> Response:
         obj = (event.get("data") or {}).get("object") or {}
         pi_id = obj.get("id") or ""
@@ -125,9 +144,8 @@ class StripeWebhookView(APIView):
                 order_ids = []
 
         if not order_ids and pi_id:
-            order = Order.objects.filter(stripe_payment_intent_id=pi_id).first()
-            if order is not None:
-                order_ids = [order.id]
+            from .models import Payment as _Payment
+            order_ids = list(_Payment.objects.filter(provider_reference=pi_id).values_list("order_id", flat=True))
 
         if not order_ids:
             logger.warning("Stripe payment_intent.succeeded: no order for pi=%s metadata=%s", pi_id, meta)

@@ -2,13 +2,13 @@
 
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 
 import { useAuth } from "@/context/auth-context";
 import { isApprovedSeller } from "@/lib/roles";
 import { useToast } from "@/context/toast-context";
-import { ApiError, apiFetch } from "@/lib/api";
+import { ApiError, apiFetch, createVehicleItem, getCategories } from "@/lib/api";
 
 const inputStyle = {
   background: "var(--bg-elevated)",
@@ -30,16 +30,44 @@ const sectionStyle = {
   marginTop: 20,
 };
 
+const labelStyle = {
+  display: "block",
+  fontSize: 10,
+  fontWeight: 700,
+  textTransform: "uppercase",
+  letterSpacing: "0.08em",
+  color: "var(--text-muted)",
+  fontFamily: "var(--ff-display)",
+  marginBottom: 4,
+};
+
+const STATUS_COLORS = {
+  pending_research: { bg: "rgba(251,191,36,0.12)", border: "rgba(251,191,36,0.3)", color: "#fbbf24" },
+  researching:      { bg: "rgba(56,189,248,0.12)",  border: "rgba(56,189,248,0.3)",  color: "#38bdf8" },
+  active:           { bg: "rgba(74,222,128,0.12)",  border: "rgba(74,222,128,0.3)",  color: "#4ade80" },
+  archived:         { bg: "rgba(148,163,184,0.12)", border: "rgba(148,163,184,0.3)", color: "#94a3b8" },
+};
+
+const ITEM_STATUS_COLORS = {
+  active:             { bg: "rgba(74,222,128,0.1)",  border: "rgba(74,222,128,0.3)",  color: "#4ade80" },
+  sold:               { bg: "rgba(251,191,36,0.1)",  border: "rgba(251,191,36,0.3)",  color: "#fbbf24" },
+  removed:            { bg: "rgba(148,163,184,0.1)", border: "rgba(148,163,184,0.3)", color: "#94a3b8" },
+  hidden_in_assembly: { bg: "rgba(99,102,241,0.1)",  border: "rgba(99,102,241,0.3)",  color: "#818cf8" },
+};
+
 function StatusBadge({ status }) {
-  const colors = {
-    pending_research: { bg: "rgba(251,191,36,0.12)", border: "rgba(251,191,36,0.3)", color: "#fbbf24" },
-    researching: { bg: "rgba(56,189,248,0.12)", border: "rgba(56,189,248,0.3)", color: "#38bdf8" },
-    active: { bg: "rgba(74,222,128,0.12)", border: "rgba(74,222,128,0.3)", color: "#4ade80" },
-    archived: { bg: "rgba(148,163,184,0.12)", border: "rgba(148,163,184,0.3)", color: "#94a3b8" },
-  };
-  const c = colors[status] || colors.archived;
+  const c = STATUS_COLORS[status] || STATUS_COLORS.archived;
   return (
     <span style={{ background: c.bg, border: `1px solid ${c.border}`, color: c.color, borderRadius: 999, padding: "2px 10px", fontSize: 11, fontWeight: 600, fontFamily: "var(--ff-display)" }}>
+      {status?.replace(/_/g, " ")}
+    </span>
+  );
+}
+
+function ItemStatusBadge({ status }) {
+  const c = ITEM_STATUS_COLORS[status] || ITEM_STATUS_COLORS.removed;
+  return (
+    <span style={{ background: c.bg, border: `1px solid ${c.border}`, color: c.color, borderRadius: 999, padding: "1px 8px", fontSize: 10, fontWeight: 600, fontFamily: "var(--ff-display)", display: "inline-block" }}>
       {status?.replace(/_/g, " ")}
     </span>
   );
@@ -54,14 +82,27 @@ export default function VehicleDashboardPage() {
   const [vehicle, setVehicle] = useState(null);
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [photoUrl, setPhotoUrl] = useState("");
+
+  // Vehicle settings form
+  const [photoFile, setPhotoFile] = useState(null);
   const [photoLabel, setPhotoLabel] = useState("");
   const [photoBusy, setPhotoBusy] = useState(false);
+  const photoFileRef = useRef(null);
   const [editZip, setEditZip] = useState("");
   const [editColor, setEditColor] = useState("");
   const [editMileage, setEditMileage] = useState("");
   const [editCondition, setEditCondition] = useState("good");
   const [savingSettings, setSavingSettings] = useState(false);
+
+  // Add item form
+  const [showAddItem, setShowAddItem] = useState(false);
+  const [categories, setCategories] = useState([]);
+  const [newCategory, setNewCategory] = useState("");
+  const [newTitle, setNewTitle] = useState("");
+  const [newPrice, setNewPrice] = useState("");
+  const [newCondition, setNewCondition] = useState("good");
+  const [newOem, setNewOem] = useState("");
+  const [addingItem, setAddingItem] = useState(false);
 
   useEffect(() => {
     if (!authLoading && !user) router.replace("/login");
@@ -71,42 +112,41 @@ export default function VehicleDashboardPage() {
     if (!authLoading && user && !isApprovedSeller(user)) router.replace("/seller/apply");
   }, [authLoading, user, router]);
 
-  useEffect(() => {
+  const loadVehicle = useCallback(async () => {
     if (!user || !id) return;
-    let cancelled = false;
-    (async () => {
-      setLoading(true);
-      try {
-        const [v, its] = await Promise.all([
-          apiFetch(`/vehicles/${id}/`),
-          apiFetch(`/vehicles/${id}/items/`),
-        ]);
-        if (!cancelled) {
-          setVehicle(v);
-          setEditZip(v?.seller_zip || "");
-          setEditColor(v?.color || "");
-          setEditMileage(v?.mileage != null ? String(v.mileage) : "");
-          setEditCondition(v?.condition || "good");
-          setItems(Array.isArray(its) ? its : []);
-        }
-      } catch (e) {
-        if (!cancelled && e instanceof ApiError) toast.error(e.message);
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    })();
-    return () => { cancelled = true; };
+    setLoading(true);
+    try {
+      const [v, its] = await Promise.all([
+        apiFetch(`/vehicles/${id}/`),
+        apiFetch(`/vehicles/${id}/items/`),
+      ]);
+      setVehicle(v);
+      setEditZip(v?.seller_zip || "");
+      setEditColor(v?.color || "");
+      setEditMileage(v?.mileage != null ? String(v.mileage) : "");
+      setEditCondition(v?.condition || "good");
+      setItems(Array.isArray(its) ? its : []);
+    } catch (e) {
+      if (e instanceof ApiError) toast.error(e.message);
+    } finally {
+      setLoading(false);
+    }
   }, [user, id, toast]);
+
+  useEffect(() => {
+    void loadVehicle();
+  }, [loadVehicle]);
 
   async function saveSettings() {
     setSavingSettings(true);
     try {
       const body = {
         seller_zip: editZip.trim(),
-        color: editColor.trim() || undefined,
+        // Send empty string to allow clearing; omit only if the field wasn't touched
+        color: editColor.trim(),
         condition: editCondition,
       };
-      if (editMileage) body.mileage = parseInt(editMileage, 10);
+      if (editMileage !== "") body.mileage = parseInt(editMileage, 10);
       const updated = await apiFetch(`/vehicles/${id}/`, { method: "PATCH", body: JSON.stringify(body) });
       setVehicle(updated);
       toast.success("Vehicle updated.");
@@ -118,14 +158,20 @@ export default function VehicleDashboardPage() {
   }
 
   async function addPhoto() {
-    if (!photoUrl.trim()) { toast.warning("Enter a photo URL."); return; }
+    if (!photoFile) { toast.warning("Select a photo file."); return; }
     setPhotoBusy(true);
     try {
-      const body = { url: photoUrl.trim(), label: photoLabel.trim(), sort_order: vehicle?.photos?.length || 0 };
-      const res = await apiFetch(`/vehicles/${id}/photos/`, { method: "POST", body: JSON.stringify(body) });
+      const existingOrders = (vehicle?.photos || []).map((p) => p.sort_order);
+      const nextOrder = existingOrders.length ? Math.max(...existingOrders) + 1 : 0;
+      const fd = new FormData();
+      fd.append("image", photoFile);
+      if (photoLabel.trim()) fd.append("label", photoLabel.trim());
+      fd.append("sort_order", String(nextOrder));
+      const res = await apiFetch(`/vehicles/${id}/photos/`, { method: "POST", body: fd });
       setVehicle((v) => ({ ...v, photos: [...(v?.photos || []), res] }));
-      setPhotoUrl("");
+      setPhotoFile(null);
       setPhotoLabel("");
+      if (photoFileRef.current) photoFileRef.current.value = "";
       toast.success("Photo added.");
     } catch (e) {
       if (e instanceof ApiError) toast.error(e.message);
@@ -143,19 +189,53 @@ export default function VehicleDashboardPage() {
     }
   }
 
+  async function openAddItem() {
+    setShowAddItem(true);
+    if (categories.length === 0) {
+      try {
+        const data = await getCategories();
+        const list = Array.isArray(data) ? data : data?.results || [];
+        setCategories(list);
+        if (list.length > 0 && !newCategory) setNewCategory(String(list[0].id));
+      } catch (e) {
+        if (e instanceof ApiError) toast.error(e.message);
+      }
+    }
+  }
+
+  async function submitAddItem(e) {
+    e.preventDefault();
+    if (!newCategory || !newTitle.trim() || !newPrice) { toast.warning("Fill in all required fields."); return; }
+    setAddingItem(true);
+    try {
+      const item = await createVehicleItem(id, {
+        category: Number(newCategory),
+        title: newTitle.trim(),
+        price: newPrice,
+        condition: newCondition,
+        oem_part_number: newOem.trim(),
+      });
+      setItems((prev) => [item, ...prev]);
+      setShowAddItem(false);
+      setNewTitle(""); setNewPrice(""); setNewOem(""); setNewCondition("good");
+      toast.success("Item created.");
+    } catch (e) {
+      if (e instanceof ApiError) toast.error(e.message);
+    } finally {
+      setAddingItem(false);
+    }
+  }
+
   if (authLoading || !user) {
     return <div className="mx-auto max-w-3xl px-6 py-16"><p className="text-sm" style={{ color: "var(--text-muted)" }}>Loading…</p></div>;
   }
 
-  if (!loading && !vehicle) {
-    return <div className="mx-auto max-w-3xl px-6 py-16"><p className="text-sm" style={{ color: "var(--text-muted)" }}>Vehicle not found.</p></div>;
-  }
-
   const gen = vehicle?.generation_detail;
   const mod = vehicle?.modification_detail;
+  // Graceful fallback: prefer generation detail, fall back to top-level fields, then VIN
   const displayName = gen
     ? [gen.make_name, gen.car_model_name, gen.name].filter(Boolean).join(" ")
-    : "Vehicle";
+    : [vehicle?.year, vehicle?.make_name, vehicle?.model_name].filter(Boolean).join(" ") || vehicle?.vin || "Vehicle";
 
   return (
     <div className="mx-auto max-w-3xl px-4 sm:px-6 py-12">
@@ -167,13 +247,26 @@ export default function VehicleDashboardPage() {
         transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
         className="relative z-10"
       >
+        {/* Header */}
         <div className="flex flex-wrap items-start justify-between gap-4 mb-2">
           <div>
             <p className="section-label mb-1">Inventory</p>
-            <h1 className="heading-display text-2xl">{loading ? "Loading…" : displayName}</h1>
+            <h1 className="heading-display text-2xl">
+              {loading ? "Loading…" : displayName}
+            </h1>
           </div>
           <Link href="/vehicles" style={{ color: "var(--text-muted)", fontSize: 13, textDecoration: "none", marginTop: 4 }}>← All vehicles</Link>
         </div>
+
+        {loading && (
+          <div style={{ marginTop: 40, textAlign: "center" }}>
+            <p className="text-sm" style={{ color: "var(--text-muted)" }}>Loading vehicle…</p>
+          </div>
+        )}
+
+        {!loading && !vehicle && (
+          <p className="text-sm mt-8" style={{ color: "var(--text-muted)" }}>Vehicle not found.</p>
+        )}
 
         {!loading && vehicle && (
           <>
@@ -204,7 +297,7 @@ export default function VehicleDashboardPage() {
               <p style={{ fontSize: 13, fontWeight: 700, color: "var(--text-primary)", fontFamily: "var(--ff-display)", marginBottom: 12 }}>Vehicle details</p>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label style={{ ...labelStyle, display: "block" }}>Condition</label>
+                  <label style={labelStyle}>Condition</label>
                   <select value={editCondition} onChange={(e) => setEditCondition(e.target.value)} style={inputStyle}>
                     <option value="excellent">Excellent</option>
                     <option value="good">Good</option>
@@ -213,15 +306,20 @@ export default function VehicleDashboardPage() {
                   </select>
                 </div>
                 <div>
-                  <label style={{ ...labelStyle, display: "block" }}>Color</label>
-                  <input value={editColor} onChange={(e) => setEditColor(e.target.value)} style={inputStyle} placeholder="e.g. Alpine White" />
+                  <label style={labelStyle}>Color</label>
+                  <input
+                    value={editColor}
+                    onChange={(e) => setEditColor(e.target.value)}
+                    style={inputStyle}
+                    placeholder="e.g. Alpine White (leave blank to clear)"
+                  />
                 </div>
                 <div>
-                  <label style={{ ...labelStyle, display: "block" }}>Mileage</label>
-                  <input type="number" value={editMileage} onChange={(e) => setEditMileage(e.target.value)} style={inputStyle} placeholder="miles" />
+                  <label style={labelStyle}>Mileage</label>
+                  <input type="number" min={0} value={editMileage} onChange={(e) => setEditMileage(e.target.value)} style={inputStyle} placeholder="miles" />
                 </div>
                 <div>
-                  <label style={{ ...labelStyle, display: "block" }}>Origin ZIP *</label>
+                  <label style={labelStyle}>Origin ZIP *</label>
                   <input value={editZip} onChange={(e) => setEditZip(e.target.value)} required maxLength={10} style={inputStyle} placeholder="98101" />
                 </div>
               </div>
@@ -255,55 +353,110 @@ export default function VehicleDashboardPage() {
                   ))}
                 </div>
               )}
-              <div className="flex gap-2">
-                <input value={photoUrl} onChange={(e) => setPhotoUrl(e.target.value)} style={{ ...inputStyle, flex: 1 }} placeholder="Photo URL (CDN)" />
-                <input value={photoLabel} onChange={(e) => setPhotoLabel(e.target.value)} style={{ ...inputStyle, width: 120 }} placeholder="Label" />
-                <button type="button" onClick={addPhoto} disabled={photoBusy} className="btn-forge" style={{ flexShrink: 0, padding: "8px 14px", fontSize: 13, opacity: photoBusy ? 0.6 : 1 }}>
-                  {photoBusy ? "…" : "Add"}
+              <div className="flex gap-2 flex-wrap">
+                <input
+                  ref={photoFileRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => setPhotoFile(e.target.files[0] || null)}
+                  style={{ ...inputStyle, flex: 1, cursor: "pointer" }}
+                />
+                <input value={photoLabel} onChange={(e) => setPhotoLabel(e.target.value)} style={{ ...inputStyle, width: 110 }} placeholder="Label (optional)" />
+                <button type="button" onClick={addPhoto} disabled={photoBusy || !photoFile} className="btn-forge" style={{ flexShrink: 0, padding: "8px 14px", fontSize: 13, opacity: (photoBusy || !photoFile) ? 0.6 : 1 }}>
+                  {photoBusy ? "…" : "Upload"}
                 </button>
               </div>
             </div>
 
             {/* Items (Parts) */}
             <div style={sectionStyle}>
-              <p style={{ fontSize: 13, fontWeight: 700, color: "var(--text-primary)", fontFamily: "var(--ff-display)", marginBottom: 12 }}>
-                Parts / Items ({items.length})
-              </p>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+                <p style={{ fontSize: 13, fontWeight: 700, color: "var(--text-primary)", fontFamily: "var(--ff-display)" }}>
+                  Parts / Items ({items.length})
+                </p>
+                <button
+                  type="button"
+                  onClick={showAddItem ? () => setShowAddItem(false) : openAddItem}
+                  className="btn-forge"
+                  style={{ padding: "6px 14px", fontSize: 12 }}
+                >
+                  {showAddItem ? "Cancel" : "+ Add item"}
+                </button>
+              </div>
+
+              {/* Inline create form */}
+              {showAddItem && (
+                <form onSubmit={submitAddItem} style={{ marginBottom: 16, padding: 14, background: "var(--bg-elevated)", border: "1px solid var(--primary-border-strong, var(--border))", borderRadius: "var(--radius-lg)" }}>
+                  <p style={{ fontSize: 11, fontWeight: 700, color: "var(--primary)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 10 }}>New item</p>
+                  <div className="grid grid-cols-2 gap-2 mb-2">
+                    <div>
+                      <label style={labelStyle}>Category *</label>
+                      <select value={newCategory} onChange={(e) => setNewCategory(e.target.value)} required style={{ ...inputStyle, cursor: "pointer" }}>
+                        {categories.length === 0 && <option value="">Loading…</option>}
+                        {categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+                      </select>
+                    </div>
+                    <div>
+                      <label style={labelStyle}>Condition *</label>
+                      <select value={newCondition} onChange={(e) => setNewCondition(e.target.value)} style={{ ...inputStyle, cursor: "pointer" }}>
+                        <option value="excellent">Excellent</option>
+                        <option value="good">Good</option>
+                        <option value="fair">Fair</option>
+                        <option value="for_parts">For parts</option>
+                      </select>
+                    </div>
+                    <div className="col-span-2">
+                      <label style={labelStyle}>Title *</label>
+                      <input value={newTitle} onChange={(e) => setNewTitle(e.target.value)} required style={inputStyle} placeholder="e.g. Front bumper — E46 M3" />
+                    </div>
+                    <div>
+                      <label style={labelStyle}>Price (USD) *</label>
+                      <input type="number" min={0} step="0.01" value={newPrice} onChange={(e) => setNewPrice(e.target.value)} required style={inputStyle} placeholder="0.00" />
+                    </div>
+                    <div>
+                      <label style={labelStyle}>OEM Part #</label>
+                      <input value={newOem} onChange={(e) => setNewOem(e.target.value)} style={inputStyle} placeholder="Optional" />
+                    </div>
+                  </div>
+                  <button type="submit" disabled={addingItem} className="btn-forge" style={{ padding: "8px 20px", fontSize: 13, opacity: addingItem ? 0.6 : 1 }}>
+                    {addingItem ? "Creating…" : "Create item"}
+                  </button>
+                </form>
+              )}
+
               {items.length === 0 ? (
                 <p style={{ fontSize: 13, color: "var(--text-muted)" }}>
-                  No items yet. Items are created automatically when the AI research process runs.
+                  No items yet. Add one above or wait for the AI research process to run.
                 </p>
               ) : (
                 <div className="space-y-2">
                   {items.map((item) => (
-                    <div key={item.id} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 12px", background: "var(--bg-elevated)", borderRadius: 8, border: "1px solid var(--border)" }}>
-                      <div>
-                        <p style={{ fontSize: 13, fontWeight: 600, color: "var(--text-primary)", fontFamily: "var(--ff-display)" }}>{item.title}</p>
-                        <p style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 1 }}>
-                          {item.category_name} · {item.condition} · {item.shipping_size}
-                        </p>
-                      </div>
-                      <div style={{ textAlign: "right" }}>
-                        <p style={{ fontSize: 13, fontWeight: 700, color: "var(--text-primary)" }}>
-                          ${parseFloat(item.price).toFixed(2)}
-                        </p>
-                        <span style={{
-                          fontSize: 10, fontWeight: 600, borderRadius: 999, padding: "1px 7px", marginTop: 2, display: "inline-block",
-                          background: item.status === "active" ? "rgba(74,222,128,0.1)" : "rgba(148,163,184,0.1)",
-                          color: item.status === "active" ? "#4ade80" : "#94a3b8",
-                          border: item.status === "active" ? "1px solid rgba(74,222,128,0.3)" : "1px solid rgba(148,163,184,0.3)",
-                        }}>{item.status}</span>
-                      </div>
+                    <div key={item.id} style={{ background: "var(--bg-elevated)", borderRadius: 8, border: "1px solid var(--border)", overflow: "hidden" }}>
+                      {/* Clickable main row */}
+                      <Link
+                        href={`/vehicles/${id}/items/${item.id}`}
+                        style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, padding: "10px 12px", textDecoration: "none" }}
+                      >
+                        <div style={{ minWidth: 0, flex: 1 }}>
+                          <p style={{ fontSize: 13, fontWeight: 600, color: "var(--text-primary)", fontFamily: "var(--ff-display)" }}>{item.title}</p>
+                          <p style={{ fontSize: 11, color: "var(--text-muted)", marginTop: 1 }}>
+                            {item.category_name}{item.oem_part_number ? ` · ${item.oem_part_number}` : ""}
+                          </p>
+                        </div>
+                        <div style={{ textAlign: "right", flexShrink: 0 }}>
+                          <p style={{ fontSize: 13, fontWeight: 700, color: "var(--text-primary)" }}>
+                            ${parseFloat(item.price).toFixed(2)}
+                          </p>
+                          <ItemStatusBadge status={item.status} />
+                        </div>
+                        <span style={{ fontSize: 11, color: "var(--primary)", fontWeight: 600, flexShrink: 0 }}>Edit →</span>
+                      </Link>
                     </div>
                   ))}
                 </div>
               )}
             </div>
           </>
-        )}
-
-        {loading && (
-          <p className="text-sm mt-8" style={{ color: "var(--text-muted)" }}>Loading vehicle…</p>
         )}
       </motion.div>
     </div>

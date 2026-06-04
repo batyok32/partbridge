@@ -32,7 +32,7 @@ class CarModel(models.Model):
 class Generation(models.Model):
     car_model = models.ForeignKey(CarModel, on_delete=models.CASCADE, related_name="generations")
     make = models.ForeignKey(Make, on_delete=models.CASCADE, related_name="generations")
-    chassis_codes = models.JSONField(default=list, blank=True)
+    chassis_codes = models.JSONField(default=list, blank=True, null=True)
     name = models.CharField(max_length=128, blank=True)
     body_style = models.CharField(max_length=64, blank=True)
     production_start = models.DateField()

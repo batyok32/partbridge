@@ -1,0 +1,190 @@
+[
+  {
+    "year": "2008",
+    "months": [
+      {
+        "month": "МАЙ",
+        "href": "javascript:submit('200805','64700025','N','%D0%9C%D0%90%D0%99 2008','0');"
+      },
+      {
+        "month": "АВГУСТ",
+        "href": "javascript:submit('200808','64700025','N','%D0%90%D0%92%D0%93%D0%A3%D0%A1%D0%A2 2008','0');"
+      },
+      {
+        "month": "СЕНТЯБРЬ",
+        "href": "javascript:submit('200809','64700025','N','%D0%A1%D0%95%D0%9D%D0%A2%D0%AF%D0%91%D0%A0%D0%AC 2008','0');"
+      },
+      {
+        "month": "ОКТЯБРЬ",
+        "href": "javascript:submit('200810','64700025','N','%D0%9E%D0%9A%D0%A2%D0%AF%D0%91%D0%A0%D0%AC 2008','0');"
+      },
+      {
+        "month": "НОЯБРЬ",
+        "href": "javascript:submit('200811','64700025','N','%D0%9D%D0%9E%D0%AF%D0%91%D0%A0%D0%AC 2008','0');"
+      },
+      {
+        "month": "ДЕКАБРЬ",
+        "href": "javascript:submit('200812','64700025','N','%D0%94%D0%95%D0%9A%D0%90%D0%91%D0%A0%D0%AC 2008','0');"
+      }
+    ]
+  },
+  {
+    "year": "2009",
+    "months": [
+      {
+        "month": "ЯНВАРЬ",
+        "href": "javascript:submit('200901','64700025','N','%D0%AF%D0%9D%D0%92%D0%90%D0%A0%D0%AC 2009','1');"
+      },
+      {
+        "month": "ФЕВРАЛЬ",
+        "href": "javascript:submit('200902','64700025','N','%D0%A4%D0%95%D0%92%D0%A0%D0%90%D0%9B%D0%AC 2009','1');"
+      },
+      {
+        "month": "МАРТ",
+        "href": "javascript:submit('200903','64700025','N','%D0%9C%D0%90%D0%A0%D0%A2 2009','1');"
+      },
+      {
+        "month": "АПРЕЛЬ",
+        "href": "javascript:submit('200904','64700025','N','%D0%90%D0%9F%D0%A0%D0%95%D0%9B%D0%AC 2009','1');"
+      },
+      {
+        "month": "МАЙ",
+        "href": "javascript:submit('200905','64700025','N','%D0%9C%D0%90%D0%99 2009','1');"
+      },
+      {
+        "month": "ИЮНЬ",
+        "href": "javascript:submit('200906','64700025','N','%D0%98%D0%AE%D0%9D%D0%AC 2009','1');"
+      },
+      {
+        "month": "ИЮЛЬ",
+        "href": "javascript:submit('200907','64700025','N','%D0%98%D0%AE%D0%9B%D0%AC 2009','1');"
+      },
+      {
+        "month": "АВГУСТ",
+        "href": "javascript:submit('200908','64700025','N','%D0%90%D0%92%D0%93%D0%A3%D0%A1%D0%A2 2009','1');"
+      },
+      {
+        "month": "СЕНТЯБРЬ",
+        "href": "javascript:submit('200909','64700025','N','%D0%A1%D0%95%D0%9D%D0%A2%D0%AF%D0%91%D0%A0%D0%AC 2009','1');"
+      },
+      {
+        "month": "ОКТЯБРЬ",
+        "href": "javascript:submit('200910','64700025','N','%D0%9E%D0%9A%D0%A2%D0%AF%D0%91%D0%A0%D0%AC 2009','1');"
+      },
+      {
+        "month": "НОЯБРЬ",
+        "href": "javascript:submit('200911','64700025','N','%D0%9D%D0%9E%D0%AF%D0%91%D0%A0%D0%AC 2009','1');"
+      },
+      {
+        "month": "ДЕКАБРЬ",
+        "href": "javascript:submit('200912','64700025','N','%D0%94%D0%95%D0%9A%D0%90%D0%91%D0%A0%D0%AC 2009','1');"
+      }
+    ]
+  },
+  {
+    "year": "2010",
+    "months": [
+      {
+        "month": "ЯНВАРЬ",
+        "href": "javascript:submit('201001','64700025','N','%D0%AF%D0%9D%D0%92%D0%90%D0%A0%D0%AC 2010','2');"
+      },
+      {
+        "month": "ФЕВРАЛЬ",
+        "href": "javascript:submit('201002','64700025','N','%D0%A4%D0%95%D0%92%D0%A0%D0%90%D0%9B%D0%AC 2010','2');"
+      },
+      {
+        "month": "МАРТ",
+        "href": "javascript:submit('201003','64700025','N','%D0%9C%D0%90%D0%A0%D0%A2 2010','2');"
+      },
+      {
+        "month": "АПРЕЛЬ",
+        "href": "javascript:submit('201004','64700025','N','%D0%90%D0%9F%D0%A0%D0%95%D0%9B%D0%AC 2010','2');"
+      },
+      {
+        "month": "МАЙ",
+        "href": "javascript:submit('201005','64700025','N','%D0%9C%D0%90%D0%99 2010','2');"
+      },
+      {
+        "month": "ИЮНЬ",
+        "href": "javascript:submit('201006','64700025','N','%D0%98%D0%AE%D0%9D%D0%AC 2010','2');"
+      },
+      {
+        "month": "ИЮЛЬ",
+        "href": "javascript:submit('201007','64700025','N','%D0%98%D0%AE%D0%9B%D0%AC 2010','2');"
+      },
+      {
+        "month": "АВГУСТ",
+        "href": "javascript:submit('201008','64700025','N','%D0%90%D0%92%D0%93%D0%A3%D0%A1%D0%A2 2010','2');"
+      },
+      {
+        "month": "СЕНТЯБРЬ",
+        "href": "javascript:submit('201009','64700025','N','%D0%A1%D0%95%D0%9D%D0%A2%D0%AF%D0%91%D0%A0%D0%AC 2010','2');"
+      },
+      {
+        "month": "ОКТЯБРЬ",
+        "href": "javascript:submit('201010','64700025','N','%D0%9E%D0%9A%D0%A2%D0%AF%D0%91%D0%A0%D0%AC 2010','2');"
+      },
+      {
+        "month": "НОЯБРЬ",
+        "href": "javascript:submit('201011','64700025','N','%D0%9D%D0%9E%D0%AF%D0%91%D0%A0%D0%AC 2010','2');"
+      },
+      {
+        "month": "ДЕКАБРЬ",
+        "href": "javascript:submit('201012','64700025','N','%D0%94%D0%95%D0%9A%D0%90%D0%91%D0%A0%D0%AC 2010','2');"
+      }
+    ]
+  },
+  {
+    "year": "2011",
+    "months": [
+      {
+        "month": "ЯНВАРЬ",
+        "href": "javascript:submit('201101','64700025','N','%D0%AF%D0%9D%D0%92%D0%90%D0%A0%D0%AC 2011','3');"
+      },
+      {
+        "month": "ФЕВРАЛЬ",
+        "href": "javascript:submit('201102','64700025','N','%D0%A4%D0%95%D0%92%D0%A0%D0%90%D0%9B%D0%AC 2011','3');"
+      },
+      {
+        "month": "МАРТ",
+        "href": "javascript:submit('201103','64700025','N','%D0%9C%D0%90%D0%A0%D0%A2 2011','3');"
+      },
+      {
+        "month": "АПРЕЛЬ",
+        "href": "javascript:submit('201104','64700025','N','%D0%90%D0%9F%D0%A0%D0%95%D0%9B%D0%AC 2011','3');"
+      },
+      {
+        "month": "МАЙ",
+        "href": "javascript:submit('201105','64700025','N','%D0%9C%D0%90%D0%99 2011','3');"
+      },
+      {
+        "month": "ИЮНЬ",
+        "href": "javascript:submit('201106','64700025','N','%D0%98%D0%AE%D0%9D%D0%AC 2011','3');"
+      },
+      {
+        "month": "ИЮЛЬ",
+        "href": "javascript:submit('201107','64700025','N','%D0%98%D0%AE%D0%9B%D0%AC 2011','3');"
+      },
+      {
+        "month": "АВГУСТ",
+        "href": "javascript:submit('201108','64700025','N','%D0%90%D0%92%D0%93%D0%A3%D0%A1%D0%A2 2011','3');"
+      },
+      {
+        "month": "СЕНТЯБРЬ",
+        "href": "javascript:submit('201109','64700025','N','%D0%A1%D0%95%D0%9D%D0%A2%D0%AF%D0%91%D0%A0%D0%AC 2011','3');"
+      },
+      {
+        "month": "ОКТЯБРЬ",
+        "href": "javascript:submit('201110','64700025','N','%D0%9E%D0%9A%D0%A2%D0%AF%D0%91%D0%A0%D0%AC 2011','3');"
+      },
+      {
+        "month": "НОЯБРЬ",
+        "href": "javascript:submit('201111','64700025','N','%D0%9D%D0%9E%D0%AF%D0%91%D0%A0%D0%AC 2011','3');"
+      },
+      {
+        "month": "ДЕКАБРЬ",
+        "href": "javascript:submit('201112','64700025','N','%D0%94%D0%95%D0%9A%D0%90%D0%91%D0%A0%D0%AC 2011','3');"
+      }
+    ]
+  }
+]
