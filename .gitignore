@@ -2,6 +2,5 @@
 node_modules
 package-lock.json
 .next
-db.sqlite3
 env
 __pycache__

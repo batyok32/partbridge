@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 
@@ -8,6 +8,14 @@ import { useAuth } from "@/context/auth-context";
 import { ApiError, apiFetch } from "@/lib/api";
 
 export default function ConnectReturnPage() {
+  return (
+    <Suspense>
+      <ConnectReturnContent />
+    </Suspense>
+  );
+}
+
+function ConnectReturnContent() {
   const router = useRouter();
   const params = useSearchParams();
   const { user, loading } = useAuth();
