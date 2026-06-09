@@ -30,14 +30,19 @@ function Stars({ value, size = 13 }) {
 function PhotoGallery({ urls }) {
   const scrollerRef = useRef(null);
   const [active, setActive] = useState(0);
-  const list = (urls || []).filter(Boolean);
-  const n = list.length;
+  const [failed, setFailed] = useState(new Set());
+  const [lightboxIdx, setLightboxIdx] = useState(null);
+
+  const allUrls = (urls || []).filter(Boolean);
+  const validData = allUrls.map((url, i) => ({ url, i })).filter(({ i }) => !failed.has(i));
+  const validUrls = validData.map((d) => d.url);
+  const n = validUrls.length;
 
   useEffect(() => {
-    const el = scrollerRef.current;
-    if (!el) return;
-    el.scrollLeft = 0;
     setActive(0);
+    setFailed(new Set());
+    const el = scrollerRef.current;
+    if (el) el.scrollLeft = 0;
   }, [urls]);
 
   useEffect(() => {
@@ -52,37 +57,63 @@ function PhotoGallery({ urls }) {
     return () => el.removeEventListener("scroll", onScroll);
   }, [n]);
 
-  if (n === 0) {
-    return (
-      <div className="flex aspect-[16/10] w-full items-center justify-center rounded-2xl text-7xl"
-        style={{ background: "var(--bg-elevated)", border: "1px solid var(--border)" }}>
-        📦
-      </div>
-    );
-  }
+  if (n === 0) return null;
 
   return (
-    <div className="relative w-full overflow-hidden rounded-2xl" style={{ border: "1px solid var(--border)" }}>
-      <div
-        ref={scrollerRef}
-        className="flex aspect-[16/10] w-full snap-x snap-mandatory overflow-x-auto overflow-y-hidden [scrollbar-width:none]"
-        style={{ touchAction: "pan-x" }}
-      >
-        {list.map((url, i) => (
-          <div key={i} className="h-full w-full shrink-0 snap-center" style={{ minWidth: "100%" }}>
-            <img src={url} alt="" className="h-full w-full object-cover" draggable={false} />
-          </div>
-        ))}
-      </div>
-      {n > 1 && (
-        <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-1.5">
-          {list.map((_, i) => (
-            <span key={i} className="h-1.5 rounded-full transition-all"
-              style={{ width: active === i ? 18 : 6, background: active === i ? "var(--primary)" : "rgba(255,255,255,0.35)" }} />
-          ))}
+    <>
+      {lightboxIdx !== null && (
+        <div
+          onClick={() => setLightboxIdx(null)}
+          style={{ position: "fixed", inset: 0, zIndex: 1000, background: "rgba(0,0,0,0.93)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "zoom-out" }}
+        >
+          <img
+            src={validUrls[lightboxIdx]}
+            alt=""
+            onClick={(e) => e.stopPropagation()}
+            style={{ maxWidth: "95vw", maxHeight: "92vh", objectFit: "contain", borderRadius: 8 }}
+          />
+          <button type="button" onClick={() => setLightboxIdx(null)}
+            style={{ position: "absolute", top: 16, right: 16, background: "rgba(255,255,255,0.12)", border: "none", color: "#fff", fontSize: 22, width: 40, height: 40, borderRadius: "50%", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
+            ×
+          </button>
+          {n > 1 && (
+            <>
+              <button type="button" onClick={(e) => { e.stopPropagation(); setLightboxIdx((i) => (i - 1 + n) % n); }}
+                style={{ position: "absolute", left: 16, top: "50%", transform: "translateY(-50%)", background: "rgba(255,255,255,0.12)", border: "none", color: "#fff", fontSize: 26, width: 44, height: 44, borderRadius: "50%", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                ‹
+              </button>
+              <button type="button" onClick={(e) => { e.stopPropagation(); setLightboxIdx((i) => (i + 1) % n); }}
+                style={{ position: "absolute", right: 16, top: "50%", transform: "translateY(-50%)", background: "rgba(255,255,255,0.12)", border: "none", color: "#fff", fontSize: 26, width: 44, height: 44, borderRadius: "50%", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                ›
+              </button>
+            </>
+          )}
         </div>
       )}
-    </div>
+      <div className="relative w-full overflow-hidden rounded-2xl" style={{ border: "1px solid var(--border)" }}>
+        <div
+          ref={scrollerRef}
+          className="flex aspect-[16/10] w-full snap-x snap-mandatory overflow-x-auto overflow-y-hidden [scrollbar-width:none]"
+          style={{ touchAction: "pan-x" }}
+        >
+          {validData.map(({ url, i }, validIdx) => (
+            <div key={i} className="h-full w-full shrink-0 snap-center" style={{ minWidth: "100%", cursor: "zoom-in" }}
+              onClick={() => setLightboxIdx(validIdx)}>
+              <img src={url} alt="" className="h-full w-full object-cover" draggable={false}
+                onError={() => setFailed((prev) => { const s = new Set(prev); s.add(i); return s; })} />
+            </div>
+          ))}
+        </div>
+        {n > 1 && (
+          <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-1.5">
+            {validUrls.map((_, i) => (
+              <span key={i} className="h-1.5 rounded-full transition-all"
+                style={{ width: active === i ? 18 : 6, background: active === i ? "var(--primary)" : "rgba(255,255,255,0.35)" }} />
+            ))}
+          </div>
+        )}
+      </div>
+    </>
   );
 }
 
@@ -244,10 +275,10 @@ export default function PublicPartDetailPage() {
   }
 
   const itemPhotoUrls = (item.photos || []).map((p) => p.url).filter(Boolean);
-  const galleryUrls = itemPhotoUrls.length > 0
-    ? itemPhotoUrls
-    : item.category_image_url ? [item.category_image_url] : [];
-  const vehiclePhotos = (item.vehicle_photos || []).filter((p) => p.url);
+  const vehiclePhotoUrls = (item.vehicle_photos || []).map((p) => p.url).filter(Boolean);
+  const categoryFallback = itemPhotoUrls.length === 0 && item.category_image_url ? [item.category_image_url] : [];
+  const galleryUrls = [...itemPhotoUrls, ...categoryFallback, ...vehiclePhotoUrls];
+  const isAssemblyItem = item.status === "hidden_in_assembly";
   const vehicleName = [item.vehicle_year, item.vehicle_make, item.vehicle_model].filter(Boolean).join(" ");
   const itemOptions = item.options || [];
 
@@ -336,23 +367,16 @@ export default function PublicPartDetailPage() {
 
         <PhotoGallery urls={galleryUrls} />
 
-        {vehiclePhotos.length > 0 && (
-          <div>
-            <p style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em", color: "var(--text-muted)", marginBottom: 6 }}>
-              Donor vehicle photos
-            </p>
-            <ThumbnailStrip photos={vehiclePhotos} />
-          </div>
-        )}
-
         {/* Title + price */}
         <div>
           <p style={{ fontSize: 11, color: "var(--text-muted)", fontFamily: "var(--ff-display)", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 4 }}>
             {item.category_name}
           </p>
-          <h1 style={{ fontSize: 22, fontWeight: 700, color: "var(--text-primary)", fontFamily: "var(--ff-display)", lineHeight: 1.25 }}>
-            {item.title}
-          </h1>
+          {isAssemblyItem && (
+            <h1 style={{ fontSize: 22, fontWeight: 700, color: "var(--text-primary)", fontFamily: "var(--ff-display)", lineHeight: 1.25 }}>
+              {item.title}
+            </h1>
+          )}
           {vehicleName && (
             <p style={{ fontSize: 13, color: "var(--text-muted)", marginTop: 4 }}>From: {vehicleName}</p>
           )}
@@ -487,9 +511,6 @@ export default function PublicPartDetailPage() {
                 <span style={{ fontSize: 12, color: "var(--text-muted)" }}>· {item.vehicle_condition.replace(/_/g, " ")} condition</span>
               )}
             </div>
-            {item.vehicle_photos?.length > 0 && (
-              <ThumbnailStrip photos={item.vehicle_photos} />
-            )}
           </div>
         )}
 

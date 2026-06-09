@@ -3,7 +3,7 @@ export const SHIPPING_RATES = {
   small: { min: 7, max: 15, label: "Small ($7–15)" },
   medium: { min: 20, max: 50, label: "Medium ($20–50)" },
   large: { min: 450, max: 650, label: "Large ($450–650)" },
-  xl: { min: null, max: null, label: "Extra Large (freight)" },
+  xl: { min: 675, max: 975, label: "XL / Freight" },
 };
 
 const STATE_ZONE = {
@@ -20,7 +20,7 @@ function zoneForState(state) {
 export function estimateShipping(shippingSize, destinationState) {
   const tier = SHIPPING_RATES[shippingSize];
   if (!tier) return null;
-  if (tier.min == null) return { label: tier.label, amount: null, range: "Contact for quote" };
+  if (tier.min == null) return null;
   const zone = zoneForState(destinationState);
   const factor = zone === 1 ? 1 : zone === 2 ? 1.15 : 1.3;
   const mid = ((tier.min + tier.max) / 2) * factor;

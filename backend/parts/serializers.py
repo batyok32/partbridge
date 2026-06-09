@@ -95,24 +95,42 @@ class ItemListSerializer(serializers.ModelSerializer):
     vehicle_generation_label = serializers.SerializerMethodField()
     vehicle_seller_zip = serializers.CharField(source="vehicle.seller_zip", read_only=True)
     fitment = serializers.SerializerMethodField()
+    seller_id = serializers.SerializerMethodField()
     seller_name = serializers.SerializerMethodField()
     seller_rating_avg = serializers.SerializerMethodField()
     seller_review_count = serializers.SerializerMethodField()
     alt_part_numbers = PartNumberSerializer(many=True, read_only=True)
     options = OptionSerializer(many=True, read_only=True)
+    photo_urls = serializers.SerializerMethodField()
+    vehicle_image_url = serializers.SerializerMethodField()
+    is_assembly = serializers.SerializerMethodField()
+    assembly_shipping_sizes = serializers.SerializerMethodField()
 
     class Meta:
         model = Item
         fields = (
             "id", "title", "price", "status", "condition", "shipping_size",
+            "is_assembly", "assembly_shipping_sizes",
             "category", "category_name", "category_slug", "category_image_url",
             "oem_part_number", "oem_part_number_normalized", "alt_part_numbers",
             "options",
-            "primary_photo_url", "vehicle", "vehicle_year", "vehicle_make", "vehicle_model",
+            "primary_photo_url", "photo_urls", "vehicle_image_url",
+            "vehicle", "vehicle_year", "vehicle_make", "vehicle_model",
             "vehicle_generation_name", "vehicle_generation_label", "vehicle_seller_zip",
-            "fitment", "seller_name", "seller_rating_avg", "seller_review_count",
+            "fitment", "seller_id", "seller_name", "seller_rating_avg", "seller_review_count",
             "created_at",
         )
+
+    def get_is_assembly(self, obj):
+        return obj.assembly_bundle_id is not None
+
+    def get_assembly_shipping_sizes(self, obj):
+        if not obj.assembly_bundle_id:
+            return None
+        try:
+            return [bi.item.shipping_size for bi in obj.assembly_bundle.bundle_items.all() if bi.item]
+        except Exception:
+            return None
 
     def get_category_image_url(self, obj):
         cat = obj.category
@@ -123,10 +141,27 @@ class ItemListSerializer(serializers.ModelSerializer):
         photo = obj.photos.filter(is_primary=True).first() or obj.photos.first()
         if photo and photo.url:
             return _abs(request, photo.url)
-        # Fallback: category image
         cat = obj.category
         if cat and cat.image:
             return _abs(request, cat.image.url)
+        return None
+
+    def get_photo_urls(self, obj):
+        request = self.context.get("request")
+        primary = obj.photos.filter(is_primary=True).first()
+        others = obj.photos.exclude(pk=primary.pk) if primary else obj.photos.all()
+        photos = ([primary] if primary else []) + list(others[:8])
+        return [_abs(request, p.url) for p in photos if p and p.url]
+
+    def get_vehicle_image_url(self, obj):
+        if not obj.vehicle:
+            return None
+        request = self.context.get("request")
+        photo = obj.vehicle.photos.order_by("sort_order").first()
+        if not photo:
+            return None
+        if photo.image:
+            return _abs(request, photo.image.url)
         return None
 
     def get_vehicle_make(self, obj):
@@ -165,6 +200,10 @@ class ItemListSerializer(serializers.ModelSerializer):
             generation_id=generation_id,
             modification_id=self.context.get("car_modification_id"),
         )
+
+    def get_seller_id(self, obj):
+        seller = obj.vehicle.seller if obj.vehicle else None
+        return seller.id if seller else None
 
     def get_seller_name(self, obj):
         seller = obj.vehicle.seller if obj.vehicle else None

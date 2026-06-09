@@ -5,6 +5,7 @@ class Make(models.Model):
     name = models.CharField(max_length=128)
     slug = models.SlugField(max_length=128, unique=True)
     country = models.CharField(max_length=64, blank=True)
+    logo = models.ImageField(upload_to="make_logos/", null=True, blank=True)
     logo_url = models.CharField(max_length=512, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 

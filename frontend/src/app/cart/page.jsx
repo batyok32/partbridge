@@ -16,6 +16,30 @@ function fmt(v) {
   return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(Number(v));
 }
 
+// ─── Image with fallback ───────────────────────────────────────────────────
+
+function ImageWithFallback({ srcs, alt, style = {} }) {
+  const [idx, setIdx] = useState(0);
+  const validSrcs = (srcs || []).filter(Boolean);
+  const src = validSrcs[idx];
+  if (!src) {
+    return (
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%", fontSize: style.fontSize || 22, ...style }}>
+        📦
+      </div>
+    );
+  }
+  return (
+    <img
+      key={src}
+      src={src}
+      alt={alt}
+      onError={() => setIdx((i) => i + 1)}
+      style={{ width: "100%", height: "100%", objectFit: "cover" }}
+    />
+  );
+}
+
 // ─── Item card ─────────────────────────────────────────────────────────────
 
 function ItemCard({ ci, buyerState, removing, togglingMode, onRemove, onToggleMode }) {
@@ -58,11 +82,10 @@ function ItemCard({ ci, buyerState, removing, togglingMode, onRemove, onToggleMo
         {/* Photo */}
         <Link href={`/browse/parts/${item.id}`} style={{ flexShrink: 0 }}>
           <div style={{ width: 72, height: 72, borderRadius: 10, overflow: "hidden", background: "var(--bg-elevated)", border: "1px solid var(--border)" }}>
-            {item.primary_photo_url ? (
-              <img src={item.primary_photo_url} alt={item.category_name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-            ) : (
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%", fontSize: 22 }}>📦</div>
-            )}
+            <ImageWithFallback
+              srcs={[...(item.photo_urls || []), item.category_image_url]}
+              alt={item.category_name}
+            />
           </div>
         </Link>
 
@@ -254,11 +277,11 @@ function BundleCard({ cb, buyerState, removing, togglingMode, onRemove, onToggle
           return (
             <div key={bi.id} style={{ display: "flex", gap: 10, alignItems: "center" }}>
               <div style={{ width: 40, height: 40, borderRadius: 6, overflow: "hidden", flexShrink: 0, background: "var(--bg-elevated)" }}>
-                {it.primary_photo_url ? (
-                  <img src={it.primary_photo_url} alt={it.category_name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                ) : (
-                  <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%", fontSize: 14 }}>📦</div>
-                )}
+                <ImageWithFallback
+                  srcs={[...(it.photo_urls || []), it.category_image_url, bundle.bundle_category_image_url]}
+                  alt={it.category_name}
+                  style={{ fontSize: 14 }}
+                />
               </div>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <p style={{ fontSize: 12, fontWeight: 600, color: "var(--text-primary)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>

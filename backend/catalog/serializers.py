@@ -5,10 +5,18 @@ from .models import CarModel, Generation, Make, Modification
 
 class MakeSerializer(serializers.ModelSerializer):
     listing_count = serializers.IntegerField(read_only=True, required=False)
+    logo_url = serializers.SerializerMethodField()
 
     class Meta:
         model = Make
         fields = ("id", "name", "slug", "country", "logo_url", "listing_count", "created_at")
+
+    def get_logo_url(self, obj):
+        request = self.context.get("request")
+        if obj.logo:
+            url = obj.logo.url
+            return request.build_absolute_uri(url) if request else url
+        return obj.logo_url or None
 
 
 class CarModelSerializer(serializers.ModelSerializer):

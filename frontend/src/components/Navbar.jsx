@@ -27,7 +27,7 @@ function Logo() {
             letterSpacing: "-0.02em",
           }}
         >
-          P
+          L
         </span>
         <div
           className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
@@ -46,7 +46,7 @@ function Logo() {
           color: "var(--text-primary)",
         }}
       >
-        Partbridge
+        LookMyPart
       </span>
     </Link>
   );
@@ -133,7 +133,7 @@ export function Navbar() {
         >
           <NavLink href="/search">Browse Parts</NavLink>
           {user && !isSeller && (
-            <NavLink href="/seller/apply">Sell on Partbridge</NavLink>
+            <NavLink href="/seller/apply">Sell on LookMyPart</NavLink>
           )}
           {user && isSeller && <NavLink href="/vehicles">My Vehicles</NavLink>}
           {user && <NavLink href="/inbox">Inbox</NavLink>}
@@ -289,7 +289,7 @@ export function Navbar() {
               </NavLink>
               {user && !isSeller && (
                 <NavLink href="/seller/apply" onClick={close}>
-                  Sell on Partbridge
+                  Sell on LookMyPart
                 </NavLink>
               )}
               {user && isSeller && (

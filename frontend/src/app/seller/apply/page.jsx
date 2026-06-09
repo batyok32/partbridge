@@ -73,7 +73,7 @@ export default function SellerApplyPage() {
           <p className="section-label mb-2">Selling on Partbridge</p>
           <h1 className="heading-display text-2xl mb-2">Become a seller</h1>
           <p className="text-sm mb-8" style={{ color: "var(--text-muted)" }}>
-            New accounts shop as buyers. After we review your application, you can list vehicles and parts.
+            New accounts shop as buyers. Once you apply, you can immediately list vehicles and parts. Your listings will be visible to buyers after your account is approved.
           </p>
 
           {!user.email_verified_at && (
@@ -93,7 +93,7 @@ export default function SellerApplyPage() {
               className="mb-6 rounded-[12px] p-4 text-sm"
               style={{ background: "rgba(255,92,26,0.08)", border: "1px solid rgba(255,92,26,0.25)", color: "var(--text-secondary)" }}
             >
-              Your application is <strong style={{ color: "var(--text-primary)" }}>pending review</strong>. We will follow up by email.
+              You are now a seller — you can <strong style={{ color: "var(--text-primary)" }}>list vehicles and parts</strong>. Your account is <strong style={{ color: "var(--text-primary)" }}>pending approval</strong>. Listings won&apos;t be visible to buyers until your account is approved.
             </div>
           )}
 

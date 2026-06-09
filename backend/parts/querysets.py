@@ -5,9 +5,12 @@ from .models import Item, ItemCompatibility
 
 def active_items_qs():
     return (
-        Item.objects.filter(status=Item.Status.ACTIVE)
+        Item.objects.filter(
+            status=Item.Status.ACTIVE,
+            vehicle__seller__seller_applications__status="approved",
+        )
         .select_related("category", "vehicle__generation__car_model__make", "vehicle__seller")
-        .prefetch_related("photos", "compatibilities", "alt_part_numbers")
+        .prefetch_related("photos", "compatibilities", "alt_part_numbers", "assembly_bundle__bundle_items__item")
     )
 
 

@@ -27,7 +27,9 @@ export default function DashboardPage() {
   const isSeller = isApprovedSeller(user);
   const isBuyer  = isBuyerCapable(user);
   const app = user.seller_application;
-  const accountTypeLabel = isSeller ? "Buyer & approved seller" : "Buyer";
+  const isApproved = isSeller && app?.status === "approved";
+  const isPendingSeller = isSeller && app?.status === "pending";
+  const accountTypeLabel = isApproved ? "Buyer & approved seller" : isPendingSeller ? "Buyer & seller (pending approval)" : "Buyer";
 
   const quickLinks = [
     isBuyer  && { href: "/browse",   label: "Browse Parts",   desc: "Search the catalog" },
@@ -103,11 +105,9 @@ export default function DashboardPage() {
               ["Name",           user.name],
               ["Phone",          user.phone],
               ["Account",        accountTypeLabel],
-              ["Seller request", isSeller
-                ? "Approved — you can list inventory"
-                : app
-                  ? ({ pending: "Pending review", approved: "Approved", rejected: "Not approved" }[app.status] || app.status)
-                  : "None submitted"],
+              ["Seller request", app
+                ? ({ pending: "Pending approval — listings hidden from buyers", approved: "Approved", rejected: "Not approved" }[app.status] || app.status)
+                : "None submitted"],
               ["Email verified", user.email_verified_at
                 ? new Date(user.email_verified_at).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })
                 : "Not verified"],

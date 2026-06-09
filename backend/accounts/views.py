@@ -149,7 +149,7 @@ class SellerApplicationView(APIView):
         if user.is_seller:
             print("Already a seller")
             return Response(
-                {"detail": "You are already an approved seller."},
+                {"detail": "You are already a seller."},
                 status=status.HTTP_400_BAD_REQUEST,
             )
         if not user.email_verified_at:
@@ -167,9 +167,12 @@ class SellerApplicationView(APIView):
         ser = SellerApplicationCreateSerializer(data=request.data)
         ser.is_valid(raise_exception=True)
         SellerApplication.objects.create(user=user, **ser.validated_data)
+        if not user.is_seller:
+            user.is_seller = True
+            user.save(update_fields=["is_seller"])
         return Response(
             {
-                "detail": "Application submitted. We will email you when it is reviewed.",
+                "detail": "You are now a seller. You can list vehicles and parts. Your account is pending approval — listings will be visible to buyers once approved.",
                 "user": UserSerializer(user).data,
             },
             status=status.HTTP_201_CREATED,

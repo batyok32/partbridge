@@ -1,3 +1,4 @@
+from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from rest_framework import generics, status
 from rest_framework.permissions import IsAuthenticated, AllowAny
@@ -79,6 +80,127 @@ class VinDecodeView(APIView):
         except ValueError as e:
             return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
         return Response(result)
+
+
+class BrowseVehicleDetailView(APIView):
+    """Public endpoint for the browse/vehicles/[id] frontend page."""
+    permission_classes = [AllowAny]
+
+    def get(self, request, pk):
+        from parts.models import Item
+        from parts.serializers import ItemListSerializer
+
+        vehicle = get_object_or_404(
+            Vehicle.objects.select_related(
+                "generation__car_model__make", "generation__car_model", "modification"
+            ).prefetch_related("photos"),
+            pk=pk,
+        )
+
+        items_qs = (
+            Item.objects.filter(
+                vehicle=vehicle,
+                status="active",
+                vehicle__seller__seller_applications__status="approved",
+            )
+            .select_related("category", "vehicle__generation__car_model__make", "vehicle__seller")
+            .prefetch_related("photos", "options", "alt_part_numbers")
+        )
+
+        q = (request.query_params.get("q") or "").strip()
+        if q:
+            items_qs = items_qs.filter(
+                Q(title__icontains=q)
+                | Q(category__name__icontains=q)
+                | Q(oem_part_number__icontains=q)
+            )
+
+        buy_now_only = request.query_params.get("buy_now_only") == "1"
+        inactive_items = Item.objects.filter(vehicle=vehicle).exclude(status="active") if not q else Item.objects.none()
+
+        page_size = min(int(request.query_params.get("page_size") or 20), 120)
+        page = max(1, int(request.query_params.get("page") or 1))
+        total_count = items_qs.count()
+
+        if total_count == 0 and not q:
+            return Response({"detail": "No listable parts."}, status=status.HTTP_404_NOT_FOUND)
+
+        total_pages = max(1, (total_count + page_size - 1) // page_size)
+        page = min(page, total_pages)
+        offset = (page - 1) * page_size
+        page_items = items_qs[offset: offset + page_size]
+
+        ctx = {"request": request}
+        serialized_parts = ItemListSerializer(page_items, many=True, context=ctx).data
+
+        def to_browse_part(d):
+            return {
+                **d,
+                "label": d.get("category_name") or d.get("title") or "",
+                "listing_state": "buy_now" if d.get("status") == "active" else d.get("status", ""),
+                "listing_state_effective": "buy_now" if d.get("status") == "active" else d.get("status", ""),
+                "condition_draft": d.get("condition", ""),
+                "photo_urls": [{"url": u} for u in (d.get("photo_urls") or [])],
+                "primary_photo_url": (d.get("photo_urls") or [None])[0],
+                "vehicle_id": vehicle.id,
+                "part_family": {"category": {"illustration_key": None}},
+            }
+
+        parts = [to_browse_part(d) for d in serialized_parts]
+        other_parts = [to_browse_part(d) for d in ItemListSerializer(
+            inactive_items[:50], many=True, context=ctx
+        ).data] if not buy_now_only else []
+
+        request_obj = request._request if hasattr(request, "_request") else request
+        def abs_url(path):
+            if not path:
+                return None
+            if path.startswith("http"):
+                return path
+            return request.build_absolute_uri(path)
+
+        photo_urls = []
+        for photo in vehicle.photos.order_by("sort_order"):
+            url = None
+            if photo.image:
+                url = abs_url(photo.image.url)
+            if url:
+                photo_urls.append({"url": url})
+
+        make = ""
+        model = ""
+        gen_label = ""
+        if vehicle.generation:
+            make = vehicle.generation.car_model.make.name
+            model = vehicle.generation.car_model.name
+            codes = vehicle.generation.chassis_codes or []
+            start = vehicle.generation.production_start.year if vehicle.generation.production_start else ""
+            end = vehicle.generation.production_end.year if vehicle.generation.production_end else "present"
+            gen_label = f"{codes[0]} ({start}–{end})" if codes and start else vehicle.generation.name or ""
+
+        vehicle_data = {
+            "id": vehicle.id,
+            "year": vehicle.year,
+            "make": make,
+            "model": model,
+            "generation_label": gen_label,
+            "mileage": vehicle.mileage,
+            "condition": vehicle.condition,
+            "seller_zip": vehicle.seller_zip,
+            "photo_urls": photo_urls,
+            "primary_photo_url": photo_urls[0]["url"] if photo_urls else None,
+        }
+
+        return Response({
+            "vehicle": vehicle_data,
+            "parts": parts,
+            "other_parts": other_parts,
+            "inactive_parts": [],
+            "parts_count": total_count,
+            "parts_total_pages": total_pages,
+            "parts_page": page,
+            "parts_page_size": page_size,
+        })
 
 
 class VehicleItemListView(APIView):

@@ -1,6 +1,7 @@
 import re
 
 from django.conf import settings
+from django.core.validators import FileExtensionValidator
 from django.db import models
 
 
@@ -22,7 +23,12 @@ class Category(models.Model):
     slug = models.SlugField(max_length=128, unique=True)
     sort_order = models.PositiveSmallIntegerField(default=0)
     shipping_size_default = models.CharField(max_length=8, choices=ShippingSize.choices, default=ShippingSize.MEDIUM)
-    image = models.ImageField(upload_to="categories/", null=True, blank=True)
+    image = models.FileField(
+        upload_to="categories/",
+        null=True,
+        blank=True,
+        validators=[FileExtensionValidator(allowed_extensions=["jpg", "jpeg", "png", "webp", "gif", "svg"])],
+    )
 
     class Meta:
         ordering = ["sort_order", "name"]

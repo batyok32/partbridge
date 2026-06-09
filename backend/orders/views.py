@@ -72,6 +72,18 @@ def _estimate_shipping(shipping_size, buyer_state, mode="standard"):
     return round(SHIPPING_MID.get(shipping_size, 35.0) * factor, 2)
 
 
+def _estimate_shipping_for_item(item, buyer_state, mode="standard"):
+    """For assembly items, sum shipping costs across all component packages."""
+    if item.assembly_bundle_id:
+        try:
+            sizes = [bi.item.shipping_size for bi in item.assembly_bundle.bundle_items.all() if bi.item]
+            if sizes:
+                return sum(_estimate_shipping(s, buyer_state, mode) for s in sizes)
+        except Exception:
+            pass
+    return _estimate_shipping(item.shipping_size, buyer_state, mode)
+
+
 # ─── Cart ─────────────────────────────────────────────────────────────────────
 
 class CartView(APIView):
@@ -208,7 +220,7 @@ class CartPreviewCheckoutView(APIView):
         buyer_state = (request.data.get("buyer_state") or "").strip().upper()[:2]
         buyer_zip = (request.data.get("buyer_zip") or "").strip()
 
-        cart_items = CartItem.objects.filter(user=request.user).select_related("item__vehicle__seller", "item__category")
+        cart_items = CartItem.objects.filter(user=request.user).select_related("item__vehicle__seller", "item__category").prefetch_related("item__assembly_bundle__bundle_items__item")
         cart_bundles = CartBundle.objects.filter(user=request.user).select_related("bundle__bundle_category").prefetch_related(
             "bundle__bundle_items__item__category",
         )
@@ -561,8 +573,12 @@ class DisputeListCreateView(APIView):
 
     def post(self, request, order_item_id):
         order_item = get_object_or_404(OrderItem, pk=order_item_id, order__buyer=request.user)
+        print(f"[DisputeCreate] order_item_id={order_item_id} user={request.user.id}")
+        print(f"[DisputeCreate] request.data={request.data}")
         ser = DisputeSerializer(data=request.data)
-        ser.is_valid(raise_exception=True)
+        if not ser.is_valid():
+            print(f"[DisputeCreate] validation errors: {ser.errors}")
+            return Response(ser.errors, status=status.HTTP_400_BAD_REQUEST)
         dispute = ser.save(
             order_item=order_item,
             buyer=request.user,
@@ -606,8 +622,12 @@ class SellerReviewCreateView(APIView):
 
     def post(self, request, order_item_id):
         order_item = get_object_or_404(OrderItem, pk=order_item_id, order__buyer=request.user)
+        print(f"[SellerReview] order_item_id={order_item_id} user={request.user.id}")
+        print(f"[SellerReview] request.data={request.data}")
         ser = SellerReviewSerializer(data=request.data)
-        ser.is_valid(raise_exception=True)
+        if not ser.is_valid():
+            print(f"[SellerReview] validation errors: {ser.errors}")
+            return Response(ser.errors, status=status.HTTP_400_BAD_REQUEST)
         review = ser.save(
             order_item=order_item,
             buyer=request.user,

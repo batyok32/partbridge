@@ -17,7 +17,9 @@ export default function FeaturedCategories() {
       if (car.modificationId) params.modification = car.modificationId;
       params.compatible_only = "1";
     }
-    getFeaturedCategories(params).then(setCategories).catch(() => setCategories([]));
+    getFeaturedCategories(params)
+      .then((data) => setCategories(data.filter((c) => c.item_count > 0)))
+      .catch(() => setCategories([]));
   }, [car?.generationId, car?.modificationId]);
 
   if (categories.length === 0) return null;

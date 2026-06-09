@@ -21,9 +21,9 @@ const ibmPlexMono = IBM_Plex_Mono({
 });
 
 export const metadata = {
-  title: "Partbridge — easy used parts, shipping & buyer protection",
+  title: "LookMyPart — buy and sell used car parts simply",
   description:
-    "Find used OEM and take-off parts for your vehicle. Clear shipping tiers, refund rules on listings, and messaging with real sellers.",
+    "The used car parts marketplace. Sell your car's parts with real market pricing. Find the exact part you need with verified condition and transparent shipping.",
 };
 
 export default function RootLayout({ children }) {

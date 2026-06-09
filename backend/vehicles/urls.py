@@ -1,6 +1,7 @@
 from django.urls import path
 
 from .views import (
+    BrowseVehicleDetailView,
     VehicleDetailView,
     VehicleItemDetailView,
     VehicleItemListView,
@@ -13,6 +14,7 @@ from .views import (
 
 urlpatterns = [
     path("vin/decode/", VinDecodeView.as_view(), name="vin-decode"),
+    path("browse/vehicles/<int:pk>/", BrowseVehicleDetailView.as_view(), name="browse-vehicle-detail"),
     path("vehicles/", VehicleListCreateView.as_view(), name="vehicle-list"),
     path("vehicles/<int:pk>/", VehicleDetailView.as_view(), name="vehicle-detail"),
     path("vehicles/<int:vehicle_id>/photos/", VehiclePhotoListCreateView.as_view(), name="vehicle-photos"),

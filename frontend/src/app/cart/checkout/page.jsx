@@ -9,6 +9,7 @@ import { Elements, PaymentElement, useElements, useStripe } from "@stripe/react-
 
 import { useAuth } from "@/context/auth-context";
 import { useCart } from "@/context/cart-context";
+import { useTheme } from "@/context/theme-context";
 import { useToast } from "@/context/toast-context";
 import { ApiError, apiFetch, removeFromCart } from "@/lib/api";
 import { lookupUsZip } from "@/lib/us-zip-lookup";
@@ -155,6 +156,7 @@ export default function CartCheckoutFlowPage() {
   const router = useRouter();
   const { user, loading: authLoading } = useAuth();
   const { refresh: refreshCart } = useCart();
+  const { theme } = useTheme();
   const toast = useToast();
 
   const [step, setStep] = useState(1);
@@ -434,19 +436,29 @@ export default function CartCheckoutFlowPage() {
     );
   }
 
+  const isDark = theme === "dark";
   const stripeElementsOptions = clientSecret
     ? {
         clientSecret,
         appearance: {
-          theme: "night",
-          variables: {
-            colorPrimary: "var(--primary, #6366f1)",
-            colorBackground: "var(--bg-elevated, #1e1e2e)",
-            colorText: "var(--text-primary, #e2e8f0)",
-            colorDanger: "#f87171",
-            borderRadius: "8px",
-            fontFamily: "var(--ff-body, system-ui, sans-serif)",
-          },
+          theme: isDark ? "night" : "stripe",
+          variables: isDark
+            ? {
+                colorPrimary: "#ff9900",
+                colorBackground: "#232d3b",
+                colorText: "#f7f8f8",
+                colorDanger: "#f87171",
+                borderRadius: "8px",
+                fontFamily: "var(--ff-body, system-ui, sans-serif)",
+              }
+            : {
+                colorPrimary: "#c7511f",
+                colorBackground: "#ffffff",
+                colorText: "#0f1111",
+                colorDanger: "#ef4444",
+                borderRadius: "8px",
+                fontFamily: "var(--ff-body, system-ui, sans-serif)",
+              },
         },
       }
     : null;

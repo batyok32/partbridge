@@ -26,7 +26,12 @@ class BundleSearchView(generics.ListAPIView):
     serializer_class = BundleSearchSerializer
 
     def get_queryset(self):
-        qs = _BUNDLE_QS.filter(status=Bundle.Status.ACTIVE)
+        # Assembly bundles are already surfaced as regular Item objects in the items grid.
+        # Only show discount/kit bundles here to avoid duplicates.
+        qs = _BUNDLE_QS.filter(
+            status=Bundle.Status.ACTIVE,
+            bundle_category__type=BundleCategory.BundleType.DISCOUNT,
+        )
         params = self.request.query_params
         if make_id := params.get("make"):
             qs = qs.filter(bundle_items__item__vehicle__generation__make_id=make_id).distinct()

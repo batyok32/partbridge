@@ -1,0 +1,570 @@
+if i want to be seller i apply for seller and become seller with no approval, i become seller automatically if i apply to it
+so no need to say Your application is pending review. We will follow up by email.
+Seller applies and becomes seller automatically but just not approved yet, but he can list cars and work with them, just he is not approved yet so his items wont be shown to the public to purchase
+
+after verfication verify-email?email=cookgoc%40gmail.com send to login page or login directly
+
+Kit and bundle images that fails to load remove them and dont show
+kit and bundle images are also should have logic first loads bundle category image then loads category image if fails
+when it says Included parts in bundle it should give option to scroll through the list, option to click on it to go details page
+details page of bundle should show images should have logic first loads bundle category image then loads category image if fails
+Failed to load images should be dismissed and dont show
+Option to message seller in bundle detail page
+Full details of items in the bundle, and the images that show should go with the logic of image showing in the results of search page, the same logic of image loading
+Full details of items means their category name, the car it came from, price
+Image of items, image of category (if items image excempt), images of donor car, part number, altermative part numbers, size, options it has
+Assembly bundles shouldnt be in bundles it should be in items, list not in bundles list
+Assembly bundles detail page should be the same detail page as items detail page
+Items detail page should have some changes: Donor vehicle photos should be option to see by zoom in high format to see in detail the images, no need for title remove title if it is not assembly bundle, failed to load images dont show them, image loading logic should be the same as before first item images, category image(if items images exempt), then donor vehicles images
+
+browse/vehicles/54 - is old page - it should remodified for current implementation of website for our new architecture
+
+Orders page (sales page) - sellers page the shipment procedure looks cheap, add tracking and thats all, i dont think ebay and other marketplaces does like this
+
+kits and bundles should be in row format in mobile version
+
+cart items have image problems too, cart items images should load item images if fails then skips, if no item images left or wasnt there at all then category image,
+For bundles the same use bundle-category image that is related if exist, if not then bundle's simple category image
+
+## Cart checkout stripe payment is for dark screen only it should be depending on website theme change design
+
+Shippo Integration Deep Dive
+
+What we're replacing / augmenting
+
+Right now the platform uses static lookup tables (STATE_ZONE, SHIPPING_MID) duplicated in 3 places (frontend shipping.js, frontend shipping-rates.js, and backend views.py) to estimate shipping. Sellers
+manually type tracking numbers. There's no label generation, no real carrier rates, and no automated delivery detection.
+
+Shippo replaces all of that.
+
+---
+
+What Shippo gives us
+
+┌─────────────────────────┬─────────────────────────────────────────────────────────────────────┐
+│ Feature │ What it does for PartBridge │
+├─────────────────────────┼─────────────────────────────────────────────────────────────────────┤
+│ Real-time carrier rates │ Actual USPS/UPS/FedEx prices per item based on real dims + ZIP pair │
+├─────────────────────────┼─────────────────────────────────────────────────────────────────────┤
+│ Label purchase │ Seller buys postage in one click, gets printable PDF │
+├─────────────────────────┼─────────────────────────────────────────────────────────────────────┤
+│ Tracking number │ Auto-returned with label — no manual entry │
+├─────────────────────────┼─────────────────────────────────────────────────────────────────────┤
+│ Tracking webhooks │ TRACK_UPDATED → we auto-flip order to Delivered │
+├─────────────────────────┼─────────────────────────────────────────────────────────────────────┤
+│ Address validation │ Validate buyer address at checkout before payment │
+├─────────────────────────┼─────────────────────────────────────────────────────────────────────┤
+│ Void/refund label │ If order cancelled, void unused label to reclaim postage │
+└─────────────────────────┴─────────────────────────────────────────────────────────────────────┘
+
+---
+
+Architecture overview
+
+Checkout (buyer)
+├── POST /orders/shipping/rates/ ← new
+│ Shippo.Shipment.create() → return rate array to frontend
+└── Buyer picks a rate per item ← rate_object_id stored
+
+Place Order
+└── CartCheckoutView stores shippo_shipment_id + rate_object_id
+on ShippingRequest (not yet charged, label not yet bought)
+
+Seller action (after payment captured)
+└── POST /orders/sales/{id}/buy-label/ ← new
+Shippo.Transaction.create(rate_object_id)
+→ stores tracking_number, label_url, actual_cost
+→ Order.status → SHIPPED
+
+Shippo Webhook
+└── POST /api/shippo/webhook/ ← new
+TRACK_UPDATED + status=DELIVERED → \_mark_order_delivered()
+
+---
+
+Every file that changes
+
+Backend
+
+1. backend/orders/models.py — add 3 fields to ShippingRequest
+
+shippo_shipment_id = CharField(max_length=128, blank=True)
+shippo_rate_object_id = CharField(max_length=128, blank=True) # buyer-selected rate
+shippo_transaction_id = CharField(max_length=128, blank=True) # after label purchased
+
+2. NEW backend/orders/shippo_service.py
+
+Three functions:
+
+- get_rates(from_zip, to_zip, weight_lbs, dim_l, dim_w, dim_h) → list of {rate_id, carrier, service, amount, days}
+- buy_label(rate_object_id) → {tracking_number, label_url, carrier, cost}
+- validate_address(full dict) → {valid: bool, messages: [...]}
+
+3. backend/orders/views.py — 3 new views
+
+- ShippingRatesView (POST /orders/shipping/rates/) — takes item_id + buyer_zip + buyer_state, calls get_rates(), returns carrier options to the frontend
+- SellerBuyLabelView (POST /orders/sales/{id}/buy-label/) — seller calls this after order confirmed, purchases Shippo label, saves tracking/label to ShippingRequest, flips order to SHIPPED
+- ShippoWebhookView (POST /api/shippo/webhook/) — validates Shippo signature, handles TRACK_UPDATED events → marks delivered, handles TRANSACTION_CREATED for record keeping
+
+4. backend/orders/urls.py — register 3 new routes
+
+5. backend/accounts/models.py — add seller_zip to User
+
+The ShippingRequest has origin_zip already but it's empty on creation — we need to populate it from the seller's profile. Add seller_zip = CharField(max_length=16, blank=True) to the User model.
+
+6. backend/requirements.txt — add shippo>=3.0
+
+7. backend/config/settings.py — add SHIPPO_API_KEY + SHIPPO_WEBHOOK_SECRET
+
+8. Migration for ShippingRequest + User.seller_zip
+
+---
+
+Frontend
+
+9. NEW frontend/src/components/ShippoRateSelector.jsx
+
+Reusable rate-picker component:
+
+- Shows each rate as a card: UPS Ground · $12.50 · est. 3-5 days
+- Radio-select behavior
+- Loading skeleton while fetching
+- "Free" tier highlighting if ever applicable
+
+10. frontend/src/app/cart/checkout/page.jsx — real rates at checkout
+
+- When buyer enters shipping address, useEffect fires to POST /orders/shipping/rates/ for each cart item
+- Replace the static estimateShipping() display with the ShippoRateSelector
+- Store selected rate_object_id per item in component state
+- Pass rate selections when calling /orders/cart/checkout/
+
+11. frontend/src/app/orders/[id]/page.jsx — replace tracking form with "Buy Label"
+
+- Remove the manual tracking_number + carrier input form
+- Add "Buy Shipping Label" button
+- On click: call POST /orders/sales/{id}/buy-label/
+- Response gives back {tracking_number, label_url, carrier}
+- Show "Print Label" download link + tracking number (read-only now)
+- Order auto-moves to SHIPPED
+
+12. frontend/src/lib/shipping-rates.js — keep as fallback only
+
+Keep static functions but mark them as estimates used only for listing cards (where we don't yet have buyer zip). Real rates are always fetched from Shippo at checkout.
+
+---
+
+Freight (XL size) — special case
+
+Shippo handles parcels up to ~150 lbs. Auto parts xl (engines, transmissions) need LTL freight — Shippo doesn't cover this. Plan:
+
+- For shipping_size = xl: skip Shippo rates, show static freight estimate + "Freight quote will be provided" message
+- Long-term: integrate uShip or FreightQuote for XL
+
+---
+
+Rate expiry handling
+
+Shippo rate objects expire in ~24h. When seller clicks "Buy Label":
+
+- If shippo_rate_object_id is older than 20h → re-call get_rates() and pick the same carrier/service automatically
+- Show seller the refreshed price if it changed
+
+---
+
+Address validation at checkout
+
+Before creating a Shippo shipment (to get rates), we validate the buyer's address via Shippo's address validation API. If validation fails → show inline error on the checkout form, don't proceed to
+rates.
+
+---
+
+Seller ship-from address
+
+Currently missing. We need the seller's full ship-from address for Shippo, not just ZIP. Two options:
+
+1. Quick: require seller_zip on the User profile, derive from that (Shippo accepts ZIP-only for rates)
+2. Full: add a SellerShipFromAddress model with full address for label accuracy
+
+Recommend option 1 now (ZIP-only) since Shippo's rating works ZIP-to-ZIP. When label is purchased, Shippo needs a full address — we can use the seller's ShippingAddress if they have one, or prompt them
+to add one.
+
+---
+
+Webhook security
+
+Shippo signs webhooks with HMAC-SHA256. The ShippoWebhookView must:
+
+1. Read raw body before parsing JSON
+2. Verify Shippo-Signature header against SHIPPO_WEBHOOK_SECRET
+3. Return 200 quickly, do work synchronously (small payloads) or queue if needed
+
+---
+
+Implementation order (phases)
+
+┌───────┬─────────────────────────────────────────────────┬──────────────────────────────────────┐
+│ Phase │ What │ Why first │
+├───────┼─────────────────────────────────────────────────┼──────────────────────────────────────┤
+│ 1 │ shippo_service.py + model fields + migration │ Foundation everything else builds on │
+├───────┼─────────────────────────────────────────────────┼──────────────────────────────────────┤
+│ 2 │ ShippingRatesView + frontend ShippoRateSelector │ Unblocks checkout UX │
+├───────┼─────────────────────────────────────────────────┼──────────────────────────────────────┤
+│ 3 │ SellerBuyLabelView + replace tracking form │ Core seller workflow │
+├───────┼─────────────────────────────────────────────────┼──────────────────────────────────────┤
+│ 4 │ Webhook view + auto-delivery detection │ Automation, can go live without it │
+├───────┼─────────────────────────────────────────────────┼──────────────────────────────────────┤
+│ 5 │ Address validation at checkout │ Polish │
+├───────┼─────────────────────────────────────────────────┼──────────────────────────────────────┤
+│ 6 │ Rate expiry re-fetch logic │ Edge case handling │
+└───────┴─────────────────────────────────────────────────┴──────────────────────────────────────┘
+
+---
+
+What we are NOT doing (scope boundary)
+
+- Customs forms / international shipping — US-only for now
+- Multi-parcel shipments — one item = one shipment
+- Insurance — future feature
+- Return labels — can add after disputes are built out
+
+---
+
+Full Shipping Integration Plan
+
+Shipping logic by size (final rules)
+
+┌────────┬──────────────────────────┬───────────────────────────────────────────────────────┬──────────────────────────┬────────────────────────────────────────┐
+│ Size │ Options │ Checkout price │ Fulfillment │ Tracking │
+├────────┼──────────────────────────┼───────────────────────────────────────────────────────┼──────────────────────────┼────────────────────────────────────────┤
+│ small │ Shippo rates │ Real carrier rates (Shippo) │ Seller buys Shippo label │ Carrier live (Shippo webhook → our DB) │  
+ ├────────┼──────────────────────────┼───────────────────────────────────────────────────────┼──────────────────────────┼────────────────────────────────────────┤
+│ medium │ Shippo rates │ Real carrier rates (Shippo) │ Seller buys Shippo label │ Carrier live (Shippo webhook → our DB) │
+├────────┼──────────────────────────┼───────────────────────────────────────────────────────┼──────────────────────────┼────────────────────────────────────────┤
+│ large │ Freight │ Midpoint estimate shown; actual settled post-shipment │ Admin arranges │ Custom tracking (admin updates our DB) │
+├────────┼──────────────────────────┼───────────────────────────────────────────────────────┼──────────────────────────┼────────────────────────────────────────┤
+│ large │ Economy ($100 flat) │ $100 │ Admin fulfills │ Custom tracking (admin updates our DB) │
+├────────┼──────────────────────────┼───────────────────────────────────────────────────────┼──────────────────────────┼────────────────────────────────────────┤
+│ xl │ Economy only ($150 flat) │ $150 │ Admin fulfills │ Custom tracking (admin updates our DB) │
+└────────┴──────────────────────────┴───────────────────────────────────────────────────────┴──────────────────────────┴────────────────────────────────────────┘
+
+---
+
+What does NOT change
+
+- Item.shipping_size auto-calculation logic — untouched
+- Stripe payment flow — untouched
+- All existing order/cart models — only additive changes
+- Static estimates in shipping-rates.js / shipping.js — kept as listing-card display fallbacks only
+
+---
+
+Model changes
+
+ShippingRequest — new fields to add
+
+shipping_type CharField(16) choices: shippo | freight | economy
+tells us which fulfillment path applies
+
+shippo_shipment_id CharField(128, blank=True) — Shippo shipment object ID
+shippo_rate_object_id CharField(128, blank=True) — buyer's selected rate
+shippo_transaction_id CharField(128, blank=True) — after label purchased
+
+tracking_token CharField(32, unique=True) — random token for public URL
+e.g. partbridge.com/tracking/a8f3b2x
+
+freight_quote_amount DecimalField(null=True) — estimate shown at checkout
+freight_actual_amount DecimalField(null=True) — admin fills in after carrier invoice
+freight_overage_notified BooleanField(default=False)
+freight_buyer_accepted BooleanField(null=True) — null=pending, True=accepted, False=rejected
+
+The existing fields quoted_cost, actual_cost, carrier, tracking_number, label_url, estimated_days, is_delivered, delivered_at are all kept and used.
+
+---
+
+New model: TrackingUpdate
+
+Stores the timeline that shows on the public tracking page. For Shippo items this gets populated by the webhook. For freight/economy, admin adds manually through Django admin.
+
+shipping_request FK(ShippingRequest, related_name='tracking_updates')
+status CharField choices:
+label_created | picked_up | in_transit
+out_for_delivery | delivered | exception | info
+location CharField(255, blank=True) — "Memphis, TN"
+message TextField — "Package scanned at hub"
+created_at DateTimeField(auto_now_add=True)
+
+---
+
+User model — 1 new field
+
+seller_zip CharField(16, blank=True) — seller's ship-from ZIP
+used as Shippo parcel origin
+
+---
+
+Migrations needed
+
+1. backend/orders/migrations/XXXX_shippo_tracking_fields.py — ShippingRequest + TrackingUpdate
+2. backend/accounts/migrations/XXXX_seller_zip.py — User.seller_zip
+
+---
+
+New files to create
+
+backend/orders/shippo_service.py
+
+Three functions:
+
+get_rates(from_zip, to_zip, weight_lbs, dim_l, dim_w, dim_h)
+→ list of { rate_object_id, carrier, service, amount_usd, est_days }
+
+buy_label(rate_object_id, from_address, to_address, parcel)
+→ { tracking_number, label_url, carrier, cost }
+
+void_transaction(transaction_id)
+→ bool success
+
+validate_address(line1, city, state, zip)  
+ → { valid: bool, messages: [...] }
+
+Falls back gracefully when SHIPPO_API_KEY is not set (dev stub mode, returns fake rates).
+
+---
+
+backend/orders/tracking_service.py
+
+add_update(shipping_request, status, location, message)
+→ creates TrackingUpdate record
+
+process_shippo_webhook_event(event_type, tracking_number, status, location, message)
+→ finds ShippingRequest by tracking_number
+→ calls add_update()
+→ if status == DELIVERED: calls \_mark_order_delivered()
+
+get_timeline(tracking_token)
+→ returns list of TrackingUpdate records for public display
+
+---
+
+frontend/src/app/tracking/[token]/page.jsx
+
+Public page — no auth required. URL: /tracking/abc123
+
+Shows:
+
+- Item name, thumbnail
+- Current status badge (color-coded)
+- Carrier + tracking number (if Shippo item, optional link to carrier)
+- Timeline of TrackingUpdate records with timestamps + locations
+- For freight/economy: "Managed by PartBridge logistics"
+
+Calls: GET /tracking/{token}/ (no auth)
+
+---
+
+frontend/src/components/ShippoRateSelector.jsx
+
+Used at checkout for small/medium items. Shows cards:
+
+[ UPS Ground $12.50 3–5 days ● ]
+[ USPS Priority $9.80 2–3 days ]
+[ FedEx Home $14.20 2–4 days ]
+
+Loading skeleton while fetching. Selects one rate per item. Emits onSelect(rate_object_id, amount).
+
+---
+
+frontend/src/components/LargeShippingOptions.jsx
+
+Used at checkout for large items. Shows two choices:
+
+● Freight $450–$650 est. 5–14 days
+"Final price settled after pickup. You pay the estimate now.
+If actual is less, you get a refund. If more, we'll contact you."
+
+○ Economy $100 flat 30–45 days
+"We arrange delivery. Custom tracking available at partbridge.com/tracking/…"
+
+---
+
+frontend/src/components/TrackingTimeline.jsx
+
+Reusable timeline component. Used on the public tracking page and optionally inside the buyer order detail page. Renders TrackingUpdate records as a vertical stepper with timestamps.
+
+---
+
+Existing files to modify
+
+backend/orders/models.py
+
+- Add 8 fields to ShippingRequest (listed above)
+- Add TrackingUpdate model
+
+backend/orders/views.py
+
+Four new view classes:
+
+ShippingRatesView — POST /orders/shipping/rates/
+
+- Auth: IsAuthenticated (buyer)
+- Body: { item_id, buyer_zip }
+- Logic: loads Item dims/weight + seller_zip, calls shippo_service.get_rates()
+- Only works for small/medium — returns 404 for large/xl with a note
+- Returns: [{ rate_object_id, carrier, service, amount_usd, est_days }, ...]
+
+SellerBuyLabelView — POST /orders/sales/{id}/buy-label/
+
+- Auth: IsAuthenticated (seller)
+- Verifies seller owns the order item
+- Gets ShippingRequest for the order item
+- If rate is stale (>20h old), re-calls get_rates() and picks same carrier/service automatically
+- Calls shippo_service.buy_label()
+- Updates ShippingRequest: tracking_number, label_url, carrier, actual_cost, shippo_transaction_id
+- Calls tracking_service.add_update(status=label_created)
+- Flips Order.status → SHIPPED
+- Returns: { tracking_number, label_url, carrier }
+
+PublicTrackingView — GET /tracking/{token}/
+
+- Auth: None (public)
+- Loads ShippingRequest by tracking_token
+- Returns: item info + current status + TrackingUpdate timeline
+
+ShippoWebhookView — POST /api/shippo/webhook/
+
+- Auth: None (HMAC signature verification)
+- Verifies Shippo-Webhook-Signature header against SHIPPO_WEBHOOK_SECRET
+- Handles track_updated events
+- Calls tracking_service.process_shippo_webhook_event()
+- Always returns 200 immediately
+
+AdminTrackingUpdateView — POST /admin-api/shipping/{id}/tracking-update/
+
+- Auth: IsAdminUser
+- Body: { status, location, message }
+- Calls tracking_service.add_update()
+- If status == delivered: calls \_mark_order_delivered()
+
+AdminFreightSettleView — PATCH /admin-api/shipping/{id}/freight-settle/
+
+- Auth: IsAdminUser
+- Body: { actual_cost }
+- Compares actual vs quoted
+- If actual < quoted → creates Stripe partial refund for the difference
+- If actual > quoted → sets freight_overage_notified=True, triggers notification to buyer (email or in-app)
+- Saves freight_actual_amount
+
+backend/orders/urls.py
+
+Add 6 new paths:
+path("orders/shipping/rates/", ShippingRatesView, "shipping-rates")
+path("orders/sales/<int:pk>/buy-label/", SellerBuyLabelView, "seller-buy-label")
+path("tracking/<str:token>/", PublicTrackingView, "public-tracking")
+path("api/shippo/webhook/", ShippoWebhookView, "shippo-webhook")
+path("admin-api/shipping/<int:pk>/tracking-update/", AdminTrackingUpdateView, ...)
+path("admin-api/shipping/<int:pk>/freight-settle/", AdminFreightSettleView, ...)
+
+backend/orders/admin.py
+
+- ShippingRequestAdmin — shows all fields, adds inline TrackingUpdate admin
+- TrackingUpdateAdmin — full CRUD with list_display + search
+- Both registered
+
+backend/accounts/models.py
+
+- Add seller_zip = CharField(16, blank=True) to User
+
+backend/config/settings.py
+
+SHIPPO_API_KEY = env("SHIPPO_API_KEY", default="")
+SHIPPO_WEBHOOK_SECRET = env("SHIPPO_WEBHOOK_SECRET", default="")
+
+backend/requirements.txt
+
+shippo>=3.0.0
+
+frontend/src/app/cart/checkout/page.jsx
+
+When buyer enters ZIP:
+
+- For each small/medium item in cart → fetch POST /orders/shipping/rates/ → replace static estimate display with ShippoRateSelector
+- For each large item → show LargeShippingOptions (freight vs economy)
+- For xl items → show economy flat $150 (no selection needed)
+- Rate selections stored in component state as { [item_id]: { rate_object_id, amount } }
+- Passed to POST /cart/checkout/ in request body as shipping_selections
+
+CartCheckoutView on backend needs to accept shipping_selections and:
+
+- For Shippo items: store shippo_rate_object_id on ShippingRequest, use actual rate amount for shipping_cost
+- For freight: store freight_quote_amount, use midpoint estimate
+- For economy: use flat $100 or $150
+
+frontend/src/app/orders/[id]/page.jsx (seller order detail)
+
+- Remove the manual tracking number + carrier text inputs
+- For small/medium orders: replace with a "Buy Shipping Label" button
+  - On click → POST /orders/sales/{id}/buy-label/
+  - On success: show read-only tracking number + "Print Label" link (opens label_url)
+  - Order status auto-updates to SHIPPED
+- For large/xl orders: show read-only status panel — "PartBridge logistics will handle this shipment. Tracking available at [link]."
+
+frontend/src/lib/shipping-rates.js
+
+No functional change — add a comment marking these as listing-card display estimates only, not used at checkout.
+
+---
+
+Checkout flow summary by size
+
+Small / Medium
+
+1. Buyer enters ZIP
+2. Frontend: POST /orders/shipping/rates/ per item
+3. Buyer sees real carrier options, picks one
+4. Checkout POST carries { shipping_selections: { item_id: { rate_object_id, amount } } }
+5. Backend creates ShippingRequest: shipping_type=shippo, shippo_rate_object_id=..., quoted_cost=actual rate
+6. Stripe PI created for real total
+
+Large (Freight)
+
+1. Frontend shows freight ($450–$650 est.) vs economy ($100) selector
+2. Buyer picks Freight
+3. Checkout POST: shipping_mode=freight
+4. Backend creates ShippingRequest: shipping_type=freight, freight_quote_amount=midpoint
+5. Stripe PI includes freight estimate in total
+   --- post payment ---
+6. Admin arranges carrier, adds TrackingUpdate records manually
+7. Admin calls freight-settle with actual_cost
+8. If actual < quoted → Stripe partial refund issued automatically
+9. If actual > quoted → buyer notified, can accept or cancel
+10. If cancel then everything goes back to its place, item becomes active again, order cancels, user receives money
+    Large (Economy) / XL
+
+11. Checkout POST: shipping_mode=economy
+12. Backend creates ShippingRequest: shipping_type=economy, quoted_cost=$100/$150
+13. Admin fulfills manually
+14. Admin adds TrackingUpdate records
+15. Admin marks delivered → order closes
+
+---
+
+Public tracking URL flow
+
+1. When ShippingRequest is created (at checkout), tracking_token is auto-generated (e.g. secrets.token_urlsafe(16))
+2. Buyer order detail page shows: "Track your package → partbridge.com/tracking/abc123"
+3. Page is public — no login needed (so buyers can share links)
+4. For Shippo items: real carrier updates shown (populated via webhook)
+5. For freight/economy: admin-entered updates shown with timestamps
+
+---
+
+File count summary
+
+┌────────┬───────┬─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│ Action │ Count │ Files │
+├────────┼───────┼─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+│ Create │ 7 │ shippo_service.py, tracking_service.py, tracking/[token]/page.jsx, ShippoRateSelector.jsx, LargeShippingOptions.jsx, TrackingTimeline.jsx, 2 migrations │
+├────────┼───────┼─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+│ Modify │ 10 │ orders/models.py, orders/views.py, orders/urls.py, orders/admin.py, accounts/models.py, accounts/migrations/, settings.py, requirements.txt, cart/checkout/page.jsx, │
+│ │ │ orders/[id]/page.jsx │
+└────────┴───────┴─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘

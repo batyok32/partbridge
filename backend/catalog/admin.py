@@ -22,6 +22,7 @@ class MakeAdmin(admin.ModelAdmin):
     list_display = ("id", "name", "slug", "country", "created_at")
     search_fields = ("name", "slug")
     prepopulated_fields = {"slug": ("name",)}
+    fields = ("name", "slug", "country", "logo", "logo_url")
 
 
 @admin.register(CarModel)
